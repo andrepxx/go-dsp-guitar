@@ -1,0 +1,741 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//w3c//dtd xhtml 1.0 strict//en" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>
+			go-dsp-guitar: Documentation
+		</title>
+		<link href="css/style.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<body class="body">
+		<div class="section title">
+			go-dsp-guitar: Guitar amplification for the 21st century
+		</div>
+		<div class="section heading">
+			Introduction
+		</div>
+		<div class="section">
+			<span class="emphasis">go-dsp-guitar</span> is a virtual effects rack, mainly for guitarists. It allows you to simulate the behaviour of a guitar amplifier and associated effects units (stompboxes, rack effects, ...) on your computer. Although the software focuses on guitar effects, it can also process other instruments and even voice.
+		</div>
+		<div class="section">
+			<span class="emphasis">go-dsp-guitar</span> can operate in two different modes, <span class="emphasis">real-time mode</span> and <span class="emphasis">batch processing mode</span>.
+		</div>
+		<div class="section">
+			When operating in <span class="emphasis">real-time mode</span>, it connects to a sound server called <span class="emphasis">JACK</span> to capture audio signals from either your computer's sound card or audio interface or from other <span class="emphasis">JACK</span>-aware applications. <span class="emphasis">go-dsp-guitar</span> will then process these signals using a number of user-configurable chains of effects, one for each input channel, simulate the behaviour of each effects circuit and generate the corresponding output. The output will be fed back to <span class="emphasis">JACK</span> and either output through your computer's sound card or audio interface or forwarded to another <span class="emphasis">JACK</span>-aware application. All signal processing happens in real-time (i. e. as you play your instrument), so that this mode is suitable for practice or live performances, but also for direct recording of the processed (or &quot;wet&quot;) signal in a digital-audio workstation (DAW). The downside of this mode of operation is that it limits the algorithmic complexity of the processing you can perform. If the calculations do not finish in real-time, you will get clicks and pops or even distortion in the output.
+		</div>
+		<div class="section">
+			On the other hand, <span class="emphasis">batch processing mode</span> allows you to load pre-existing, unprocessed (or &quot;dry&quot;) guitar (or other instrument) tracks from a set of files, process them and store them in another set of files. Since the processing does not need to happen in real-time, it can basically be as algorithmically complex as you want. This allows you to build long and complex effects chains and faithfully simulate each effects unit with very high precision. In addition, you can use this mode to process audio files without <span class="emphasis">JACK</span> running. You can even process signals on systems which do not have any audio hardware installed.
+		</div>
+		<div class="section heading">
+			Setting up JACK for real-time processing
+		</div>
+		<div class="section">
+			In order to perform real-time audio processing on your system, you first need to install and configure the <span class="emphasis">JACK</span> audio server on your system. How this is done depends on your operating system or distribution. We suggest that you also install <span class="emphasis">Qjackctl</span>, which is a graphical application to configure and control <span class="emphasis">JACK</span>, and configure the audio server using this utility. Normally, you will have a separate audio device, such as an external audio interface, that you use for real-time processing, while you keep the normal system sound running on your internal on-board audio device.
+		</div>
+		<div class="section">
+			In <span class="emphasis">Qjackctl</span>, open the settings window, enable <span class="emphasis">real-time mode</span> and set the sampling rate. You will usually set this to the native sampling rate of your interface, which is usually the highest rate your audio hardware supports and often printed on your device. We suggest you to select either 48 kHz, 96 kHz or 192 kHz as the sampling rate. These sampling rates are much more common today, than sampling rates like 44.1 kHz or 88.2 kHz, which stem from the 90s, when CD audio was the norm. Most modern converters will usually operate &quot;better&quot; when running at the former rates than the latter. If you choose a higher sampling rate, the algorithms in <span class="emphasis">go-dsp-guitar</span> will run with a narrower time-domain discretization, which will (slightly) improve simulation accuracy. However, keep in mind that this will also result in your computer having to perform more intensive processing. If in doubt, we recommend that you choose a sampling rate of 96 kHz, if your audio hardware supports it.
+		</div>
+		<div class="section">
+			Next, set the <span class="emphasis">frames per period</span> value. This determines how many samples your converter will collect, before it calls into your applications (like <span class="emphasis">go-dsp-guitar</span>) to process these. There is a certain tradeoff to be done here. Smaller values reduce latency, the time it takes, for example, from when you hit a string on your guitar until you hear a sound from your speakers or headphones, but allow your system less time to perform the actual processing, so you will run into dropouts more frequently and won't be able to perform as much complex processing than if your latency was higher. We suggest that you start at a value of 1024, which gives you about 20 milliseconds of <span class="emphasis">round-trip</span> latency when sampling at 96 kHz, and see how it goes. If your <span class="emphasis">DSP load</span> indicator is constantly below about 40 percent, you may reduce this value to 512, 256, 128 or even 64 to achieve even lower (e. g. 10 ms, 5 ms, 2.5 ms or even 1.25 ms round-trip) latency. On the other hand, if you experience dropouts, you might have to increase this value to 2048, 4096 or even 8192, especially if your converter runs on a very high sampling rate (e. g. 192 kHz). The setting you select here is not all that important though, since you can change the frames per period settings from within <span class="emphasis">go-dsp-guitar</span>. Keep the <span class="emphasis">periods per buffer</span> value at 2.
+		</div>
+		<div class="section">
+			Next, go to the <span class="emphasis">advanced</span> tab, set the <span class="emphasis">maximum port</span> value to 128 and select the audio interface, which you want to use for signal processing, under the <span class="emphasis">input device</span> and <span class="emphasis">output device</span> option. We suggest that you do not select the device, over which your system sound runs. Instead, use a separate, dedicated audio device for real-time processing. For example, use your on-board sound for the system sound and your USB audio interface to process your guitar signal.
+		</div>
+		<div class="section">
+			Suggested settings:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item"><span class="key">Real-time mode:</span> <span class="value">Enabled</span></li>
+				<li class="item"><span class="key">Sampling rate:</span> <span class="value">96000</span></li>
+				<li class="item"><span class="key">Frames per period:</span> <span class="value">1024</span></li>
+				<li class="item"><span class="key">Periods per buffer:</span> <span class="value">2</span></li>
+				<li class="item"><span class="key">Maximum port:</span> <span class="value">128</span></li>
+				<li class="item"><span class="key">Input device:</span> <span class="value emphasis">[Your audio interface]</span></li>
+				<li class="item"><span class="key">Output device:</span> <span class="value emphasis">[Your audio interface]</span></li>
+			</ul>
+		</div>
+		<div class="section">
+			Now, hit <span class="emphasis">Ok</span> and <span class="emphasis">start</span> the audio server.
+		</div>
+		<div class="section heading">
+			Running go-dsp-guitar in real-time mode
+		</div>
+		<div class="section">
+			To run <span class="emphasis">go-dsp-guitar</span> in real-time mode, you first need to have <span class="emphasis">JACK</span> running. Afterwards, navigate to the place where you installed the software and run the <span class="emphasis">dsp</span> executable. Substitute the path in the first line with the directory where you built the software or extracted the binary package.
+		</div>
+		<div class="section code">
+			<div>$ cd ~/go/src/github.com/andrepxx/go-dsp-guitar/</div>
+			<div>$ ./dsp</div>
+		</div>
+		<div class="section">
+			The command should not return to the prompt of the shell. Should you get any error message and the program terminate (return to the shell prompt), there is likely either a problem with <span class="emphasis">JACK</span> or the TCP ports, which <span class="emphasis">go-dsp-guitar</span> uses (ports 8080 and 8443), are already in use by another process on your machine. You may change these port numbers by editing the file in <span class="emphasis highlight">config/config.json</span>, relative to the path of your <span class="emphasis">go-dsp-guitar</span> installation, though we advise against this, unless you know what you are doing.
+		</div>
+		<div class="section">
+			Once <span class="emphasis">go-dsp-guitar</span> is running, you can connect to its web interface by opening one of the following URLs in your web browser.
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item highlight">http://localhost:8080/</li>
+				<li class="item highlight">https://localhost:8443/</li>
+			</ul>
+		</div>
+		<div class="section">
+			In real-time mode, <span class="emphasis">go-dsp-guitar</span> will register the following ports with <span class="emphasis">JACK</span>.
+		</div>
+		<div class="section">
+			Input ports:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item highlight">in_0</li>
+				<li class="item highlight">in_1</li>
+			</ul>
+		</div>
+		<div class="section">
+			Output ports:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item highlight">out_0</li>
+				<li class="item highlight">out_1</li>
+				<li class="item highlight">master_left</li>
+				<li class="item highlight">master_right</li>
+				<li class="item highlight">metronome</li>
+			</ul>
+		</div>
+		<div class="section">
+			In a typical live performance situation, where you play guitar and do vocal performance, you might connect your guitar to <span class="emphasis">in_0</span> and your microphone to <span class="emphasis">in_1</span>. Say you wish to distort your guitar signal and reverbarate your vocal signal so you configure the effects chains this way. (More on that later.) The output <span class="emphasis">out_0</span> will then carry your processed (e. g. distorted) guitar signal, while the output <span class="emphasis">out_1</span> will carry your processed (e. g. reverberated) vocal signal. These &quot;direct output&quot; signals may be used for recording or for forwarding them to a dedicated mixing desk at the venue. The outputs <span class="emphasis">master_left</span> and <span class="emphasis">master_right</span> will carry the stereo mixdown, i. e. the sum of all outputs, with their respective level adjustments and room simulation applied, as configured in the <span class="emphasis">Spatializer</span> unit. (More on that in the section on effects units.) You will usually use the master outputs for monitoring. However, you may also use them in case you would like to forward a &quot;pre-mixed&quot; signal to the mixing desk. Finally, the <span class="emphasis">metronome</span> output is an auxiliary output, which carries the metronome signal only.
+		</div>
+		<div class="section heading">
+			Running go-dsp-guitar in batch-processing mode
+		</div>
+		<div class="section">
+			To run <span class="emphasis">go-dsp-guitar</span> in batch-processing mode, you navigate to the place where you installed the software and run the <span class="emphasis">dsp</span> executable with the parameter <span class="emphasis">-channels</span>, followed by the number of input channels (i. e. instruments) you wish to process. Substitute the path in the first line with the directory where you built the software or extracted the binary package.
+		</div>
+		<div class="section code">
+			<div>$ cd ~/go/src/github.com/andrepxx/go-dsp-guitar/</div>
+			<div>$ ./dsp -channels <span calss="emphasis">[n]</span></div>
+		</div>
+		<div class="section">
+			<span class="emphasis">go-dsp-guitar</span> will then ask you to enter the target sample rate (in <span class="emphasis">Hertz</span>) of your project. This determines the time discretization, in which all processing will be performed and also the sample rate of the output files generated. All files supplied as input will be resampled to this sample rate before processing using the <span class="emphasis">Lanczos</span> resampling method.
+		</div>
+		<div class="section">
+			The command should not return to the prompt of the shell. Should you get any error message and the program terminate (return to the shell prompt), the TCP ports, which <span class="emphasis">go-dsp-guitar</span> uses (ports 8080 and 8443), are probably already in use by another process on your machine. You may change these port numbers by editing the file in <span class="emphasis highlight">config/config.json</span>, relative to the path of your <span class="emphasis">go-dsp-guitar</span> installation, though we advise against this, unless you know what you are doing.
+		</div>
+		<div class="section">
+			Once <span class="emphasis">go-dsp-guitar</span> is running, you can connect to its web interface by opening one of the following URLs in your web browser.
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item highlight">http://localhost:8080/</li>
+				<li class="item highlight">https://localhost:8443/</li>
+			</ul>
+		</div>
+		<div class="section">
+			After you set up your signal flow, you can then hit the <span class="emphasis">Process now</span> button in the <span class="emphasis">Batch processing</span> section of the web interface. After this, the web interface will lock up and the command line program will prompt you for the target format (linear PCM &apos;lpcm&apos; or floating-point &apos;float&apos;) and bit depth (8, 16, 24 or 32 for &apos;lpcm&apos;, 32 or 64 for &apos;float&apos;), followed by the file path to each file used as an input, as well as the channel from that file to be used.
+		</div>
+		<div class="section">
+			After each channel has been loaded from file, it will be resampled to the appropriate target sampling rate, then the audio data will be processed and finally, each processed (output) channel will be written to a (monophonic) wave file of your choosing. If the audio data loaded into the input channels is of different lengths, the shorter sequences will be extended by zero-padding them to the length of the longest sequence. Also, the two master-outputs (left and right), as well as the metronome channel can be written to files. Leaving a file path empty discards that particular output. After all results have been either written to file or discarded, no further prompt will appear. The web interface can then be reloaded, the signal chain can be reconfigured and another batch processing step can be started by clicking on the <span class="emphasis">Process now</span> button. If you do not wish to perform further processing, hit <span class="emphasis highlight">Ctrl + C</span> on the command line where <span class="emphasis">go-dsp-guitar</span> is running.
+		</div>
+		<div class="section heading">
+			The web interface
+		</div>
+		<div class="section">
+			To configure your signal chains, open the web interface in your web browser. The web interface consists of a number of <span class="emphasis">channels</span>, as well as a global <span class="emphasis">master section</span>. Each of these can contain a number of <span class="emphasis">effects units</span>, which process or alter the signal flowing through them. When running in <span class="emphasis">real-time mode</span>, there are normally two channels. When running in <span class="emphasis">batch-processing mode</span>, the desired number of channels is passed as an argument to the <span class="emphasis">dsp</span> executable.
+		</div>
+		<div class="section heading">
+			Signal flow
+		</div>
+		<div class="section">
+			The signal from each of the (monophonic) inputs (<span class="emphasis">in_0</span>, <span class="emphasis">in_1</span>, ...) is fed through a series of <span class="emphasis">effects units</span>. The ordered arrangement of these <span class="emphasis">effects units</span> is what we call the <span class="emphasis">signal chain</span>. The signal flows through each of the individual signal chains from top to bottom, while all of the chains are run in parallel. Each of the signal chain produces an individual (monophonic) output (<span class="emphasis">out_0</span>, <span class="emphasis">out_1</span>, ...). The order of the individual effects units within each signal chain is important. For example, a reverberation unit will usually be placed <span class="emphasis">after</span> a distortion unit, since it is much more common to reverberate a distorted signal, than to distort a reverberated signal. We will discuss the most common ordering of the effects in the section where we describe each effects unit and this is usually a nice way to get started. However, sometimes, it is necessary to go <span class="emphasis">against</span> common rules to get the desired sound. Therefore, there is no <span class="emphasis">incorrect</span> ordering of effects in the strict sense. Because of this, <span class="emphasis">go-dsp-guitar</span> gives you full control and freedom over your signal routing and effects order. Just keep in mind that unexpected things might happen, if you choose to leave well-trodden paths.
+		</div>
+		<div class="section">
+			Signal flow deviates from the usual rules regarding the <span class="emphasis">master section</span> located at the bottom of the user interface. The <span class="emphasis">Tuner</span> is always fed the direct signal from the selected input and does <span class="emphasis">not</span> alter the signal itself in any way. The <span class="emphasis">output</span> signals from all individual effects chains are routed out to their respective outputs, and also fed into the <span class="emphasis">Spatializer</span>, which mixes them down to a stereo signal with a simple phase-shift based room simulation and feeds them to the master section. Finally, the <span class="emphasis">Metronome</span> has its own, individual output, but may optionally be mixed into the master output by enabling the <span class="emphasis">Master</span> button. This makes sense when the <span class="emphasis">master output</span> is used for monitoring purposes by the musician, who will want to hear the metronome ticking.
+		</div>
+		<div class="section heading">
+			Description of all effects units
+		</div>
+		<div class="section">
+			In the following, we will describe each of the effects units. We will describe what these units do, how they are used, and possibly how they achieve what they are doing. We will also describe each of their parameters and possibly how you should configure them in order to achieve certain effects. The order in which we describe the effects units represents the order in which they appear in the drop-down menu of <span class="emphasis">go-dsp-guitar</span>, which is also the <span class="emphasis">usual</span> order, in which they are arranged. The order in which we describe the paramters is the order in which they appear in the user interface. Note that normally, you will only have a subset of these effects units in your signal chain. Also note that you are allowed to have multiple instances of the same effects unit in your signal chain if you desire so. And of course, you can arrange them in any order you like, though certainly not all configurations will result in usable sound.
+		</div>
+		<div class="section heading">
+			Effects unit: Signal generator
+		</div>
+		<div class="section">
+			The <span class="emphasis">signal generator</span> is a function generator, which allows you to mix your original input with the synthesized signal. It is mainly used for testing purposes, since it can provide a highly predictable, synthetic input into the following effects units, but may also be used creatively, for example as an <span class="emphasis">LFO</span> (low-frequency oscillator). Since it is a signal source, it is normally used at the beginning of the signal chain. However, as with all effects unit, it may be placed anywhere in the chain.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Input amplitude:</span> Allows you to scale/multiply your input signal with a linear factor from 0 to 100 percent. For example, setting this to zero prevents all input signal from reaching the output. Setting this to 100 feeds the full input signal to the output. Setting this to 50 reduces the amplitude of the input signal to exactly one half and feeds it to the output. This setting is useful to prevent clipping when the input signal, which normally has a range of [-1; 1] (or <span class="emphasis">0 dBFS</span>) is mixed with another signal from the same range.
+				</li>
+				<li class="item">
+					<span class="highlight">Input gain:</span> Allows you to attenuate the input signal by a logarithmic attenuation factor from -60 dB to 0 dB. This setting is used <span class="emphasis">in addition</span> to the linear scaling by the <span class="emphasis">Input amplitude</span> setting, so setting this to, say <span class="emphasis">-10 dB</span>, while the <span class="emphasis">input amplitude</span> setting is at <span class="emphasis">50</span> will result in a total scaling factor of <span class="emphasis">(50 / 100) * 10^(-10 dB / 20 dB) = &#x7e;0.1581</span>.
+				</li>
+				<li class="item">
+					<span class="highlight">Signal type:</span> Allows you to select from a variety of signal shapes, from <span class="highlight">sine</span>, over <span class="highlight">triangle</span>, <span class="highlight">square</span> and <span class="highlight">sawtooth</span> waves, up to white <span class="highlight">noise</span>.
+				</li>
+				<li class="item">
+					<span class="highlight">Signal frequency:</span> Allows you to set the frequency of the generated periodic signal in <span class="emphasis">Hz</span> (cycles per second). The allowed range is from 1 Hz to 20 kHz. This setting has no effect when <span class="highlight">noise</span> is selected as the <span class="emphasis">signal type</span>.
+				</li>
+				<li class="item">
+					<span class="highlight">Signal amplitude:</span> Allows you to set the amplitude of the generated signal on a linear scale from 0 to 100 percent. When set to zero, no additional output is generated. In this case, only the input signal is passed through, unless the <span class="emphasis">Input amplitude</span> is also set to zero. In the latter case, no signal is output from the unit at all.
+				</li>
+				<li class="item">
+					<span class="highlight">Signal gain:</span> Allows you to attenuate the input signal by a logarithmic attenuation factor from -60 dB to 0 dB. This setting is used <span class="emphasis">in addition</span> to the linear scaling by the <span class="emphasis">Signal amplitude</span> setting.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Noise gate
+		</div>
+		<div class="section">
+			A <span class="emphasis">noise gate</span> cuts the input signal when its amplitude falls below a certain threshold for a certain amount of time and starts passing it through again once its amplitude rises above another threshold. It is useful to cut the signal from the guitar when the musician is not playing. Otherwise, hum or static noise from the pickups may be heard, especially when the signal is later amplified by distortion units or preamplifiers with high gain. To properly cut the signal, the noise gate is normally placed first in the signal chain, before all other effects units.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Threshold open:</span> The signal level (in <span class="emphasis">dBFS</span>), at which the noise gate opens. The noise gate starts forwarding signals once a signal (peak) exceeds this level.
+				</li>
+				<li class="item">
+					<span class="highlight">Threshold close:</span> The signal level (in <span class="emphasis">dBFS</span>), at which the noise gate closes. The noise gate cuts the signal, when it remains below this (peak) level for a certain amount of time.
+				</li>
+				<li class="item">
+					<span class="highlight">Hold time:</span> The amount of time (in <span class="emphasis">ms</span>), the signal level has to remain below the closing threshold for the noise gate to cut the signal.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Bandpass
+		</div>
+		<div class="section">
+			A <span class="emphasis">bandpass</span> is a certain type of filter, which attenuates signal components with frequencies above and below certain thresholds. It may be used early in the signal path as a sort of noise reduction by cutting the signal energy in frequency bands which are known not to be important for a certain instrument. For this purpose, it is best to be directly placed after the noise gate (if present). However, it may also be used later in the signal path for effects, for example to achieve a kind of &quot;mid-rangy&quot;, nasal, &quot;tinny&quot; or otherwise lo-fi sound when placed after the pre-amplifier or distortion units. The bandpass filter in <span class="emphasis">go-dsp-guitar</span> is implemented as an <span class="emphasis">IIR</span> (infinite impulse response) filter, which means that, after the filter is excited by a sharp transient, it takes the filter an infinite amount of time to &quot;settle&quot; to an output of zero again. This means that the filter, once excited, reaches steady state only asymptotically. The filter topologies are based on actual analog <span class="emphasis">active</span> filter designs.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Filter order:</span> The number of reactive components (i. e. capacitors, inductors) in the filter. This determines the <span class="emph">roll-off</span> of the filter, or how sharp the cutoff happens in the frequency domain. The attenuation outside the passband is -6 dB per octave for a 2nd-order filter, -12 dB per octave for a 4th-order filter, -18 dB per octave for a 6th-order filter and -24 dB per octave for an 8th-order filter. While a higher filter order results in a sharper cutoff, it will also increase the computational ressources required to simulate the filter.
+				</li>
+				<li class="item">
+					<span class="highlight">Frequency 1:</span> One of the cutoff frequencies of the filter (in <span class="emphasis">Hz</span>). If this is the lower number, then the filter will attenuate frequencies <span class="emphasis">below</span> this threshold. If this is the higher number, then the filter will attenuate frequencies <span class="emphasis">above</span> this threshold.
+				</li>
+				<li class="item">
+					<span class="highlight">Frequency 2:</span> The other cutoff frequency of the filter (in <span class="emphasis">Hz</span>). If this is the lower number, then the filter will attenuate frequencies <span class="emphasis">below</span> this threshold. If this is the higher number, then the filter will attenuate frequencies <span class="emphasis">above</span> this threshold.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Auto wah
+		</div>
+		<div class="section">
+			The <span class="emphasis">auto wah</span> is a voltage-controlled filter effect. It implements a 16th-order (-48 dB per octave) bandpass filter whose resonance frequency is controlled by either the average or peak amplitude of the input signal. Wah effects are used a lot by guitarists, especially within old-school rock and funk music. Because it is an amplitude-controlled effect, the <span class="emphasis">auto wah</span> unit should be placed <span class="emphasis">before</span> distortion effects in the signal chain, as these compress or reduce the dynamic range of the signal.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Follow:</span> This value determines, whether the voltage controlling the resonance frequency of the filter should be derived from the signal <span class="highlight">envelope</span> (i. e. peak amplitude) or the average signal <span class="highlight">level</span>. The <span class="highlight">envelope</span> option makes the filter follow changes in the input amplitude more closely and rapidly, while the <span class="highlight">level</span> option makes the filter work more steadily and reduces the impact of large short-term signal spikes.
+				</li>
+				<li class="item">
+					<span class="highlight">Level 1:</span> The level of the input signal (in <span class="emphasis">dBFS</span>) where the resonance frequency of the filter will start or stop changing. If this is the lower number, then the filter will maintain a constant resonance frequency, as determined by the <span class="emphasis">Frequency 1</span> value, when the signal falls below this threshold. If this is the higher number, then the filter will maintain a constant resonance frequency, as determined by the <span class="emphasis">Frequency 1</span> value, when the signal rises above this threshold.
+				</li>
+				<li class="item">
+					<span class="highlight">Level 2:</span> The level of the input signal (in <span class="emphasis">dBFS</span>) where the resonance frequency of the filter will start or stop changing. If this is the higher number, then the filter will maintain a constant resonance frequency, as determined by the <span class="emphasis">Frequency 2</span> value, when the signal rises above this threshold. If this is the lower number, then the filter will maintain a constant resonance frequency, as determined by the <span class="emphasis">Frequency 2</span> value, when the signal falls below this threshold.
+				</li>
+				<li class="item">
+					<span class="highlight">Frequency 1:</span> The resonance frequency of the filter (in <span class="emphasis">Hz</span>) at an input level as determined by the value of <span class="emphasis">Level 1</span>. The resonance frequency will increase or decrease linearly from <span class="emphasis">Frequency 1</span> to <span class="emphasis">Frequency 2</span> as the input level increases or decreases from <span class="emphasis">Level 1</span> to <span class="emphasis">Level 2</span>. Note that the signal levels are in <span class="emphasis">dB</span> and therefore <span class="emphasis">logarithmic</span> in the signal amplitude.
+				</li>
+				<li class="item">
+					<span class="highlight">Frequency 2:</span> The resonance frequency of the filter (in <span class="emphasis">Hz</span>) at an input level as determined by the value of <span class="emphasis">Level 2</span>. The resonance frequency will increase or decrease linearly from <span class="emphasis">Frequency 1</span> to <span class="emphasis">Frequency 2</span> as the input level increases or decreases from <span class="emphasis">Level 1</span> to <span class="emphasis">Level 2</span>. Note that the signal levels are in <span class="emphasis">dB</span> and therefore <span class="emphasis">logarithmic</span> in the signal amplitude.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Octaver
+		</div>
+		<div class="section">
+			An <span class="emphasis">octaver</span> creates several notes at octaves above or below the original note played on the guitar. It therefore allows your guitar to achieve a fuller sound or gives the impression of other instruments, especially bass guitars, playing along your guitar track even when there are actually no other instruments present.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Follow:</span> This value determines whether the voltage controlling the amplitude of the generated octave signals should be derived from the signal <span class="highlight">envelope</span> (i. e. peak amplitude) or the average signal <span class="highlight">level</span>. The <span class="highlight">envelope</span> option makes the control voltage follow changes in the input amplitude more closely and rapidly, while the <span class="highlight">level</span> option makes the control voltage more steady and reduces the impact of large short-term signal spikes. The latter option gives the effect a much smoother sound and is generally recommended.
+				</li>
+				<li class="item">
+					<span class="highlight">Level octave up:</span> The level (in <span class="emphasis">dB</span>) of the generated signal that is one octave above the actual notes played on the instrument, relative to the level of the input signal.
+				</li>
+				<li class="item">
+					<span class="highlight">Level clean:</span> The level (in <span class="emphasis">dB</span>) of the unaltered signal passing through the effect, relative to the level of the input signal.
+				</li>
+				<li class="item">
+					<span class="highlight">Level dist:</span> The level (in <span class="emphasis">dB</span>) of a generated distorted signal, relative to the level of the input signal. Other than with usual distortion effects, this signal is <span class="emphasis">not</span> compressed and therefore has approximately the same dynamic range as the input signal, but contains additional odd-order harmonics. This signal is actually an intermediate step required for the generation of the octave signals and therefore included here.
+				</li>
+				<li class="item">
+					<span class="highlight">Level octave down (I):</span> The level (in <span class="emphasis">dB</span>) of a generated signal one octave below the input signal, relative to the level of the input signal.
+				</li>
+				<li class="item">
+					<span class="highlight">Level octave down (II):</span> The level (in <span class="emphasis">dB</span>) of a generated signal two octaves below the input signal, relative to the level of the input signal.
+				</li>
+				<li class="item">
+					<span class="highlight">Level hysteresis:</span> The octave signals are generated by passing the input signal through a series of flip-flops. These elements have a hysteresis, which is controlled by the voltage applied to their inputs. This value determines the amount of hysteresis (in <span class="emphasis">dB</span>), relative to the amplitude of the input signal. There is generally no need to adjust this value. It is just here for completeness.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Excess
+		</div>
+		<div class="section">
+			<span class="emphasis">Excess</span> is an effect which creates non-linear distortion by phase-modulating the input signal with itself. When operated on low intensity, it can achieve an effect similar to distortion. When operated on high intensity, the signal will almost turn into white noise, especially at high amplitudes. This effect can be very useful when creating non-conventional, more progressive sounds.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Gain:</span> The amount of gain applied to the input signal. Values below zero simply attenuate the signal. Values above zero amplify the signal. When the linear region of the effect is exceeded, the signal will start phase-modulating itself. Higher values therefore achieve stronger modulation. As the signal amplitude decays, the effects of the modulation will become less intense.
+				</li>
+				<li class="item">
+					<span class="highlight">Level:</span> The level of the maximum signal output from the effects unit in <span class="emphasis">dBFS</span>.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Fuzz
+		</div>
+		<div class="section">
+			<span class="emphasis">Fuzz</span> is a non-linear distortion effect with asymmetric clipping, which produces both even- and odd-order harmonics. Traditional fuzz-boxes are based upon simple Silicon- or Germanium-based transistor circuits and typically employ hard clipping, while tube circuits typically employ softer clipping. The effects unit in <span class="emphasis">go-fx-guitar</span> allows you to tune the fuzz unit for the &quot;hardness&quot; or &quot;softness&quot; of the clipping. It enables a guitarist to achieve anything from smooth and &quot;blusey&quot; to rough-sounding distortion tones typically associated with old-school rock music or blues.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Follow:</span> Asymmetric clipping is achieved by adding a <span class="emphasis">bias</span> signal with a strong DC component to the input signal before it reaches the pre-amplifier stages. To prevent the output of the pre-amplifier to get stuck at either positive or negative supply rail voltage (which would effectively prevent it from passing on any real information about the input signal to the output), this bias voltage has to follow the level of the input signal. An input signal with a larger amplitude allows for a larger bias voltage, while the bias voltage has to be reduced as the amplitude of the input signal decays towards zero. This value determines, whether the bias voltage should follow the signal <span class="highlight">envelope</span> or the average signal <span class="highlight">level</span>. The <span class="highlight">envelope</span> option makes the bias voltage follow changes in the input amplitude more closely and rapidly, while the <span class="highlight">level</span> option makes the bias voltage more steady and reduces the impact of large short-term signal spikes.
+				</li>
+				<li class="item">
+					<span class="highlight">Bias:</span> The polarity and amount of bias voltage applied to the pre-amplifier stage, relative to either the peak amplitude or average level of the input signal. The further away the bias value is from the zero point, the more asymmetric the clipping is and the higher the level of even-order harmonics is, in relation to odd-order harmonics. With a bias-value of zero, the effects unit mainly produces odd-order harmonics.
+				</li>
+				<li class="item">
+					<span class="highlight">Boost:</span> The amount of gain (amplification) in the first amplifier stage in the pre-amplifier circuit in <span class="emphasis">dB</span>. Raising this above zero enables you to drive the actual clipping stage deeper into saturation and achieve a more distorted tone even from a relatively low input signal. Use this when you are unable to achieve enough saturation and/or sustain with the normal <span class="emphasis">gain</span> control alone.
+				</li>
+				<li class="item">
+					<span class="highlight">Gain:</span> The amount of gain (amplification) in the second amplifier stage in the pre-amplifier circuit in <span class="emphasis">dB</span>. Higher values drive the pre-amplifier circuit deeper into saturation and therefore produce stronger distortion and more sustain. Negative values allow you to attenuate the signal.
+				</li>
+				<li class="item">
+					<span class="highlight">Fuzz:</span> Allows you to control, how hard or soft the pre-amplifier stages clip. A low value produces soft, valve-like saturation and keeps a lot of the dynamics of the input signal, while a high value produces harder saturation and compressses the dynamics of the input signal much more.
+				</li>
+				<li class="item">
+					<span class="highlight">Level:</span> Determines the amount of signal attenuation (in <span class="emphasis">dB</span>) at the output stage. This enables you to reduce the output level of the effects unit in order to better match the level of other signals or to avoid clipping the input of the next effects unit. A level of zero means, that the entire range of [-1; 1] is used to represent the output signal values.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Overdrive
+		</div>
+		<div class="section">
+			<span class="emphasis">Overdrive</span> is a non-linear distortion effect with symmetric soft-clipping. It enables a guitarist to achieve the smooth saturation tones typically associated with overdriven valve amplifiers and genres from blues over rock to hard rock. Due to the symmetric clipping, the effects unit produces odd-order harmonics only.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Boost:</span> The amount of gain (amplification) in the first amplifier stage in the pre-amplifier circuit in <span class="emphasis">dB</span>. Raising this above zero enables you to drive the actual clipping stage deeper into saturation and achieve a more distorted tone even from a relatively low input signal. Use this when you are unable to achieve enough saturation and/or sustain with the normal <span class="emphasis">gain</span> control alone.
+				</li>
+				<li class="item">
+					<span class="highlight">Gain:</span> The amount of gain (amplification) in the second amplifier stage in the pre-amplifier circuit in <span class="emphasis">dB</span>. Higher values drive the pre-amplifier circuit deeper into saturation and therefore produce stronger distortion and more sustain. Negative values allow you to attenuate the signal.
+				</li>
+				<li class="item">
+					<span class="highlight">Drive:</span> Allows you to blend the clean (input) signal with the distorted (output) signal from the clipping stages. A value of zero effectively bypasses the clipping stages completely. A value of 100 will cause the effects unit to output the distorted signal only. Values in between these two extremes will blend the input signal with the output signal and pass them on to the output.
+				</li>
+				<li class="item">
+					<span class="highlight">Level:</span> Determines the amount of signal attenuation (in <span class="emphasis">dB</span>) at the output stage. This enables you to reduce the output level of the effects unit in order to better match the level of other signals or to avoid clipping the input of the next effects unit. A level of zero means, that the entire range of [-1; 1] is used to represent the output signal values.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Distortion
+		</div>
+		<div class="section">
+			<span class="emphasis">Distortion</span> is a non-linear distortion effect with symmetric hard-clipping. It enables a guitarist to achieve more modern saturation tones typically associated with contemporary hard rock and heavy metal music. Due to the symmetric clipping, the effects unit produces odd-order harmonics only.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Boost:</span> The amount of gain (amplification) in the first amplifier stage in the pre-amplifier circuit in <span class="emphasis">dB</span>. Raising this above zero enables you to drive the actual clipping stage deeper into saturation and achieve a more distorted tone even from a relatively low input signal. Use this when you are unable to achieve enough saturation and/or sustain with the normal <span class="emphasis">gain</span> control alone.
+				</li>
+				<li class="item">
+					<span class="highlight">Gain:</span> The amount of gain (amplification) in the second amplifier stage in the pre-amplifier circuit in <span class="emphasis">dB</span>. Higher values drive the pre-amplifier circuit deeper into saturation and therefore produce stronger distortion and more sustain. Negative values allow you to attenuate the signal.
+				</li>
+				<li class="item">
+					<span class="highlight">Level:</span> Determines the amount of signal attenuation (in <span class="emphasis">dB</span>) at the output stage. This enables you to reduce the output level of the effects unit in order to better match the level of other signals or to avoid clipping the input of the next effects unit. A level of zero means, that the entire range of [-1; 1] is used to represent the output signal values.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Tone stack
+		</div>
+		<div class="section">
+			A <span class="emphasis">tone stack</span> is a simple tone control or equalizer circuit as it is commonly found in the pre-amp section of guitar amplifiers. It is usually placed directly after the clipping stage, so in <span class="emphasis">go-dsp-guitar</span>, it would come directly after a <span class="emphasis">Fuzz</span>, <span class="emphasis">Overdrive</span> or <span class="emphasis">Distortion</span> unit. It consists of a configurable 8th-order filter network with four tunable values.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Low:</span> Controls the amount of low frequencies or bass in the signal in <span class="emphasis">dB</span>. The frequency range affected by this control ranges from about 20 Hz to about 300 Hz. An increase in bass response makes the signal more punchy and tight, while a decrease in bass response prevents rumble.
+				</li>
+				<li class="item">
+					<span class="highlight">Middle:</span> Controls the amount of midrange in the signal in <span class="emphasis">dB</span>. The frequency range affected by this control ranges from about 300 Hz to about 3 kHz. A slight cut in midrange frequencies can result in an aggressive, scooped sound. Under some circumstances, especially with a too deep midrange cut, the sound can be thin and lifeless. A boost in midrange frequencies makes the sound more direct and &quot;in-your-face&quot; and ensures that it really cuts through in a dense mix. Most guitarists prefer a rather boosted midrange response.
+				</li>
+				<li class="item">
+					<span class="highlight">Presence:</span> Controls the amount of high-midrange in the signal in <span class="emphasis">dB</span>. The frequency range affected by this control ranges from about 3 kHz to about 6 kHz. A decrease in presence makes the sound slightly more muffled and distant, while an increase in presence makes the sound more present and aggressive.
+				</li>
+				<li class="item">
+					<span class="highlight">High:</span> Controls the amount of high frequencies or treble in the signal in <span class="emphasis">dB</span>. The frequency range affected by this control ranges from about 6 kHz to about 20 kHz. An increase in highs makes the sound more hissy and sibilant, while a decrease in highs makes the sound a little less brilliant.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Chorus
+		</div>
+		<div class="section">
+			The <span class="emphasis">chorus</span> unit creates the impression that the melody is played by a multitude of instruments at once. To achieve this, it replicates the original signal from the instrument, slightly modulates the pitch of each of the signals and finally mixes them all together. As a modulation effect, this unit is normally placed after both pre-amplifier and tone stack.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Depth:</span> Controls the intensity of the modulation, i. e. how much the pitch of the signals is shifted.
+				</li>
+				<li class="item">
+					<span class="highlight">Speed:</span> Controls how fast the pitch of the signals is shifted. A higher modulation speed also results in a higher modulation depth, so normally, when increasing the speed, the depth value can be reduced.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Flanger
+		</div>
+		<div class="section">
+			A <span class="emphasis">flanger</span> is a comb filter controlled by a low-frequency oscillator (LFO). A comb filter creates a series of peaks and troughs in the frequency response. Comb filters operate by duplicating the signal, sending one of the copies through a series of all-pass filter networks, which alter only the phase, but not the amplitude of each (sinusoid) signal component, and finally averaging over both the unaltered and the phase-shifted signal by summing both signals up and cutting the resulting amplitude in half. The LFO signal controls the amount of (frequency-dependant) phase-shift experienced by one of the signals and therefore the placement and spacing of these peaks and troughs within the frequency spectrum, which get slowly shifted around. As a modulation effect, this unit is normally placed after both pre-amplifier and tone stack.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Depth:</span> Controls how far the peaks and troughs move within the frequency spectrum. A higher depth results in a more intense effect.
+				</li>
+				<li class="item">
+					<span class="highlight">Speed:</span> Controls how fast the peaks and troughs move through the frequency spectrum. A higher speed results in a more dynamic effect, while a lower speed results in a slower effect, which can sometimes be much more dramatic.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Phaser
+		</div>
+		<div class="section">
+			A <span class="emphasis">phaser</span> is an effects unit very similar to a <span class="emphasis">flanger</span>. It also implements a comb filter controlled by a low-frequency oscillator (LFO). The difference is that the maximum amount of phase shift the signal experiences can also be controlled. When the signals are (+)90 degrees out of phase, it achieves the same results as a flanger effect. However, the phaser also allows for lower, or even <span class="emphasis">negative</span> phase shifts, resulting in a slightly different effect. As a modulation effect, this unit is normally placed after both pre-amplifier and tone stack.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Depth:</span> Controls how far the peaks and troughs move within the frequency spectrum. A higher depth results in a more intense effect.
+				</li>
+				<li class="item">
+					<span class="highlight">Speed:</span> Controls how fast the peaks and troughs move through the frequency spectrum. A higher speed results in a more dynamic effect, while a lower speed results in a slower effect, which can sometimes be much more dramatic.
+				</li>
+				<li class="item">
+					<span class="highlight">Phase:</span> Controls the amount of phase shift the signal experiences, which has an effect on the depth of the throughs in the frequency spectrum and therefore the intensity of the effect.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Tremolo
+		</div>
+		<div class="section">
+			<span class="emphasis">Tremolo</span> is an effect, which amplitude-modulates the input signal with another signal from a low-frequency oscillator (LFO). It can be used to create staccato-like effects. As a modulation effect, this unit is normally placed after both pre-amplifier and tone stack.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Frequency:</span> Controls how fast the amplitude of the signal changes.
+				</li>
+				<li class="item">
+					<span class="highlight">Phase:</span> Controls the proportion of the time interval where the signal is passed with unaltered amplitude, relative to the proportion of the time interval where the signal is reduced in amplitude.
+				</li>
+				<li class="item">
+					<span class="highlight">Depth:</span> Controls how much (in <span class="emphasis">dB</span>) the amplitude of the input signal gets varied by the tremolo effect. A more negative number means a larger variation (reduction) in amplitude.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Ring modulator
+		</div>
+		<div class="section">
+			A <span class="emphasis">ring modulator</span> multiplies the input signal with a sinusoidal carrier wave, therefore creating additional frequency components (sum and difference frequencies), which are not harmonically related to the input signal. Like the <span class="emphasis">Excess</span> unit, this effect can be very useful when creating non-conventional, more progressive sounds.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Frequency:</span> The frequency of the carrier wave modulated onto the input signal.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Delay
+		</div>
+		<div class="section">
+			A <span class="emphasis">delay</span> unit repeats the input signal after a short amount of time, normally with reduced amplitude. It is used for creating simple echos for increased ambience or to achieve layered, complex sounds with a single instrument. Long delay times basically allow a guitarist to overdub his/her own playing.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Delay time:</span> The amount of time (in <span class="emphasis">ms</span>) after which the input signal is repeated. Use short delay times for ambience and long delay times to create layered sounds.
+				</li>
+				<li class="item">
+					<span class="highlight">Feedback:</span> The amplitude of the repeated signal (in <span class="emphasis">dB</span>), relative to the input signal.
+				</li>
+				<li class="item">
+					<span class="highlight">Level:</span> The overall attenuation in signal level (in <span class="emphasis">dB</span>) applied at the output stage. Reduce this to prevent clipping when the original and repeated signal are added together and interfere constructively.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Power amp
+		</div>
+		<div class="section">
+			The <span class="emphasis">power amp</span> unit is one of the most complex effects available in <span class="emphasis">go-dsp-guitar</span>. It is capable of simulating different (tube-/valve-based) power-amplifier topologies, as well as speaker cabinets connected to these and picked up by microphones placed in different positions, relative to the speaker cone. It is actually a hybrid of a power amplifier and speaker simulator. It recreates both the frequency and phase response of the simulated devices by approximating them with high-order filters, which are then simulated in real-time.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Filter order:</span> The maximum filter order used to approximate the selected set of power amplifiers and/or speakers. The actual filter order may be lower than this threshold, if the selected set of devices can be recreated exactly (up to a very small numeric error) with a lower-order filter so this only places an upper bound on the filter order. If the filter order becomes too high, you may experience long latency due to a large phase delay caused by the large filter topology and/or dropouts in audio, if your computer is unable to simulate the large filter topology in real-time. By selecting a higher buffer size (period size) in <span class="emphasis">JACK</span>, you will be able to simulate higher-order filters, at the expense of increased latency.
+				</li>
+				<li class="item">
+					<span class="highlight">Filter [1 - 8]:</span> Allows you to select a set of up to eight different power amplifiers and/or combinations of speaker cabinet and microphone to simulate. The input signal will be applied to all eight filters in parallel and the output of all filters will be generated and summed up. Technically, all eight filters are combined into a single filter, the order of which is either that of the largest filter in the set, or the maximum filter order selected by the user, whichever is lower. The input signal is then passed through that filter. Due to this, a higher number of filters does not require more processing time. The order of the largest filter and/or the maximum filter order selected determines the amount of work the processor has to perform.
+				</li>
+				<li class="item">
+					<span class="highlight">Level [1 - 8]:</span> The output level of each filter (in <span class="emphasis">dBFS</span>). Use this to control the relative loudness of each amplifier/speaker, relative to the others. Note that, the more filters you use, the lower you will have to set each level to avoid clipping, as the output of all filters is summed up. Usually, you will want to avoid driving the power section into saturation. Instead, you will distort the signal earlier in the signal chain and ensure that the power amplifiers have sufficient headroom at their outputs.
+				</li>
+			</ul>
+		</div>
+		<div class="section">
+			The following power amplifier and/or speaker simulations are currently implemented in <span class="emphasis">go-dsp-guitar</span>.
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">&quot;- NONE-&quot;:</span> Disables this particular output. This is distinct from turning the respective level down. Because the level is logarithmic, you cannot reduce the amplitude to zero. Also, turning the level of a high-order filter down will not reduce the order of the resulting overall filter topology like disabling a filter entirely by selecting this entry will.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: American Modern (Center)&quot;:</span> Simulates a modern, &quot;American-voiced&quot; three-channel 150 Watt all-valve head, equipped with six EL-34 power-amp valves, running into two 4x12 inch speaker cabinets. The sound from the speaker is picked up with a dynamic microphone positioned close to the speaker membrane, at the center of the speaker cone, right at the edge of the dust cap, giving a rather rough and direct sound perfect for high-gain Thrash Metal.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: American Modern (Classic)&quot;:</span> As above, but with the microphone positioned dead-center and placed further away from the speaker membrane, to pick up more of the overall sound emerging from the cabinet, perfect for smooth leads.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: American Modern (Off-Axis)&quot;:</span> As above, but with the microphone positioned close to the speaker membrane and at the outer edge of the speaker cone for more punch in the low end, perfect for rhythm work.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: American Vintage (Center)&quot;:</span> Simulates a vintage American two-channel amplifier from the 1960-s, equipped with four power-amp valves of type 6L6, running into a single 2x12 inch speaker cabinet. The sound from the speaker is picked up with a dynamic microphone positioned close to the speaker membrane, at the center of the speaker cone, right at the edge of the dust cap, for either a bright and sparkly clean sound or a brilliant, slightly edgy sound when distorted.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: American Vintage (Classic)&quot;:</span> As above, but with the microphone positioned dead-center and placed further away from the speaker membrane, to pick up more of the overall sound emerging from the cabinet, perfect for smooth leads.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: American Vintage (Off-Axis)&quot;:</span> As above, but with the microphone positioned close to the speaker membrane and at the outer edge of the speaker cone for more punch in the low end, perfect for rhythm work.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: British Modern (Center)&quot;:</span> Simulates a modern, &quot;British-voiced&quot; 100 Watt all-valve head, equipped with EL-34 power-amp valves, running into two 4x12 inch speaker cabinets. The sound from the speaker is picked up with a dynamic microphone positioned close to the speaker membrane, at the center of the speaker cone, right at the edge of the dust cap, giving a rather rough and direct sound perfect for classic Heavy Metal at higher gain.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: British Modern (Classic)&quot;:</span> As above, but with the microphone positioned dead-center and placed further away from the speaker membrane, to pick up more of the overall sound emerging from the cabinet, perfect for smooth leads.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: British Modern (Off-Axis)&quot;:</span> As above, but with the microphone positioned close to the speaker membrane and at the outer edge of the speaker cone for more punch in the low end, perfect for rhythm work.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: Custom BP&quot;:</span> Runs the signal through a vintage HiFi amplifier driving a custom-built speaker cabinet with a 1x12 inch speaker placed inside. This is the first of the speaker cabinets captured, which has more of a signature sound.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: Custom HC-450&quot;:</span> Runs the signal through a vintage HiFi amplifier driving a custom-built speaker cabinet with a 1x12 inch speaker placed inside. This is the second of the speaker cabinets captured, which, aside from a mid-range emphasis resulting from the single-driver design, has a much flatter, more natural frequency response than the first cabinet.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: German Modern&quot;:</span> Simulates a modern, German four-channel 150 Watt all-valve head, equipped with four EL-34 power-amp valves, running into two 4x12 inch speaker cabinets. The sound from the speaker is picked up with two dynamic microphones positioned close to the speaker membrane, one at the center of the speaker cone, right at the edge of the dust cap, the other at the edge of the speaker cone, giving a rough and direct sound with enhanced bass response, perfect for high-gain Death Metal and NDH.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;Guitar: Scandinavian Modern&quot;:</span> This is not actually a power amplifier, but rather a filter topology from a special distortion pedal with a very specific frequency response. The pedal was a proof of concept and never went into series production. It is therefore very rare, with only a few hundred units built and sold worldwide, and is thus considered a collector's item today. It is specifically designed for the raw sound associated with the first wave of Scandinavian Black Metal bands from 1985. Place this behind one of the distortion effects, turn up the gain and enjoy a very harsh, slightly trebly and distinctively old-school lo-fi sound with a strong mid-range emphasis.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;PA: HC 2-way (High)&quot;:</span> The treble (1-inch) speaker of a modern 50 W RMS 2-way speaker cabinet used for monitoring purposes.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;PA: HC 2-way (Low)&quot;:</span> The bass (15-inch) speaker of a modern 50 W RMS 2-way speaker cabinet used for monitoring purposes.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;PA: HC 4-way (High)&quot;:</span> The treble speaker of a modern 100 W RMS 4-way PA speaker cabinet.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;PA: HC 4-way (Mid)&quot;:</span> The mid-range speaker of a modern 100 W RMS 4-way PA speaker cabinet.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;PA: HC 4-way (Low)&quot;:</span> The bass speaker of a modern 100 W RMS 4-way PA speaker cabinet.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;PA: HC 4-way (Sub)&quot;:</span> The sub-bass speaker of a modern 100 W RMS 4-way PA speaker cabinet.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;PA: ISP 2-way (High)&quot;:</span> The treble speaker of a vintage 50 W RMS 2-way speaker cabinet used for monitoring purposes.
+				</li>
+				<li class="item">
+					<span class="highlight">&quot;PA: ISP 2-way (Low)&quot;:</span> The bass speaker of a vintage 50 W RMS 2-way speaker cabinet used for monitoring purposes.
+				</li>
+			</ul>
+		</div>
+		<div class="section">
+			Most of the time, you will probably run multiple variations of a particular speaker cabinet (i. e. different microphone placements for a guitar cabinet or all drivers of a PA cabinet) in parallel and adjust their respective levels to tune your sound. However, <span class="emphasis">go-dsp-guitar</span> will also let you combine speakers from different cabinets and/or amplifiers and run them in parallel. Specifically, by running the signal through multiple guitar amplifiers at once, you can achieve an effect similar to &quot;dual-amping&quot; a guitar.
+		</div>
+		<div class="section heading">
+			Effects unit: Latency
+		</div>
+		<div class="section">
+			This is a &quot;pseudo-unit&quot;, which is is only present when <span class="emphasis">go-dsp-guitar</span> runs in <span class="emphasis">real-time mode</span> (see the respective section above). It allows the user to change the <span class="emphasis">JACK</span> buffer size (frames per period) on-the-fly from within the application. Increase the buffer size when <span class="emphasis">DSP load</span> is too high for reliable operation in order to prevent audio dropouts and distortion. Decrease buffer size when <span class="emphasis">DSP load</span> is very low (below 50 %) to reduce processing latency.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Frames per period:</span> The number of frames (samples) collected from the audio hardware before a processing cycle is started. All frames are processsed simultaneously using vectorized operations. Reducing this value decreases processing latency, but requires more computational ressources. Increasing this value increases processing latency, but frees up computational ressources and therefore allows for more sophisticated processing, e. g. more effects units and/or higher filter orders.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Tuner
+		</div>
+		<div class="section">
+			This is a chromatic instrument <span class="emphasis">tuner</span>, which allows you to tune your instrument (e. g. guitar) to a variety of scales. To operate the tuner, select the input channel, to which the instrument you want to tune is connected and hit a note, e. g. by strumming a single open string on your guitar. Then turn the tuning pegs on your instrument, until the correct note appears and the deviation in cents is close to zero. Finally, set the channel value back to <span class="highlight">- NONE -</span> to deactivate the tuner, as this frees additional processing ressources.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Cents:</span> Displays the deviation in <span class="emphasis">cents</span> from the note displayed. (An interval of 1200 cents is exactly one octave.) Provided the string is tuned to the expected note, when this value is negative, the string needs to be tuned higher by increasing string tension. Conversely, when the correct note is displayed, but this value is positive, the string needs to be tuned lower by reducing string tension. As you move your tuning pegs, this value will change. Normally, you will first tune the string way below the targeted tone, then increase tension until the deviation in cents is slightly positive. As soon as you let go of the tuning peg, the deviation in cents will slightly drop down. With a bit of practice, you should be able to get very close to zero. If you tune the string too high, loosen it again by tuning it way down, then slowly tune it up again.
+				</li>
+				<li class="item">
+					<span class="highlight">Frequency:</span> The detected resonant frequency of the string in <span class="emphasis">Hertz</span>.
+				</li>
+				<li class="item">
+					<span class="highlight">Note:</span> The closest note on the chromatic scale. Deviation to this note in <span class="emphasis">Cents</span> is displayed above.
+				</li>
+				<li class="item">
+					<span class="highlight">Channel:</span> The input channel from which the chromatic tuner gets its signal. Set this to the channel where the instrument you want to tune is connected or to <span class="highlight">- NONE -</span> to disable the tuner. The tuner always gets its input directly from <span class="emphasis">JACK</span>, before any other processing occured, so it will work regardless of the effects present in your signal chains or the levels set in the spatializer, so you can either reduce your channel's output amplitude to zero and tune silently without your audience hearing, or you can choose to blast your audience in the face will full-on distorted guitar sound while you tune your instrument. :-)
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Spatializer
+		</div>
+		<div class="section">
+			The <span class="emphasis">spatializer</span> mixes the output signal from the individual effects chains (i. e. the processed instrument and/or microphone signals) and combines them into a stereo mix with room simulation. The mixed signal is then fed to the master outputs, of which there are two, one for the left stereo channel and one for the right stereo channel. The unit contains the following controls for each of your input channels.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Azimuth [n]:</span> Allows you to pan the output signal from channel [n] (<span class="emphasis">out_[n]</span>) left/right in the stereo mix. This controls the angle from which the sound is radiated onto the listener. A value of zero means, that the sound source is located directly in front of the listener, while a negative value pans the sound source to the left and a positive value pans the sound source to the right, both up to an angle of 90 degrees, where the sound source will be positioned on one side of the listener. In order for this control to have any effect on the output, the distance from the sound source to the listener must be non-zero, otherwise the sound source will be positioned directly <span class="emphasis">at</span> the listener's position.
+				</li>
+				<li class="item">
+					<span class="highlight">Distance [n]:</span> The distance (in <span class="emphasis">meters</span>) from the sound source [n] to the listener. A closer sound source will have a larger difference in volume from one ear to the other, than one which is further away, unless the sound source is located <span class="emphasis">inside</span> the listener's head, in which case the difference may be less, or even zero. Like the azimuth value, this will also slightly change the phase relation between the signals, due to the difference in distances from the sound source from one of the listener's ears to the other, due to trigonometry.
+				</li>
+				<li class="item">
+					<span class="highlight">Level [n]:</span> Allows you to linearly reduce the signal level of the respective channel (<span class="emphasis">out_[n]</span>). Set this to zero to mute the respective channel and effectively remove it from the master output. Turn the level of unused channels down to zero for a better signal-to-noise ratio, since even inputs at your audio interface, to which no signal source is connected, will usually capture a low amount of noise from the pre-amplifiers.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Metronome
+		</div>
+		<div class="section">
+			The <span class="emphasis">metronome</span> allows you to play a click track for timing and synchronisation. The metronome has its own output and may be routed separately via <span class="emphasis">JACK</span>. Depending on whether the <span class="emphasis">Master</span> button is enabled (highlighted) or disabled, the metronome's output will optionally be added (panned dead-center and with unity level) to the master output.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Beats per period:</span> How many beats are there in each period. The metronome will always play exactly one &quot;Tick sound&quot;, followed by <span class="emphasis">[n - 1]</span> &quot;Tock sounds&quot;. If this is set to 1, only ticks will be played. If this is set to 2, one tick and one tock will be played alternatively. If this is set to 3, one tick will be played, followed by two tocks, then the pattern will repeat, and so on.
+				</li>
+				<li class="item">
+					<span class="highlight">Speed:</span> The speed in <span class="emphasis">beats per minute</span>, with which the metronome ticks.
+				</li>
+				<li class="item">
+					<span class="highlight">Tick sound:</span> The sound that is played on the first note of each interval. Set this to <span class="highlight">- NONE -</span> to skip the first beat of each interval.
+				</li>
+				<li class="item">
+					<span class="highlight">Tock sound:</span> The sound that is played on all other notes of the interval. Set this to <span class="highlight">- NONE -</span> to only play a sound on the first note of the interval.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
+			Effects unit: Signal levels
+		</div>
+		<div class="section">
+			This is a unit, which features level meters, which try to adopt the parameters specified in <span class="emphasis">DIN IEC 60268-18</span>. The meters display the peak signal levels of each input and output channel. They are implemented as <span class="emphasis">sampled peak programme meters</span> (SPPMs). An additional meter shown at the top displays the system's current DSP load. Level meters and the DSP load indicator are only available when <span class="emphasis">go-dsp-guitar</span> runs in <span class="emphasis">real-time mode</span>.
+		</div>
+		<div class="section heading">
+			Effects unit: Batch processing
+		</div>
+		<div class="section">
+			This is a &quot;pseudo-unit&quot;, which is only present when <span class="emphasis">go-dsp-guitar</span> runs in <span class="emphasis">batch-processing mode</span> (see the respective section above). Click on the <span class="emphasis">Process now</span> button to apply the current setup to a set of audio files. Refresh the page after you processed the first set of files to modify the configuration.
+		</div>
+	</body>
+</html>
+

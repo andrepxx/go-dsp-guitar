@@ -1,0 +1,106 @@
+## Setting up JACK under Windows.
+
+I will assume you have an ASIO-capable card in your system and the audio drivers installed and working.
+
+Go to http://jackaudio.org/downloads, download *JACK 2 for Windows (64-bit)* and install it in the default location.
+
+Default location: `C:\Program Files (x86)\Jack\`
+
+Open up *JACK Control*, set the following options.
+
+--- Parameters ---
+
+Driver: portaudio
+Realtime: yes
+Sample rate: 96000
+Frames/Period: 1024
+
+--- Advanced ---
+
+Output Device: *[Your ASIO driver]* (For me: "ASIO::UMC ASIO Driver")
+Input Device: *[Your ASIO driver]* (For me: "ASIO::UMC ASIO Driver")
+
+## Setting up Go under Windows.
+
+Go to https://golang.org/dl/, download latest version of Go for Windows and install it in the default location.
+
+Default location: `C:\Go\`
+
+## Setting up MSYS and MinGW.
+
+Download *MinGW-w64* from: https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download
+
+Run the installer.
+
+Change the *architecture* value to *x86_64* for a 64-bit system.
+
+By default, *MinGW-w64* will install to `C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64`. Change that! The space will cause problems later on. I'm serious! Install it to `C:\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64` instead.
+
+We will call that last path the *MinGW-w64 root directory*.
+
+Download *MSYS-20111123.zip* from: https://sourceforge.net/projects/mingw-w64/files/External%20binary%20packages%20%28Win64%20hosted%29/MSYS%20%2832-bit%29/.
+
+Exctract the MSYS archive and it will contain a folder called `msys`.
+
+Take everything that's inside that folder and copy it into the *MinGW-w64 root directory*. (Do not copy the `msys` folder itself, but its contents.)
+
+When asked whether folders should be merged, say: "Yes, always."
+
+## Now, let's build it. :-)
+
+Run `msys.bat` and a `/home` directory will be created (inside your *MinGW-w64 root directory*) and a POSIX shell will be opened.
+
+Create `~/go` directory and directory structure.
+
+```
+$ mkdir go
+$ cd go/
+$ mkdir src
+$ cd src/
+$ mkdir github.com
+$ cd github.com/
+$ mkdir andrepxx
+$ cd andrepxx/
+$ mkdir go-jack
+$ cd go-jack/
+```
+
+Download source of *github.com/andrepxx/go-jack* as ZIP file and extract the contents of the `go-jack-master/` directory (contained within the Archive) to the directory created above (inside MinGW).
+
+(No, you cannot just `go get ...` it, since there is no `git` in *MinGW*.)
+
+Set your `$GOPATH`. (Replace *username* with your actual user name. And no, you cannot use the tilde `~` shortcut.)
+
+`$ GOPATH="/home/username/go"`
+
+Build passthrough example.
+
+First, edit `passthrough.go` and `midipassthrough.go` to `import "github.com/andrepxx/go-jack"` instead of `import "github.com/xthexder/go-jack"`, then try to build them.
+
+```
+$ cd example/
+$ make
+```
+
+It will complain, that it cannot find the include `jack/jack.h`.
+
+Copy the `jack` folder from `C:\Program Files (x86)\Jack\includes` into `/x86_64-w64-mingw32/include` inside your *MinGW root directory*.
+
+Copy the contents of `C:\Program Files (x86)\Jack\lib` into `/x86_64-w64-mingw32/lib` inside your *MinGW root directory*.
+
+Now, run `make` again.
+
+`$ make`
+
+This time, the code should build successfully. Open up *Jack Control* (from the start menu), "Start" your JACK server, then go back to your *MinGW shell*.
+
+`$ ./passthrough.exe`
+
+**And it works!**
+
+*Go Passthrough* will appear as a *JACK client* in the *Connection* window and pass audio signals through. :-)
+
+Have fun! :-)
+
+(I said it's painful, but it works. :-) )
+

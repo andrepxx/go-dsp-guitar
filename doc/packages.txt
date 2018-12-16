@@ -1,0 +1,26 @@
+Commonly required packages for building go-dsp-guitar
+-----------------------------------------------------
+
+gcc-aarch64-linux-gnu
+gcc-arm-linux-gnu
+gcc-x86_64-linux
+git
+glibc-arm-linux-gnu
+glibc-devel.i686
+glibc-devel.x86_64
+glibc-headers.i686
+glibc-headers.x86_64
+golang-bin (Fedora / RHEL)
+golang-go (Debian / Ubuntu)
+jack-audio-connection-kit (Fedora / RHEL)
+jack-audio-connection-kit-devel (Fedora / RHEL)
+libjack-jackd2-dev (Debian / Ubuntu)
+mingw32-gcc
+mingw32-gcc-c++
+mingw32-pkg-config
+mingw64-gcc
+mingw64-gcc-c++
+mingw64-pkg-config
+openssl
+rsync
+

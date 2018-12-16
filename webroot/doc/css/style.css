@@ -1,0 +1,68 @@
+.body
+{
+	background-color: #000000;
+	color: #aaaaaa;
+	font-family: sans-serif;
+	font-size: 16px;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	margin: 0px;
+	padding: 15px;
+	text-align: left;
+	vertical-align: top;
+	white-space: normal;
+}
+
+.code
+{
+	background-color: #222222;
+	color: #ffffff;
+	font-family: monospace;
+}
+
+.emphasis
+{
+	font-style: italic;
+}
+
+.heading
+{
+	color: #ffffff;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.item
+{
+	padding-bottom: 5px;
+}
+
+.highlight
+{
+	color: #ffffff;
+}
+
+.key
+{
+	color: #ffffff;
+	font-weight: bold;
+}
+
+.section
+{
+	margin-bottom: 15px;
+}
+
+.title
+{
+	color: #ffffff;
+	font-size: 32px;
+	font-weight: bold;
+	text-align: center;
+}
+
+.value
+{
+}
+

@@ -1,0 +1,42 @@
+Changelog for go-dsp-guitar
+---------------------------
+
+v1.0.0
+
+- Reimplement DSP code in Golang using JACK instead of ALSA.
+- Implement improved filter simulation using fast convolution.
+- Pay attention to the order in which filters were compiled by applying sequence numbers to the data structure in the compilation channel.
+- Implement four-band equalizer using IIR filters.
+- Implement web-based user interface.
+- Fix deadlock, which occurs, when a filter is recompiled while the associated "power amp" effect is in bypass mode.
+- Implement metronome.
+- Get rid of remaining hard-coded sample rate values in the controller.
+- Implement phaser effect.
+- Implement auto-wah effect using envelope-follower.
+- Optimize the FFT implementation.
+   - Optimize generation of Fourier coefficients.
+   - Optimize generation of permutation coefficients.
+   - Calculate 2N-point FFT of real and/or Hermitian functions using N-point complex FFT.
+   - Make use of "math/bits" for bit-level operations. These functions get translated into specialized machine instructions.
+- Process all channels concurrently.
+- Enable the envelope follower to track RMS power levels instead of peak levels only.
+- Implement an instrument tuner based on the auto-correlation function.
+- Improve the accuracy of the tuner using quadratic interpolation of the auto-correlation function.
+- Enable processing of WAV files for simpler "re-amping".
+- Implement support for 64-bit "RF64"-files.
+- Replace the legacy "JQuery knob" with "pure-knob".
+- Optimize the algorithm for fast convolution for the case that the filter order is smaller than the buffer size.
+- Implement a (peak) level meter according to DIN IEC 60268-18.
+- Implement a method to change vectorization (frames per period) of the simulation algorithm, allowing the user to trade off simulation complexity (and therefore possible accuracy) and latency.
+- Use Lanczos interpolation in the Fourier domain to reduce filter order. This preserves the original frequency response of the filter much better than the previous method while also preserving phase response, minimizing perceived latency.
+- Get entirely rid of JQuery as a dependency using an associative data storage backed by a WeakMap instead of the '$(element).data(key, value)' function.
+- Implement unit-tests with good coverage for several packages.
+   - "circular"
+   - "fft"
+   - "level"
+   - "random"
+   - "resample"
+   - "tuner"
+   - "wave"
+- Create user documentation.
+

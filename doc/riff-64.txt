@@ -1,0 +1,27 @@
+"RF64" = 52 46 36 34 = 0x34364652
+"ds64" = 64 73 36 34 = 0x34367364
+
+struct ChunkRF64 {
+	chunkId uint32, // 0x34364652 = "RF64"
+	size uint32, // 0xffffffff (= MAX_UINT32) means "don't use"
+	type uint32, // "WAVE"
+}
+
+struct ChunkDataSize64 {
+	chunkId uint32, // 0x34367364 = "ds64"
+	chunkSize uint32, // size of the "ds64" chunk (min. 36 bytes)
+	riffSize uint64, // size of the "RF64" chunk
+	dataSize uint64, // size of the "data" chunk
+	sampleCount uint64, // number of samples (per channel) in file
+	tableLength uint32, // number of table entries (each 12 bytes in size) to skip after "ds64" chunk - this should normally be zero!
+}
+
+type dataSizeHeader struct {
+	ChunkID     uint32
+	ChunkSize   uint32
+	SizeRIFF    uint64
+	SizeData    uint64
+	SampleCount uint64
+	TableLength uint32
+}
+

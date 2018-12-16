@@ -1,0 +1,108 @@
+[
+	{
+		"Name": "Guitar: American Modern (Center)",
+		"Path": "ir/guitar/rfier-center.wav",
+		"Compensation": -25
+	},
+	{
+		"Name": "Guitar: American Modern (Classic)",
+		"Path": "ir/guitar/rfier-classic.wav",
+		"Compensation": -25
+	},
+	{
+		"Name": "Guitar: American Modern (Off-Axis)",
+		"Path": "ir/guitar/rfier-offax.wav",
+		"Compensation": -25
+	},
+	{
+		"Name": "Guitar: American Vintage (Center)",
+		"Path": "ir/guitar/tweed-center.wav",
+		"Compensation": -20
+	},
+	{
+		"Name": "Guitar: American Vintage (Classic)",
+		"Path": "ir/guitar/tweed-classic.wav",
+		"Compensation": -20
+	},
+	{
+		"Name": "Guitar: American Vintage (Off-Axis)",
+		"Path": "ir/guitar/tweed-offax.wav",
+		"Compensation": -20
+	},
+	{
+		"Name": "Guitar: British Modern (Center)",
+		"Path": "ir/guitar/brit-m-center.wav",
+		"Compensation": -20
+	},
+	{
+		"Name": "Guitar: British Modern (Classic)",
+		"Path": "ir/guitar/brit-m-classic.wav",
+		"Compensation": -20
+	},
+	{
+		"Name": "Guitar: British Modern (Off-Axis)",
+		"Path": "ir/guitar/brit-m-offax.wav",
+		"Compensation": -20
+	},
+	{
+		"Name": "Guitar: Custom BP",
+		"Path": "ir/guitar/custom-bp-neutral.wav",
+		"Compensation": -25
+	},
+	{
+		"Name": "Guitar: Custom HC-450",
+		"Path": "ir/guitar/custom-hc450-neutral.wav",
+		"Compensation": -25
+	},
+	{
+		"Name": "Guitar: German Modern",
+		"Path": "ir/guitar/vh4-neutral.wav",
+		"Compensation": -20
+	},
+	{
+		"Name": "Guitar: Scandinavian Modern",
+		"Path": "ir/guitar/bm1-neutral.wav",
+		"Compensation": -20
+	},
+	{
+		"Name": "PA: HC 2-way (High)",
+		"Path": "ir/pa/hc-2way-high.wav",
+		"Compensation": -10
+	},
+	{
+		"Name": "PA: HC 2-way (Low)",
+		"Path": "ir/pa/hc-2way-low.wav",
+		"Compensation": -30
+	},
+	{
+		"Name": "PA: HC 4-way (High)",
+		"Path": "ir/pa/hc-4way-high.wav",
+		"Compensation": -10
+	},
+	{
+		"Name": "PA: HC 4-way (Mid)",
+		"Path": "ir/pa/hc-4way-mid.wav",
+		"Compensation": -30
+	},
+	{
+		"Name": "PA: HC 4-way (Low)",
+		"Path": "ir/pa/hc-4way-low.wav",
+		"Compensation": -30
+	},
+	{
+		"Name": "PA: HC 4-way (Sub)",
+		"Path": "ir/pa/hc-4way-sub.wav",
+		"Compensation": -30
+	},
+	{
+		"Name": "PA: ISP 2-way (High)",
+		"Path": "ir/pa/isp-2way-high.wav",
+		"Compensation": -10
+	},
+	{
+		"Name": "PA: ISP 2-way (Low)",
+		"Path": "ir/pa/isp-2way-low.wav",
+		"Compensation": -30
+	}
+]
+

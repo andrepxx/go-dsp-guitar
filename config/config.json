@@ -1,0 +1,30 @@
+{
+	"ImpulseResponses": "ir/index.json",
+	
+	"WebServer": {
+		"Name": "go-dsp-guitar/1.0.0",
+		"Port": "8080",
+		"TLSPort": "8443",
+		"TLSPrivateKey": "keys/private.pem",
+		"TLSPublicKey": "keys/public.pem",
+		"WebRoot": "webroot/",
+		"Index": "/index.xhtml",
+
+		"MimeTypes": {
+			"css": "text/css; charset=utf-8",
+			"js": "text/javascript; charset=utf-8",
+			"json": "application/json; charset=utf-8",
+			"png": "image/png",
+			"svg": "image/svg+xml; charset=utf-8",
+			"txt": "text/plain; charset=utf-8",
+			"webm": "video/webm",
+			"xhtml": "application/xhtml+xml; charset=utf-8",
+			"xml": "application/xml; charset=utf-8"
+		},
+
+		"DefaultMime": "application/octet-stream",
+		"ErrorMime": "text/plain; charset=utf-8"
+	}
+	
+}
+
