@@ -51,6 +51,7 @@ fmt:
 	GOPATH=$(GOPATH) gofmt -w .
 
 keys:
+	mkdir keys
 	openssl genrsa -out keys/private.pem 4096
 	openssl req -new -x509 -days 365 -sha512 -key keys/private.pem -out keys/public.pem -subj "/C=DE/ST=Berlin/L=Berlin/O=None/OU=None/CN=localhost"
 
