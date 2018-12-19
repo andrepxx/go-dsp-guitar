@@ -75,11 +75,13 @@ To download and build the software from source for your system, run the followin
 
 ```
 cd ~/go/src/
-go get -v github.com/andrepxx/go-dsp-guitar
+go get -d github.com/andrepxx/go-dsp-guitar
 cd github.com/andrepxx/go-dsp-guitar/
 make keys
 make
 ```
+
+(If you build using the `v1.0.0` source code package from the *Releases* page, instead of obtaining the source via `go get` from version control, you will have to `mkdir keys` before running `make keys`. In all other cases, do **not** run `mkdir keys` before `make keys`.)
 
 This will create an RSA key pair for the TLS connection between the user-interface and the actual signal processing service (`make keys`) and then build the software for your system (`make`). The executable is called `dsp`, but you may re-name it to match your architecture. For example, on an x86-64 system running on Linux, you may rename the executable as follows.
 
