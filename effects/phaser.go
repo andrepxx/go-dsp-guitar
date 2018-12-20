@@ -23,7 +23,7 @@ func (this *phaser) Process(in []float64, out []float64, sampleRate uint32) {
 	phase, _ := this.getNumericValue("phase")
 	this.mutex.RUnlock()
 	depthFloat := float64(depth)
-	depthValue := 0.001 * depthFloat
+	depthValue := 0.01 * depthFloat
 
 	/*
 	 * Limit depth to [0.0; 1.0].
