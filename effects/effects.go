@@ -24,6 +24,7 @@ const (
 	UNIT_NOISEGATE
 	UNIT_BANDPASS
 	UNIT_AUTOWAH
+	UNIT_COMPRESSOR
 	UNIT_OCTAVER
 	UNIT_EXCESS
 	UNIT_FUZZ
@@ -461,6 +462,9 @@ func CreateUnit(unitType int) Unit {
 	case UNIT_AUTOWAH:
 		u := createAutoWah()
 		return u
+	case UNIT_COMPRESSOR:
+		u := createCompressor()
+		return u
 	case UNIT_OCTAVER:
 		u := createOctaver()
 		return u
@@ -536,6 +540,7 @@ func UnitTypes() []string {
 		"noise_gate",
 		"bandpass",
 		"auto_wah",
+		"compressor",
 		"octaver",
 		"excess",
 		"fuzz",

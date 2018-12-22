@@ -263,6 +263,28 @@
 			</ul>
 		</div>
 		<div class="section heading">
+			Effects unit: Compressor
+		</div>
+		<div class="section">
+			A <span class="emphasis">compressor</span> reduces the dynamic range of a signal. It is a voltage-controlled amplifier, where the control voltage is derived from either the signal envelope or the average signal energy. As the signal level increases, amplification is reduced gradually. As the signal level reduces, amplification increases. It is mainly used for vocals to cut through the mix, but may also be used on clean guitar signals, to increase sustain without introducing distortion.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Follow:</span> This value determines, whether the voltage controlling the gain of the amplifier should be derived from the signal <span class="highlight">envelope</span> (i. e. peak amplitude) or the average signal <span class="highlight">level</span>. The <span class="highlight">envelope</span> option turns the gain down quicker when sudden spikes occur in the input signal, while the <span class="highlight">level</span> option makes the tracking smoother and reduces abrupt changes of gain during short-term signal spikes and therefore signal distortion, especially during transients.
+				</li>
+				<li class="item">
+					<span class="highlight">Gain limit:</span> The maximum amount of gain (in <span class="emphasis">dB</span>) applied to the signal. When the signal falls below this limit, its amplitude starts decaying. Setting this higher increases the amount of compression and therefore sustain, but also considerably raises the noise floor during quiet passages.
+				</li>
+				<li class="item">
+					<span class="highlight">Target level:</span> The targeted output level (in <span class="emphasis">dBFS</span>) the compressor tries to achieve. Signals louder than this will get attenuated, while signals quieter than this will get amplified. Set this below <span class="emphasis">0 dBFS</span> to avoid distortion, as the compressor will need a bit of headroom to operate properly.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
 			Effects unit: Octaver
 		</div>
 		<div class="section">

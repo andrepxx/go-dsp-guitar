@@ -10,6 +10,7 @@ To manipulate the signal, the user may choose from a variety of highly customiza
 - noise gate
 - bandpass filter
 - auto-wah / envelope follower
+- compressor / limiter
 - (multi-)octaver
 - excess (distortion by phase-modulation)
 - fuzz (asymmetric hard or soft saturation)
