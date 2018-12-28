@@ -34,11 +34,20 @@ const (
 )
 
 /*
+ * A data structure describing a connection between two JACK ports.
+ */
+type connectionStruct struct {
+	From string
+	To   string
+}
+
+/*
  * The configuration for the controller.
  */
 type configStruct struct {
 	ImpulseResponses string
 	WebServer        webserver.Config
+	Connections      []connectionStruct
 }
 
 /*
@@ -2696,6 +2705,16 @@ func (this *controllerStruct) initialize(nInputs int, useHardware bool) error {
 					return nil
 				} else {
 					this.binding, err = hwio.Register(this.process, this.sampleRateListener)
+
+					/*
+					 * Setup JACK connections.
+					 */
+					for _, connection := range config.Connections {
+						source := connection.From
+						destination := connection.To
+						hwio.Connect(source, destination)
+					}
+
 					return err
 				}
 

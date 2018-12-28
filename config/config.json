@@ -24,7 +24,10 @@
 
 		"DefaultMime": "application/octet-stream",
 		"ErrorMime": "text/plain; charset=utf-8"
-	}
+	},
+	
+	"Connections": [
+	]
 	
 }
 

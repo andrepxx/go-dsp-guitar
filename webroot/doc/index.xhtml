@@ -108,6 +108,76 @@
 			In a typical live performance situation, where you play guitar and do vocal performance, you might connect your guitar to <span class="emphasis">in_0</span> and your microphone to <span class="emphasis">in_1</span>. Say you wish to distort your guitar signal and reverbarate your vocal signal so you configure the effects chains this way. (More on that later.) The output <span class="emphasis">out_0</span> will then carry your processed (e. g. distorted) guitar signal, while the output <span class="emphasis">out_1</span> will carry your processed (e. g. reverberated) vocal signal. These &quot;direct output&quot; signals may be used for recording or for forwarding them to a dedicated mixing desk at the venue. The outputs <span class="emphasis">master_left</span> and <span class="emphasis">master_right</span> will carry the stereo mixdown, i. e. the sum of all outputs, with their respective level adjustments and room simulation applied, as configured in the <span class="emphasis">Spatializer</span> unit. (More on that in the section on effects units.) You will usually use the master outputs for monitoring. However, you may also use them in case you would like to forward a &quot;pre-mixed&quot; signal to the mixing desk. Finally, the <span class="emphasis">metronome</span> output is an auxiliary output, which carries the metronome signal only.
 		</div>
 		<div class="section heading">
+			Advanced: Automatically setting up connections
+		</div>
+		<div class="section">
+			You can configure <span class="emphasis">go-dsp-guitar</span> to automatically setup <span class="emphasis">JACK</span> connections as the application starts. This facility may be used, for example, to automatically establish a connection from the physical inputs of your audio interface to the inputs of <span class="emphasis">go-dsp-guitar</span> and from the outputs of <span class="emphasis">go-dsp-guitar</span> to the physical outputs of your audio interface. To use this functionality, you have to describe the connections you wish to establish inside the configuration file stored under <span class="emphasis highlight">config/config.json</span>. Automatic setup of <span class="emphasis">JACK</span> connections is an advanced topic and not required for basic operation of <span class="emphasis">go-dsp-guitar</span>, so you might want to skip this section.
+		</div>
+		<div class="section">
+			The following sample configuration connects the physical inputs <span class="emphasis">capture_1</span> and <span class="emphasis">capture_2</span> from the audio interface to the inputs <span class="emphasis">in_0</span> and <span class="emphasis">in_1</span> of <span class="emphasis">go-dsp-guitar</span>, respectively. In addition, it connects the outputs <span class="emphasis">out_0</span>, <span class="emphasis">out_1</span>, <span class="emphasis">master_left</span> and <span class="emphasis">master_right</span> of <span class="emphasis">go-dsp-guitar</span> to the physical outputs <span class="emphasis">playback_1</span>, <span class="emphasis">playback_2</span>, <span class="emphasis">playback_3</span> and <span class="emphasis">playback_4</span> of the audio interface. This is a useful configuration for an audio interface with two inputs and four outputs, where the outputs <span class="emphasis">playback_3</span> and <span class="emphasis">playback_4</span> form the stereo pair used for monitoring (e. g. feeding into an integrated or dedicated headphone amplifier).
+		</div>
+		<div class="section code">
+			<div>&quot;Connections&quot;: [</div>
+			<div>&#160;&#160;{</div>
+			<div>&#160;&#160;&#160;&#160;&quot;From&quot;: &quot;system:capture_1&quot;,</div>
+			<div>&#160;&#160;&#160;&#160;&quot;To&quot;: &quot;go-dsp-guitar:in_0&quot;</div>
+			<div>&#160;&#160;},</div>
+			<div>&#160;&#160;{</div>
+			<div>&#160;&#160;&#160;&#160;&quot;From&quot;: &quot;system:capture_2&quot;,</div>
+			<div>&#160;&#160;&#160;&#160;&quot;To&quot;: &quot;go-dsp-guitar:in_1&quot;</div>
+			<div>&#160;&#160;},</div>
+			<div>&#160;&#160;{</div>
+			<div>&#160;&#160;&#160;&#160;&quot;From&quot;: &quot;go-dsp-guitar:out_0&quot;,</div>
+			<div>&#160;&#160;&#160;&#160;&quot;To&quot;: &quot;system:playback_1&quot;</div>
+			<div>&#160;&#160;},</div>
+			<div>&#160;&#160;{</div>
+			<div>&#160;&#160;&#160;&#160;&quot;From&quot;: &quot;go-dsp-guitar:out_1&quot;,</div>
+			<div>&#160;&#160;&#160;&#160;&quot;To&quot;: &quot;system:playback_2&quot;</div>
+			<div>&#160;&#160;},</div>
+			<div>&#160;&#160;{</div>
+			<div>&#160;&#160;&#160;&#160;&quot;From&quot;: &quot;go-dsp-guitar:master_left&quot;,</div>
+			<div>&#160;&#160;&#160;&#160;&quot;To&quot;: &quot;system:playback_3&quot;</div>
+			<div>&#160;&#160;},</div>
+			<div>&#160;&#160;{</div>
+			<div>&#160;&#160;&#160;&#160;&quot;From&quot;: &quot;go-dsp-guitar:master_right&quot;,</div>
+			<div>&#160;&#160;&#160;&#160;&quot;To&quot;: &quot;system:playback_4&quot;</div>
+			<div>&#160;&#160;}</div>
+			<div>]</div>
+		</div>
+		<div class="section">
+			For an audio interface with two outputs, you might want to route the <span class="emphasis">master_left</span> and <span class="emphasis">master_right</span> channels of <span class="emphasis">go-dsp-guitar</span> to the physical outputs <span class="emphasis">playback_1</span> and <span class="emphasis">playback_2</span>, instead and omit the routing of the channels <span class="emphasis">out_0</span> and <span class="emphasis">out_1</span>.
+		</div>
+		<div class="section code">
+			<div>&quot;Connections&quot;: [</div>
+			<div>&#160;&#160;{</div>
+			<div>&#160;&#160;&#160;&#160;&quot;From&quot;: &quot;system:capture_1&quot;,</div>
+			<div>&#160;&#160;&#160;&#160;&quot;To&quot;: &quot;go-dsp-guitar:in_0&quot;</div>
+			<div>&#160;&#160;},</div>
+			<div>&#160;&#160;{</div>
+			<div>&#160;&#160;&#160;&#160;&quot;From&quot;: &quot;system:capture_2&quot;,</div>
+			<div>&#160;&#160;&#160;&#160;&quot;To&quot;: &quot;go-dsp-guitar:in_1&quot;</div>
+			<div>&#160;&#160;},</div>
+			<div>&#160;&#160;{</div>
+			<div>&#160;&#160;&#160;&#160;&quot;From&quot;: &quot;go-dsp-guitar:master_left&quot;,</div>
+			<div>&#160;&#160;&#160;&#160;&quot;To&quot;: &quot;system:playback_1&quot;</div>
+			<div>&#160;&#160;},</div>
+			<div>&#160;&#160;{</div>
+			<div>&#160;&#160;&#160;&#160;&quot;From&quot;: &quot;go-dsp-guitar:master_right&quot;,</div>
+			<div>&#160;&#160;&#160;&#160;&quot;To&quot;: &quot;system:playback_2&quot;</div>
+			<div>&#160;&#160;}</div>
+			<div>]</div>
+		</div>
+		<div class="section">
+			In case you want to disable automatic routing, simply return to an empty connections list.
+		</div>
+		<div class="section code">
+			<div>&quot;Connections&quot;: [</div>
+			<div>]</div>
+		</div>
+		<div class="section">
+			This is also the default configuration which comes with <span class="emphasis">go-dsp-guitar</span>.
+		</div>
+		<div class="section heading">
 			Running go-dsp-guitar in batch-processing mode
 		</div>
 		<div class="section">

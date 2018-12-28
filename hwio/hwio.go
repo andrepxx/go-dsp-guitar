@@ -437,3 +437,19 @@ func Unregister(binding *Binding) {
 
 	g_mutex.RUnlock()
 }
+
+/*
+ * Connects a source port to a destination port.
+ */
+func Connect(sourcePort string, destinationPort string) {
+	g_mutex.RLock()
+
+	/*
+	 * Check if client is registered.
+	 */
+	if g_client != nil {
+		g_client.Connect(sourcePort, destinationPort)
+	}
+
+	g_mutex.RUnlock()
+}
