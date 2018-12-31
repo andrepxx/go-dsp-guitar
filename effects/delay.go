@@ -28,14 +28,16 @@ func (this *delay) Process(in []float64, out []float64, sampleRate uint32) {
 	delaySamples := int(delaySamplesFloat)
 	feedbackFactor := decibelsToFactor(feedback)
 	levelFactor := decibelsToFactor(level)
-	bufferSize := len(this.buffer)
+	buffer := this.buffer
+	bufferSize := len(buffer)
 
 	/*
 	 * Make sure the buffer has the appropriate size.
 	 */
 	if bufferSize != delaySamples {
-		this.buffer = make([]float64, delaySamples)
+		buffer = make([]float64, delaySamples)
 		bufferSize = delaySamples
+		this.buffer = buffer
 	}
 
 	/*
@@ -53,7 +55,7 @@ func (this *delay) Process(in []float64, out []float64, sampleRate uint32) {
 			delayedSample = in[delayedIdx]
 		} else {
 			bufferPtr := bufferSize + delayedIdx
-			delayedSample = this.buffer[bufferPtr]
+			delayedSample = buffer[bufferPtr]
 		}
 
 		pre := levelFactor * (sample + (feedbackFactor * delayedSample))
@@ -78,10 +80,10 @@ func (this *delay) Process(in []float64, out []float64, sampleRate uint32) {
 	 * Check whether our buffer is larger than the number of samples processed.
 	 */
 	if boundary >= 0 {
-		copy(this.buffer[0:boundary], this.buffer[numSamples:bufferSize])
-		copy(this.buffer[boundary:bufferSize], in)
+		copy(buffer[0:boundary], buffer[numSamples:bufferSize])
+		copy(buffer[boundary:bufferSize], in)
 	} else {
-		copy(this.buffer, in[-boundary:numSamples])
+		copy(buffer, in[-boundary:numSamples])
 	}
 
 }

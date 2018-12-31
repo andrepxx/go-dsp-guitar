@@ -23,6 +23,7 @@ To manipulate the signal, the user may choose from a variety of highly customiza
 - tremolo (amplitude modulation)
 - ring modulator
 - delay (echo)
+- reverb (ambience)
 - power amplifier and speaker simulation
 
 In addition, the software provides ...

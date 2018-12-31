@@ -37,6 +37,7 @@ const (
 	UNIT_TREMOLO
 	UNIT_RINGMODULATOR
 	UNIT_DELAY
+	UNIT_REVERB
 	UNIT_POWERAMP
 )
 
@@ -501,6 +502,9 @@ func CreateUnit(unitType int) Unit {
 	case UNIT_DELAY:
 		u := createDelay()
 		return u
+	case UNIT_REVERB:
+		u := createReverb()
+		return u
 	case UNIT_POWERAMP:
 		u := createPowerAmp()
 		return u
@@ -553,6 +557,7 @@ func UnitTypes() []string {
 		"tremolo",
 		"ring_modulator",
 		"delay",
+		"reverb",
 		"power_amp",
 	}
 
