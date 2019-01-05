@@ -22,6 +22,7 @@ const (
  * Mathematical constants
  */
 const (
+	MATH_INV_SQRT_2   = 1.0 / math.Sqrt2
 	MATH_MINUS_TWO_PI = -2.0 * math.Pi
 )
 
@@ -703,7 +704,7 @@ func RealFourier(in []float64, out []complex128, scaling int) error {
 			 * transform.
 			 */
 			if scaling == SCALING_ORTHONORMAL {
-				invSqrt2 := complex(1.0/math.Sqrt2, 0.0)
+				invSqrt2 := complex(MATH_INV_SQRT_2, 0.0)
 
 				/*
 				 * Multiply each element in the output vector by a square
