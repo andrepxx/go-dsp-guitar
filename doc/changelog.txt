@@ -1,6 +1,23 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.1.0
+
+New features / enhancements:
+
+- Implement new Compressor effects unit as a compressor / limiter. This effects unit is especially suited for vocals, but may also be used on guitar signals.
+- Add facility for automatic setup of JACK connections. This feature allows the user to define a list of JACK connections inside the configuration file located at config/config.json. The connections will automatically be established when the application starts in real-time mode. They will not be torn down, when the application exits.
+- Implement Reverb effects unit, optimize Delay effects unit. The new Reverb effects unit implements an algorithmic reverberation effect based upon the work of Manfred Schroeder from 1962. The structure of the reverb has been slightly modified from the paper version to include the early reflections from the tapped delay line before they pass through the subsequent allpass filters, into the response.
+
+Maintenance / bugfixes / corrections:
+
+- Fix Makefile target for TLS key generation.
+- Update build description in README.md.
+- Fix erroneous factor in Phaser module. This makes the behaviour more useful and consistent with that of the Flanger module.
+- Introduce new mathematical constant to clean up FFT code.
+- Increment minor version number: v1.0.0 --> v1.1.0
+
+
 v1.0.0
 
 - Reimplement DSP code in Golang using JACK instead of ALSA.
