@@ -368,8 +368,11 @@ function PureKnob() {
 				'angleStart': 0,
 				'colorBG': '#181818',
 				'colorFG': '#ff8800',
+				'fnStringToValue': function(string) { return parseInt(string); },
+				'fnValueToString': function(value) { return value.toString(); },
 				'needle': false,
 				'readonly': false,
+				'textScale': 1.0,
 				'trackWidth': 0.4,
 				'valMin': 0,
 				'valMax': 100,
@@ -444,7 +447,8 @@ function PureKnob() {
 				var actualStart = angleStart + angleOffset;
 				var actualEnd = angleEnd + angleOffset;
 				var value = properties.val;
-				var valueStr = value.toString();
+				var valueToString = properties.fnValueToString;
+				var valueStr = valueToString(value);
 				var valMin = properties.valMin;
 				var valMax = properties.valMax;
 				var relValue = (value - valMin) / (valMax - valMin);
@@ -452,6 +456,7 @@ function PureKnob() {
 				var angleVal = actualStart + relAngle;
 				var colorTrack = properties.colorBG;
 				var colorFilling = properties.colorFG;
+				var textScale = properties.textScale;
 				var trackWidth = properties.trackWidth;
 				var height = this._height;
 				var width = this._width;
@@ -460,7 +465,7 @@ function PureKnob() {
 				var centerY = 0.5 * height;
 				var radius = 0.4 * smaller;
 				var lineWidth = Math.round(trackWidth * radius);
-				var fontSize = 0.2 * smaller;
+				var fontSize = (0.2 * smaller) * textScale;
 				var fontSizeString = fontSize.toString();
 				var canvas = this._canvas;
 				var ctx = canvas.getContext('2d');
@@ -508,10 +513,11 @@ function PureKnob() {
 				ctx.fillText(valueStr, centerX, centerY);
 				
 				/*
-				 * Set the color of the input element.
+				 * Set the color and font size of the input element.
 				 */
 				var elemInput = this._input;
 				elemInput.style.color = colorFilling;
+				elemInput.style.fontSize = fontSizeString + 'px';
 			},
 			
 			/*
@@ -830,7 +836,7 @@ function PureKnob() {
 			if (!readonly) {
 				var touches = e.touches;
 				var numTouches = touches.length;
-				var singleTouch = (numTouches == 1);
+				var singleTouch = (numTouches === 1);
 				
 				/*
 				 * Only process single touches, not multi-touch
@@ -843,7 +849,7 @@ function PureKnob() {
 					 * If this is the first touch, bind double tap
 					 * interval.
 					 */
-					if (knob._touchCount == 0) {
+					if (knob._touchCount === 0) {
 						
 						/*
 						 * This is executed when the double tap
@@ -855,7 +861,7 @@ function PureKnob() {
 							 * If control was tapped exactly
 							 * twice, enable on-screen keyboard.
 							 */
-							if (knob._touchCount == 2) {
+							if (knob._touchCount === 2) {
 								var properties = knob._properties;
 								var readonly = properties.readonly;
 							
@@ -911,7 +917,7 @@ function PureKnob() {
 				if (!readonly) {
 					var touches = e.touches;
 					var numTouches = touches.length;
-					var singleTouch = (numTouches == 1);
+					var singleTouch = (numTouches === 1);
 					
 					/*
 					 * Only process single touches, not multi-touch
@@ -948,7 +954,7 @@ function PureKnob() {
 				if (!readonly) {					
 					var touches = e.touches;
 					var numTouches = touches.length;
-					var singleTouch = (numTouches == 1);
+					var singleTouch = (numTouches === 1);
 					
 					/*
 					 * Only process single touches, not multi-touch
@@ -1043,8 +1049,10 @@ function PureKnob() {
 				 * Only evaluate value when user pressed enter.
 				 */
 				if (kc === 13) {
+					var properties = knob._properties;
 					var value = input.value;
-					var val = parseInt(value);
+					var stringToValue = properties.fnStringToValue;
+					var val = stringToValue(value);
 					var valid = isFinite(val);
 					
 					/*
