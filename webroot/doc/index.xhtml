@@ -209,6 +209,16 @@
 			After each channel has been loaded from file, it will be resampled to the appropriate target sampling rate, then the audio data will be processed and finally, each processed (output) channel will be written to a (monophonic) wave file of your choosing. If the audio data loaded into the input channels is of different lengths, the shorter sequences will be extended by zero-padding them to the length of the longest sequence. Also, the two master-outputs (left and right), as well as the metronome channel can be written to files. Leaving a file path empty discards that particular output. After all results have been either written to file or discarded, no further prompt will appear. The web interface can then be reloaded, the signal chain can be reconfigured and another batch processing step can be started by clicking on the <span class="emphasis">Process now</span> button. If you do not wish to perform further processing, hit <span class="emphasis highlight">Ctrl + C</span> on the command line where <span class="emphasis">go-dsp-guitar</span> is running.
 		</div>
 		<div class="section heading">
+			Obtaining the version of go-dsp-guitar
+		</div>
+		<div class="section">
+			In order to obtain version information for <span class="emphasis">go-dsp-guitar</span>, you navigate to the place where you installed the software and run the <span class="emphasis">dsp</span> executable with the parameter <span class="emphasis">-version</span>. Substitute the path in the first line with the directory where you built the software or extracted the binary package. Note that <span class="emphasis">v1.0.0</span> and <span class="emphasis">v1.1.0</span> of <span class="emphasis">go-dsp-guitar</span> do not support the <span class="emphasis">-version</span> flag.
+		</div>
+		<div class="section code">
+			<div>$ cd ~/go/src/github.com/andrepxx/go-dsp-guitar/</div>
+			<div>$ ./dsp -version</div>
+		</div>
+		<div class="section heading">
 			The web interface
 		</div>
 		<div class="section">

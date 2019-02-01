@@ -2864,3 +2864,33 @@ func CreateController() Controller {
 	controller := controllerStruct{}
 	return &controller
 }
+
+/*
+ * Returns version information.
+ */
+func Version() (string, error) {
+	content, err := ioutil.ReadFile(CONFIG_PATH)
+
+	/*
+	 * Check if file could be read.
+	 */
+	if err != nil {
+		return "", fmt.Errorf("Could not open config file: '%s'", CONFIG_PATH)
+	} else {
+		config := configStruct{}
+		err = json.Unmarshal(content, &config)
+
+		/*
+		 * Check if file failed to unmarshal.
+		 */
+		if err != nil {
+			return "", fmt.Errorf("Could not decode config file: '%s'", CONFIG_PATH)
+		} else {
+			svr := config.WebServer
+			version := svr.Name
+			return version, nil
+		}
+
+	}
+
+}
