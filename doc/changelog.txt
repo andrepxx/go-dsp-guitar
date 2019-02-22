@@ -1,6 +1,18 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.2.0
+
+New features / enhancements:
+
+- Add command-line switch to print version information.
+
+Maintenance / bugfixes / corrections:
+
+- Update to latest version of "pure-knob".
+- Increment minor version number: v1.1.0 --> v1.2.0
+
+
 v1.1.0
 
 New features / enhancements:
