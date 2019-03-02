@@ -10,6 +10,7 @@ import (
 	"github.com/andrepxx/go-dsp-guitar/hwio"
 	"github.com/andrepxx/go-dsp-guitar/level"
 	"github.com/andrepxx/go-dsp-guitar/metronome"
+	"github.com/andrepxx/go-dsp-guitar/persistence"
 	"github.com/andrepxx/go-dsp-guitar/resample"
 	"github.com/andrepxx/go-dsp-guitar/signal"
 	"github.com/andrepxx/go-dsp-guitar/spatializer"
@@ -415,7 +416,8 @@ func (this *controllerStruct) getConfigurationHandler(request webserver.HttpRequ
 	speed := uint32(0)
 	preSounds := irs.Names()
 	numSounds := len(preSounds)
-	sounds := make([]string, numSounds+1)
+	numSoundsInc := numSounds + 1
+	sounds := make([]string, numSoundsInc)
 	sounds[0] = "- NONE -"
 	copy(sounds[1:], preSounds)
 	tickSound := ""
@@ -425,7 +427,7 @@ func (this *controllerStruct) getConfigurationHandler(request webserver.HttpRequ
 	/*
 	 * Check if we have a metronome.
 	 */
-	if this.metr != nil {
+	if currentMetronome != nil {
 		beatsPerPeriod = currentMetronome.BeatsPerPeriod()
 		speed = currentMetronome.Speed()
 		tickSound, _ = currentMetronome.Tick()
@@ -906,6 +908,506 @@ func (this *controllerStruct) moveUpHandler(request webserver.HttpRequest) webse
 	}
 
 	mimeType, buffer := this.createJSON(webResponse)
+
+	/*
+	 * Create HTTP response.
+	 */
+	response := webserver.HttpResponse{
+		Header: map[string]string{"Content-type": mimeType},
+		Body:   buffer,
+	}
+
+	return response
+}
+
+/*
+ * Restore (import) current configuration from JSON file.
+ */
+func (this *controllerStruct) persistenceRestoreHandler(request webserver.HttpRequest) webserver.HttpResponse {
+	patchFiles := request.Files["patchfile"]
+	webResponse := webResponseStruct{}
+
+	/*
+	 * Make sure that patch files are not nil.
+	 */
+	if patchFiles == nil {
+
+		/*
+		 * Indicate failure.
+		 */
+		webResponse = webResponseStruct{
+			Success: false,
+			Reason:  "Field 'patchfile' not defined as a multipart field.",
+		}
+
+	} else {
+		numPatchFiles := len(patchFiles)
+
+		/*
+		 * Make sure that exactly one patch file is sent in request.
+		 */
+		if numPatchFiles == 0 {
+
+			/*
+			 * Indicate failure.
+			 */
+			webResponse = webResponseStruct{
+				Success: false,
+				Reason:  "No patch file sent in request.",
+			}
+
+		} else if numPatchFiles != 1 {
+
+			/*
+			 * Indicate failure.
+			 */
+			webResponse = webResponseStruct{
+				Success: false,
+				Reason:  "Multiple patch files sent in request.",
+			}
+
+		} else {
+			patchFile := patchFiles[0]
+			patchBytes, err := ioutil.ReadAll(patchFile)
+
+			/*
+			 * Check if patch file could be successfully read.
+			 */
+			if err != nil {
+
+				/*
+				 * Indicate failure.
+				 */
+				webResponse = webResponseStruct{
+					Success: false,
+					Reason:  "Failed to read patch file.",
+				}
+
+			} else {
+				configuration := persistence.Configuration{}
+				err := json.Unmarshal(patchBytes, &configuration)
+
+				/*
+				 * Check if unmarshalling was successful.
+				 */
+				if err != nil {
+					msg := err.Error()
+
+					/*
+					 * Indicate failure.
+					 */
+					webResponse = webResponseStruct{
+						Success: false,
+						Reason:  "Error during unmarshalling: " + msg,
+					}
+
+				} else {
+					fileFormat := configuration.FileFormat
+					fileType := fileFormat.Type
+					fileVersion := fileFormat.Version
+					majorVersion := fileVersion.Major
+					minorVersion := fileVersion.Minor
+
+					/*
+					 * Ensure that file format is compatible.
+					 */
+					if fileType != "patch" {
+
+						/*
+						 * Indicate failure.
+						 */
+						webResponse = webResponseStruct{
+							Success: false,
+							Reason:  "Uploaded file is not a patch file.",
+						}
+
+					} else if majorVersion != 1 || minorVersion < 0 {
+
+						/*
+						 * Indicate failure.
+						 */
+						webResponse = webResponseStruct{
+							Success: false,
+							Reason:  "Incompatible version of file format.",
+						}
+
+					} else {
+
+						/*
+						 * If we are bound to a hardware interface, restore frames per period.
+						 */
+						if this.binding != nil {
+							framesPerPeriod := configuration.FramesPerPeriod
+							hwio.SetFramesPerPeriod(framesPerPeriod)
+						}
+
+						channels := configuration.Channels
+						numChannels := len(channels)
+						signalChains := this.effects
+						numChains := len(signalChains)
+
+						/*
+						 * Verify that the configuration file does not contain
+						 * more channels than we have.
+						 */
+						if numChannels > numChains {
+							numChannelsString := string(numChannels)
+							numChainsString := string(numChains)
+							warningMessage := "WARNING: Restored file contains "
+							warningMessage += numChannelsString
+							warningMessage += " channels, but we currently have only "
+							warningMessage += numChainsString
+							warningMessage += ". Restore may be incomplete."
+
+							/*
+							 * Indicate failure.
+							 */
+							webResponse = webResponseStruct{
+								Success: false,
+								Reason:  warningMessage,
+							}
+
+						}
+
+						spat := this.spat
+						unitTypes := effects.UnitTypes()
+
+						/*
+						 * Restore each channel.
+						 */
+						for channelId, channel := range channels {
+							signalChain := signalChains[channelId]
+							numUnits := signalChain.Length()
+
+							/*
+							 * Remove all units from the signal chain.
+							 */
+							for numUnits > 0 {
+								unitId := numUnits - 1
+								signalChain.RemoveUnit(unitId)
+								numUnits = signalChain.Length()
+							}
+
+							units := channel.Units
+
+							/*
+							 * Restore each processing unit.
+							 */
+							for _, unit := range units {
+								unitType := unit.Type
+								unitTypeId := int(-1)
+								unitTypeFound := false
+
+								/*
+								 * Search for the right unit type.
+								 */
+								for id, currentUnitType := range unitTypes {
+
+									/*
+									 * If we found the correct unit type,
+									 * store its ID.
+									 */
+									if unitType == currentUnitType {
+										unitTypeId = id
+										unitTypeFound = true
+									}
+
+								}
+
+								/*
+								 * If we found the unit type, restore the unit.
+								 */
+								if unitTypeFound {
+									signalChain.AppendUnit(unitTypeId)
+									numUnits := signalChain.Length()
+									lastUnitId := numUnits - 1
+
+									/*
+									 * Restore each discrete parameter.
+									 */
+									for _, param := range unit.DiscreteParams {
+										key := param.Key
+										value := param.Value
+										signalChain.SetDiscreteValue(lastUnitId, key, value)
+									}
+
+									/*
+									 * Restore each numeric parameter.
+									 */
+									for _, param := range unit.NumericParams {
+										key := param.Key
+										value := param.Value
+										signalChain.SetNumericValue(lastUnitId, key, value)
+									}
+
+									bypass := unit.Bypass
+									signalChain.SetBypass(lastUnitId, bypass)
+								}
+
+							}
+
+							persistedSpat := channel.Spatializer
+							azimuth := persistedSpat.Azimuth
+							distance := persistedSpat.Distance
+							level := persistedSpat.Level
+							spat.SetAzimuth(channelId, azimuth)
+							spat.SetDistance(channelId, distance)
+							spat.SetLevel(channelId, level)
+						}
+
+						irs := this.impulseResponses
+						sampleRate := this.sampleRate
+						metr := this.metr
+						persistedMetr := configuration.Metronome
+						masterOutput := persistedMetr.Master
+						this.metrMasterOutput = masterOutput
+						beatsPerPeriod := persistedMetr.BeatsPerPeriod
+						metr.SetBeatsPerPeriod(beatsPerPeriod)
+						speed := persistedMetr.Speed
+						metr.SetSpeed(speed)
+						tickSound := persistedMetr.TickSound
+
+						/*
+						 * Check if we should disable the tick sound.
+						 */
+						if tickSound == "- NONE -" {
+							metr.SetTick(tickSound, nil)
+						} else {
+							flt := irs.CreateFilter(tickSound, sampleRate)
+
+							/*
+							 * Check if filter was successfully loaded.
+							 */
+							if flt != nil {
+								coeffs := flt.Coefficients()
+								metr.SetTick(tickSound, coeffs)
+							}
+
+						}
+
+						tockSound := persistedMetr.TockSound
+
+						/*
+						 * Check if we should disable the tock sound.
+						 */
+						if tockSound == "- NONE -" {
+							metr.SetTock(tockSound, nil)
+						} else {
+							flt := irs.CreateFilter(tockSound, sampleRate)
+
+							/*
+							 * Check if filter was successfully loaded.
+							 */
+							if flt != nil {
+								coeffs := flt.Coefficients()
+								metr.SetTock(tockSound, coeffs)
+							}
+
+						}
+
+						/*
+						 * Indicate success.
+						 */
+						webResponse = webResponseStruct{
+							Success: true,
+							Reason:  "",
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+
+	mimeType, buffer := this.createJSON(webResponse)
+
+	/*
+	 * Create HTTP response.
+	 */
+	response := webserver.HttpResponse{
+		Header: map[string]string{"Content-type": mimeType},
+		Body:   buffer,
+	}
+
+	return response
+}
+
+/*
+ * Save (export) current configuration to JSON file.
+ */
+func (this *controllerStruct) persistenceSaveHandler(request webserver.HttpRequest) webserver.HttpResponse {
+	cfg := this.config
+	svr := cfg.WebServer
+	appName := svr.Name
+	framesPerPeriod := uint32(BLOCK_SIZE)
+
+	/*
+	 * If we are bound to a hardware interface, query frames per period.
+	 */
+	if this.binding != nil {
+		framesPerPeriod = hwio.FramesPerPeriod()
+	}
+
+	/*
+	 * Create file format version.
+	 */
+	version := persistence.Version{
+		Major: 1,
+		Minor: 0,
+	}
+
+	/*
+	 * Create file format.
+	 */
+	fileFormat := persistence.FileFormat{
+		Application: appName,
+		Type:        "patch",
+		Version:     version,
+	}
+
+	channels := []persistence.Channel{}
+	spat := this.spat
+	unitTypes := effects.UnitTypes()
+
+	/*
+	 * Iterate over the signal chains.
+	 */
+	for chainId, chain := range this.effects {
+		numUnits := chain.Length()
+		units := make([]persistence.Unit, numUnits)
+
+		/*
+		 * Iterate over all units in the current chain.
+		 */
+		for unitId := 0; unitId < numUnits; unitId++ {
+			bypass, _ := chain.GetBypass(unitId)
+			unitType, _ := chain.UnitType(unitId)
+			unitTypeString := unitTypes[unitType]
+			discreteParams := []persistence.DiscreteParam{}
+			numericParams := []persistence.NumericParam{}
+			params, _ := chain.Parameters(unitId)
+
+			/*
+			 * Iterate over all parameters.
+			 */
+			for _, param := range params {
+				paramName := param.Name
+				paramType := param.Type
+
+				/*
+				 * Handle both discrete and numeric parameters.
+				 */
+				switch paramType {
+				case effects.PARAMETER_TYPE_DISCRETE:
+					idx := param.DiscreteValueIndex
+					discreteValues := param.DiscreteValues
+					discreteValue := discreteValues[idx]
+
+					/*
+					 * Create description for discrete parameter.
+					 */
+					discreteParam := persistence.DiscreteParam{
+						Key:   paramName,
+						Value: discreteValue,
+					}
+
+					discreteParams = append(discreteParams, discreteParam)
+				case effects.PARAMETER_TYPE_NUMERIC:
+					numericValue := param.NumericValue
+
+					/*
+					 * Create description for numeric parameter.
+					 */
+					numericParam := persistence.NumericParam{
+						Key:   paramName,
+						Value: numericValue,
+					}
+
+					numericParams = append(numericParams, numericParam)
+				}
+
+			}
+
+			/*
+			 * Create data structure describing a signal processing unit.
+			 */
+			unit := persistence.Unit{
+				Type:           unitTypeString,
+				Bypass:         bypass,
+				DiscreteParams: discreteParams,
+				NumericParams:  numericParams,
+			}
+
+			units[unitId] = unit
+		}
+
+		azimuth, _ := spat.GetAzimuth(chainId)
+		distance, _ := spat.GetDistance(chainId)
+		level, _ := spat.GetLevel(chainId)
+
+		/*
+		 * Create data structure describing spatializer settings for this channel.
+		 */
+		pSpat := persistence.Spatializer{
+			Azimuth:  azimuth,
+			Distance: distance,
+			Level:    level,
+		}
+
+		/*
+		 * Create data structure describing audio channel.
+		 */
+		channel := persistence.Channel{
+			Units:       units,
+			Spatializer: pSpat,
+		}
+
+		channels = append(channels, channel)
+	}
+
+	metrMasterOutput := this.metrMasterOutput
+	metr := this.metr
+	beatsPerPeriod := uint32(0)
+	speed := uint32(0)
+	tickSound := ""
+	tockSound := ""
+
+	/*
+	 * Check if we have a metronome.
+	 */
+	if metr != nil {
+		beatsPerPeriod = metr.BeatsPerPeriod()
+		speed = metr.Speed()
+		tickSound, _ = metr.Tick()
+		tockSound, _ = metr.Tock()
+	}
+
+	/*
+	 * Create metronome information.
+	 */
+	metrP := persistence.Metronome{
+		Master:         metrMasterOutput,
+		BeatsPerPeriod: beatsPerPeriod,
+		Speed:          speed,
+		TickSound:      tickSound,
+		TockSound:      tockSound,
+	}
+
+	/*
+	 * Create configuration.
+	 */
+	configuration := persistence.Configuration{
+		FileFormat:      fileFormat,
+		FramesPerPeriod: framesPerPeriod,
+		Channels:        channels,
+		Metronome:       metrP,
+	}
+
+	mimeType, buffer := this.createJSON(configuration)
 
 	/*
 	 * Create HTTP response.
@@ -1644,12 +2146,13 @@ func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpReq
 			}
 
 		case "tick-sound":
+			irs := this.impulseResponses
 
 			/*
 			 * Check if we should disable the tick sound.
 			 */
 			if value == "- NONE -" {
-				this.metr.SetTick(value, nil)
+				metr.SetTick(value, nil)
 
 				/*
 				 * Indicate success.
@@ -1661,7 +2164,7 @@ func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpReq
 
 			} else {
 				sampleRate := this.sampleRate
-				flt := this.impulseResponses.CreateFilter(value, sampleRate)
+				flt := irs.CreateFilter(value, sampleRate)
 
 				/*
 				 * Check if filter was successfully loaded.
@@ -1678,7 +2181,7 @@ func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpReq
 
 				} else {
 					coeffs := flt.Coefficients()
-					this.metr.SetTick(value, coeffs)
+					metr.SetTick(value, coeffs)
 
 					/*
 					 * Indicate success.
@@ -1693,12 +2196,13 @@ func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpReq
 			}
 
 		case "tock-sound":
+			irs := this.impulseResponses
 
 			/*
 			 * Check if we should disable the tock sound.
 			 */
 			if value == "- NONE -" {
-				this.metr.SetTock(value, nil)
+				metr.SetTock(value, nil)
 
 				/*
 				 * Indicate success.
@@ -1710,7 +2214,7 @@ func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpReq
 
 			} else {
 				sampleRate := this.sampleRate
-				flt := this.impulseResponses.CreateFilter(value, sampleRate)
+				flt := irs.CreateFilter(value, sampleRate)
 
 				/*
 				 * Check if filter was successfully loaded.
@@ -1727,7 +2231,7 @@ func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpReq
 
 				} else {
 					coeffs := flt.Coefficients()
-					this.metr.SetTock(value, coeffs)
+					metr.SetTock(value, coeffs)
 
 					/*
 					 * Indicate success.
@@ -1773,13 +2277,13 @@ func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpReq
  * Sets a value for the tuner.
  */
 func (this *controllerStruct) setTunerValueHandler(request webserver.HttpRequest) webserver.HttpResponse {
-	metr := this.metr
+	currentTuner := this.tuner
 	webResponse := webResponseStruct{}
 
 	/*
-	 * Check if we have a metronome.
+	 * Check if we have a tuner.
 	 */
-	if metr != nil {
+	if currentTuner != nil {
 		param := request.Params["param"]
 		value := request.Params["value"]
 
@@ -1996,6 +2500,10 @@ func (this *controllerStruct) dispatch(request webserver.HttpRequest) webserver.
 		response = this.moveDownHandler(request)
 	case "move-up":
 		response = this.moveUpHandler(request)
+	case "persistence-restore":
+		response = this.persistenceRestoreHandler(request)
+	case "persistence-save":
+		response = this.persistenceSaveHandler(request)
 	case "process":
 		response = this.processHandler(request)
 	case "remove-unit":
@@ -2122,14 +2630,15 @@ func (this *controllerStruct) process(inputBuffers [][]float64, outputBuffers []
 	if nOut >= nMinOut {
 		lastIdx := nOut - 1
 		auxBuffer := outputBuffers[lastIdx]
+		metr := this.metr
 
 		/*
 		 * Check if there is a metronome.
 		 */
-		if this.metr == nil {
+		if metr == nil {
 			auxBuffer = nil
 		} else {
-			this.metr.Process(auxBuffer)
+			metr.Process(auxBuffer)
 			levelMetersMetr := this.levelMetersMetr
 
 			/*
@@ -2178,8 +2687,10 @@ func (this *controllerStruct) process(inputBuffers [][]float64, outputBuffers []
  */
 func (this *controllerStruct) sampleRateListener(rate uint32) {
 	this.sampleRate = rate
-	this.spat.SetSampleRate(rate)
-	this.metr.SetSampleRate(rate)
+	spat := this.spat
+	spat.SetSampleRate(rate)
+	metr := this.metr
+	metr.SetSampleRate(rate)
 }
 
 /*
@@ -2645,7 +3156,10 @@ func (this *controllerStruct) initialize(nInputs int, useHardware bool) error {
 				this.effects = fx
 				this.sampleRate = DEFAULT_SAMPLE_RATE
 				this.spat = spatializer.Create(nInputs)
-				this.metr = metronome.Create()
+				metr := metronome.Create()
+				metr.SetTick("- NONE -", nil)
+				metr.SetTock("- NONE -", nil)
+				this.metr = metr
 				this.tuner = tuner.Create()
 				this.tunerChannel = -1
 				levelMetersInput := make([]level.Meter, nInputs)
@@ -2654,7 +3168,8 @@ func (this *controllerStruct) initialize(nInputs int, useHardware bool) error {
 				 * Create level meter for each input channel.
 				 */
 				for i := range levelMetersInput {
-					levelMetersInput[i] = level.CreateMeter()
+					meter := level.CreateMeter()
+					levelMetersInput[i] = meter
 				}
 
 				this.levelMetersInput = levelMetersInput
@@ -2664,7 +3179,8 @@ func (this *controllerStruct) initialize(nInputs int, useHardware bool) error {
 				 * Create level meter for each output channel.
 				 */
 				for i := range levelMetersOutput {
-					levelMetersOutput[i] = level.CreateMeter()
+					meter := level.CreateMeter()
+					levelMetersOutput[i] = meter
 				}
 
 				this.levelMetersOutput = levelMetersOutput
@@ -2674,8 +3190,10 @@ func (this *controllerStruct) initialize(nInputs int, useHardware bool) error {
 				 * Create level meter for each metronome channel.
 				 */
 				for i := range levelMetersMetr {
-					levelMetersMetr[i] = level.CreateMeter()
+					meter := level.CreateMeter()
+					levelMetersMetr[i] = meter
 				}
+
 				this.levelMetersMetr = levelMetersMetr
 				masterOutputs := int(spatializer.OUTPUT_COUNT)
 				levelMetersMaster := make([]level.Meter, masterOutputs)
@@ -2684,7 +3202,8 @@ func (this *controllerStruct) initialize(nInputs int, useHardware bool) error {
 				 * Create level meter for each master output channel.
 				 */
 				for i := range levelMetersMaster {
-					levelMetersMaster[i] = level.CreateMeter()
+					meter := level.CreateMeter()
+					levelMetersMaster[i] = meter
 				}
 
 				this.levelMetersMaster = levelMetersMaster
@@ -2731,8 +3250,10 @@ func (this *controllerStruct) initialize(nInputs int, useHardware bool) error {
  */
 func (this *controllerStruct) finalize() {
 	this.running = false
-	hwio.Unregister(this.binding)
-	close(this.processingTaskChannel)
+	binding := this.binding
+	hwio.Unregister(binding)
+	ptc := this.processingTaskChannel
+	close(ptc)
 }
 
 /*
@@ -2759,7 +3280,8 @@ func (this *controllerStruct) Operate(numChannels int) {
 		msgNew := "Initialization failed: " + msg
 		fmt.Printf("%s\n", msgNew)
 	} else {
-		serverCfg := this.config.WebServer
+		cfg := this.config
+		serverCfg := cfg.WebServer
 		server := webserver.CreateWebServer(serverCfg)
 
 		/*

@@ -20,6 +20,11 @@
 	cursor: pointer;
 }
 
+.auto
+{
+	margin: auto;
+}
+
 .body
 {
 	background-color: #000000;
@@ -133,8 +138,8 @@
 	border-radius: 10px;
 	border-style: solid;
 	border-width: 2px;
-	display: inline-block;
 	color: #ffffff;
+	display: inline-block;
 	left: 0px;
 	margin: 10px;
 	padding: 5px;
@@ -169,29 +174,29 @@
 .contentdiv.addunitdiv
 {
 	background-color: #111111;
-	color: #ffffff;
 	border-color: #333333;
+	color: #ffffff;
 }
 
 .contentdiv.iodiv
 {
 	background-color: #444444;
-	color: #ffffff;
 	border-color: #666666;
+	color: #ffffff;
 }
 
 .contentdiv.masterdiv
 {
 	background-color: #444466;
-	color: #ffffff;
 	border-color: #666688;
+	color: #ffffff;
 }
 
 .contentdiv.masterunitdiv
 {
 	background-color: #222244;
-	color: #ffffff;
 	border-color: #444466;
+	color: #ffffff;
 }
 
 .controlsdiv
@@ -216,12 +221,12 @@
 	border-width: 1px;
 	color: #ffffff;
 	cursor: pointer;
+	height: 30px;
 	margin-bottom: 0px;
 	margin-left: 0px;
 	margin-right: 10px;
 	margin-top: 0px;
 	position: relative;
-	height: 30px;
 }
 
 .dropdownlabel
@@ -310,9 +315,9 @@
 	border-width: 1px;
 	color: #ffffff;
 	font-family: monospace;
+	height: 100px;
 	margin: 0px;
 	position: relative;
-	height: 100px;
 	width: 1000px;
 }
 
@@ -327,9 +332,9 @@
 	border-width: 1px;
 	color: #ffffff;
 	font-family: monospace;
+	height: 30px;
 	margin: 0px;
 	position: relative;
-	height: 30px;
 	width: 80px;
 }
 
@@ -348,6 +353,29 @@
 	display: inline-block;
 	font-weight: bold;
 	padding-left: 5px;
+}
+
+.uploadarea
+{
+	background-color: #000022;
+	border-color: #222244;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 1px;
+	color: #ddddff;
+	display: flex;
+	height: 100px;
+	left: 0px;
+	margin: 5px;
+	position: relative;
+	right: 0px;
+	text-align: center;
+}
+
+.uploadarea.dragover
+{
+	background-color: #222244;
+	border-color: #444466;
 }
 
 .wide

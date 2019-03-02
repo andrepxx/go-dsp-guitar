@@ -4,9 +4,14 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"strings"
+)
+
+const (
+	REQUEST_SIZE = 1 << 20
 )
 
 /*
@@ -18,6 +23,7 @@ type HttpRequest struct {
 	Path     string
 	Host     string
 	Params   map[string]string
+	Files    map[string][]multipart.File
 }
 
 /*
@@ -91,7 +97,7 @@ func (this *webServerStruct) setDefaultHeaders(writer http.ResponseWriter, reque
  * A handler for CGI requests.
  */
 func (this *webServerStruct) cgiHandler(writer http.ResponseWriter, request *http.Request) {
-	request.ParseForm()
+	request.ParseMultipartForm(REQUEST_SIZE)
 
 	/*
 	 * The parsed HTTP request.
@@ -102,6 +108,7 @@ func (this *webServerStruct) cgiHandler(writer http.ResponseWriter, request *htt
 		Path:     request.URL.Path,
 		Host:     request.Host,
 		Params:   map[string]string{},
+		Files:    map[string][]multipart.File{},
 	}
 
 	/*
@@ -110,6 +117,64 @@ func (this *webServerStruct) cgiHandler(writer http.ResponseWriter, request *htt
 	for key, values := range request.Form {
 		params := strings.Join(values, ",")
 		hrequest.Params[key] = params
+	}
+
+	multipartForm := request.MultipartForm
+
+	/*
+	 * Check if a multipart form is available.
+	 */
+	if multipartForm != nil {
+		multipartFormValue := multipartForm.Value
+
+		/*
+		 * Iterate over values in multipart form.
+		 */
+		for key, values := range multipartFormValue {
+			params := strings.Join(values, ",")
+			hrequest.Params[key] = params
+		}
+
+		multipartFormFile := multipartForm.File
+
+		/*
+		 * Iterate over files in multipart form.
+		 */
+		for key, handles := range multipartFormFile {
+			files := hrequest.Files[key]
+
+			/*
+			 * If no slice is present under this key, create one.
+			 */
+			if files == nil {
+				files = []multipart.File{}
+			}
+
+			/*
+			 * Iterate over each file handle for this key.
+			 */
+			for _, handle := range handles {
+
+				/*
+				 * Ensure that the handle is not nil.
+				 */
+				if handle != nil {
+					fd, err := handle.Open()
+
+					/*
+					 * If the handle points to a file, store file descriptor.
+					 */
+					if err == nil {
+						files = append(files, fd)
+					}
+
+				}
+
+			}
+
+			hrequest.Files[key] = files
+		}
+
 	}
 
 	/*

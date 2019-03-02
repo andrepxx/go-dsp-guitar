@@ -5,6 +5,7 @@
  */
 function Globals() {
 	this.cgi = '/cgi-bin/dsp';
+	this.mimeDefault = 'application/x-www-form-urlencoded';
 	this.unitTypes = new Array();
 }
 
@@ -178,13 +179,14 @@ function Ajax() {
 	 * - method (string): The request method (e. g. 'GET', 'POST', ...).
 	 * - url (string): The request URL.
 	 * - data (string): Data to be passed along the request (e. g. form data).
+	 * - mimeType (string): Content type (MIME type) of the content sent to the server.
 	 * - callback (function): The function to be called when a response is
 	 *	returned from the server.
 	 * - block (boolean): Whether the site should be blocked.
 	 *
 	 * Returns: Nothing.
 	 */
-	this.request = function(method, url, data, callback, block) {
+	this.request = function(method, url, data, mimeType, callback, block) {
 		var xhr = new XMLHttpRequest();
 		
 		/*
@@ -219,7 +221,13 @@ function Ajax() {
 		};
 		
 		xhr.open(method, url, true);
-		xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+		
+		/*
+		 * Set MIME type if requested.
+		 */
+		if (mimeType != null)
+			xhr.setRequestHeader('Content-type', mimeType);
+		
 		xhr.send(data);
 	};
 	
@@ -330,6 +338,7 @@ function UI() {
 		'dsp_load': 'DSP load',
 		'excess': 'Excess',
 		'feedback': 'Feedback',
+		'file_transfer_instructions': 'Right-click here and select \'Save link / target as ...\' to save current patch. Drop patch file here to restore patch.',
 		'filter_1': 'Filter 1',
 		'filter_2': 'Filter 2',
 		'filter_3': 'Filter 3',
@@ -380,6 +389,7 @@ function UI() {
 		'note': 'Note',
 		'octaver': 'Octaver',
 		'overdrive': 'Overdrive',
+		'persistence': 'Persistence',
 		'phase': 'Phase',
 		'phaser': 'Phaser',
 		'polarity': 'Polarity',
@@ -1188,6 +1198,103 @@ function UI() {
 			elem.appendChild(spacerDiv);
 		}
 		
+	}
+
+	/*
+	 * Renders the persistence area given a configuration returned from the server.
+	 */
+	this.renderPersistence = function(configuration) {
+		var elem = document.getElementById('persistence');
+		helper.clearElement(elem);
+		var unitDiv = document.createElement('div');
+		unitDiv.classList.add('contentdiv');
+		unitDiv.classList.add('masterunitdiv');
+		var headerDiv = document.createElement('div');
+		var labelDiv = document.createElement('div');
+		labelDiv.classList.add('labeldiv');
+		labelDiv.classList.add('active');
+		labelDiv.classList.add('io');
+		var label = ui.getString('persistence');
+		var labelNode = document.createTextNode(label);
+		labelDiv.appendChild(labelNode);
+		headerDiv.appendChild(labelDiv);
+		headerDiv.classList.add('headerdiv');
+		unitDiv.appendChild(headerDiv);
+		var controlsDiv = document.createElement('div');
+		controlsDiv.classList.add('controlsdiv');
+		unitDiv.appendChild(controlsDiv);
+		elem.appendChild(unitDiv);
+		var uploadAreaDiv = document.createElement('div');
+		uploadAreaDiv.classList.add('uploadarea');
+		uploadAreaDiv.addEventListener('dragend', handler.dragLeave);
+		uploadAreaDiv.addEventListener('dragenter', handler.dragEnter);
+		uploadAreaDiv.addEventListener('dragleave', handler.dragLeave);
+		uploadAreaDiv.addEventListener('dragover', handler.absorbEvent);
+		uploadAreaDiv.addEventListener('drop', handler.uploadFile);
+		var downloadAnchor = document.createElement('a');
+		var cgi = globals.cgi;
+		var downloadTarget = cgi + '?cgi=persistence-save';
+		downloadAnchor.setAttribute('href', downloadTarget);
+		downloadAnchor.setAttribute('target', '_blank');
+		downloadAnchor.classList.add('link');
+		downloadAnchor.classList.add('auto');
+		var instructionsString = ui.getString('file_transfer_instructions');
+		var instructionsNode = document.createTextNode(instructionsString);
+		downloadAnchor.appendChild(instructionsNode);
+		uploadAreaDiv.appendChild(downloadAnchor);
+		controlsDiv.appendChild(uploadAreaDiv);
+	
+		/*
+		 * Create unit object.
+		 */
+		var unit = {
+			'controls': controlsDiv,
+			'expanded': false
+		};
+	
+		/*
+		 * Expands or collapses a unit.
+		 */
+		unit.setExpanded = function(value) {
+			var controlsDiv = this.controls;
+			var displayValue = '';
+		
+			/*
+			 * Check whether we should expand or collapse the unit.
+			 */
+			if (value)
+				displayValue = 'block';
+			else
+				displayValue = 'none';
+		
+			controlsDiv.style.display = displayValue;
+			this.expanded = value;
+		}
+	
+		/*
+		 * Returns whether a unit is expanded.
+		 */
+		unit.getExpanded = function() {
+			return this.expanded;
+		}
+	
+		/*
+		 * Toggles a unit between expanded and collapsed state.
+		 */
+		unit.toggleExpanded = function() {
+			var state = this.getExpanded();
+			this.setExpanded(!state);
+		}
+	
+		/*
+		 * This is called when a user clicks on the label div.
+		 */
+		labelDiv.onclick = function(event) {
+			var unit = storage.get(this, 'unit');
+			unit.toggleExpanded();
+		}
+	
+		storage.put(labelDiv, 'unit', unit);
 	}
 	
 	/*
@@ -2478,6 +2585,8 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var unitTypeString = unitType.toString();
 		var chainString = chain.toString();
 		var request = new Request();
@@ -2485,7 +2594,7 @@ function Handler() {
 		request.append('type', unitTypeString);
 		request.append('chain', chainString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -2507,10 +2616,12 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var request = new Request();
 		request.append('cgi', 'get-level-analysis');
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, false);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, false);
 	}
 	
 	/*
@@ -2543,6 +2654,8 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
 		var unitString = unit.toString();
 		var request = new Request();
@@ -2550,7 +2663,7 @@ function Handler() {
 		request.append('chain', chainString);
 		request.append('unit', unitString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -2583,6 +2696,8 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
 		var unitString = unit.toString();
 		var request = new Request();
@@ -2590,7 +2705,7 @@ function Handler() {
 		request.append('chain', chainString);
 		request.append('unit', unitString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -2623,6 +2738,8 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
 		var unitString = unit.toString();
 		var request = new Request();
@@ -2630,7 +2747,7 @@ function Handler() {
 		request.append('chain', chainString);
 		request.append('unit', unitString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -2662,6 +2779,8 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
 		var valueString = value.toString()
 		var request = new Request();
@@ -2669,7 +2788,7 @@ function Handler() {
 		request.append('chain', chainString);
 		request.append('value', valueString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -2701,6 +2820,8 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
 		var unitString = unit.toString();
 		var valueString = value.toString();
@@ -2710,7 +2831,7 @@ function Handler() {
 		request.append('unit', unitString);
 		request.append('value', valueString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -2742,6 +2863,8 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
 		var valueString = value.toString();
 		var request = new Request();
@@ -2749,7 +2872,7 @@ function Handler() {
 		request.append('chain', chainString);
 		request.append('value', valueString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -2781,6 +2904,8 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
 		var unitString = unit.toString();
 		var paramString = param.toString();
@@ -2792,7 +2917,7 @@ function Handler() {
 		request.append('param', paramString);
 		request.append('value', valueString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -2824,12 +2949,14 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var valueString = value.toString();
 		var request = new Request();
 		request.append('cgi', 'set-frames-per-period');
 		request.append('value', valueString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -2861,6 +2988,8 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
 		var valueString = value.toString();
 		var request = new Request();
@@ -2868,7 +2997,7 @@ function Handler() {
 		request.append('chain', chainString);
 		request.append('value', valueString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -2900,6 +3029,8 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var paramString = param.toString();
 		var valueString = value.toString();
 		var request = new Request();
@@ -2907,7 +3038,7 @@ function Handler() {
 		request.append('param', paramString);
 		request.append('value', valueString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -2939,6 +3070,8 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var paramString = param.toString();
 		var valueString = value.toString();
 		var request = new Request();
@@ -2946,7 +3079,7 @@ function Handler() {
 		request.append('param', paramString);
 		request.append('value', valueString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -2978,6 +3111,8 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
 		var unitString = unit.toString();
 		var paramString = param.toString();
@@ -2989,7 +3124,7 @@ function Handler() {
 		request.append('param', paramString);
 		request.append('value', valueString);
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -3008,6 +3143,7 @@ function Handler() {
 			 */
 			if (configuration != null) {
 				ui.renderSignalChains(configuration);
+				ui.renderPersistence(configuration);
 				ui.renderLatency(configuration);
 				ui.renderTuner(configuration);
 				ui.renderSpatializer(configuration);
@@ -3018,10 +3154,12 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var request = new Request();
 		request.append('cgi', 'get-configuration');
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 	/*
@@ -3044,10 +3182,12 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var request = new Request();
 		request.append('cgi', 'get-tuner-analysis');
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, false);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, false);
 	}
 	
 	/*
@@ -3062,10 +3202,76 @@ function Handler() {
 			helper.blockSite(true);
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var request = new Request();
 		request.append('cgi', 'process');
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, false);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, false);
+	}
+	
+	/*
+	 * This is used to prevent the default action from occuring.
+	 */
+	this.absorbEvent = function(e) {
+		e.stopPropagation();
+		e.preventDefault();
+		return false;
+	}
+	
+	/*
+	 * This is used to prevent the default action from occuring.
+	 */
+	this.dragEnter = function(e) {
+		e.stopPropagation();
+		e.preventDefault();
+		var elem = e.target;
+		elem.classList.add('dragover');
+		return false;
+	}
+	
+	/*
+	 * This is used to prevent the default action from occuring.
+	 */
+	this.dragLeave = function(e) {
+		e.stopPropagation();
+		e.preventDefault();
+		var elem = e.target;
+		elem.classList.remove('dragover');
+		return false;
+	}
+	
+	/*
+	 * This is called when the user drops a patch file into the upload area.
+	 */
+	this.uploadFile = function(e) {
+		e.stopPropagation();
+		e.preventDefault();
+		var transfer = e.dataTransfer;
+		var files = transfer.files;
+		var numFiles = files.length;
+		
+		/*
+		 * Check if there is a file.
+		 */
+		if (numFiles > 0) {
+			var file = files[0];
+			
+			/*
+			 * This gets called when the server returns a response.
+			 */
+			var responseHandler = function(response) {
+				handler.refresh();
+			};
+			
+			var url = globals.cgi;
+			var data = new FormData();
+			data.append('cgi', 'persistence-restore');
+			data.append('patchfile', file);
+			ajax.request('POST', url, data, null, responseHandler, true);
+		}
+		
+		return false;
 	}
 	
 	/*
@@ -3098,10 +3304,12 @@ function Handler() {
 			
 		};
 		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
 		var request = new Request();
 		request.append('cgi', 'get-unit-types');
 		var requestBody = request.getData();
-		ajax.request('POST', globals.cgi, requestBody, responseHandler, true);
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	}
 	
 }
