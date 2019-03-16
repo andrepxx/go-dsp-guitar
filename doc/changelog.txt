@@ -1,6 +1,22 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.3.0
+
+Changelog:
+
+New features / enhancements:
+
+    Implement persistence of user patches to / from JSON files.
+
+Maintenance / bugfixes / corrections:
+
+    Update documentation.
+    Fix minor bugs in code.
+    Improve code structure.
+    Increment version number: v1.2.0 --> v1.3.0
+
+
 v1.2.0
 
 New features / enhancements:
