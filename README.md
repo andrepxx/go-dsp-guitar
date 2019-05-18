@@ -113,6 +113,8 @@ In order to cross-compile the software, you will need a cross-compilation toolch
 /usr/i686-w64-mingw32/sys-root/
 ```
 
+The `sysroot` for the Windows cross-compilation builds is set to `~/win-sysroot` from `v1.3.1` onwards.
+
 ## Packaging the software for distribution
 
 After you build either a binary for your system or cross-compiled binaries for different systems (or both), you can bundle your binaries, along with scripts and auxiliary data, into packages for distribution.
@@ -138,6 +140,8 @@ You may need the following packages in order to build the software on your syste
 
 - `gcc-aarch64-linux-gnu`
 - `gcc-arm-linux-gnu`
+- `gcc-mingw-w64-i686` (Debian / Ubuntu)
+- `gcc-mingw-w64-x86-64` (Debian / Ubuntu)
 - `gcc-x86_64-linux`
 - `git`
 - `glibc-arm-linux-gnu`
@@ -150,12 +154,12 @@ You may need the following packages in order to build the software on your syste
 - `jack-audio-connection-kit` (Fedora / RHEL)
 - `jack-audio-connection-kit-devel` (Fedora / RHEL)
 - `libjack-jackd2-dev` (Debian / Ubuntu)
-- `mingw32-gcc`
-- `mingw32-gcc-c++`
-- `mingw32-pkg-config`
-- `mingw64-gcc`
-- `mingw64-gcc-c++`
-- `mingw64-pkg-config`
+- `mingw32-gcc` (Fedora / RHEL)
+- `mingw32-gcc-c++` (Fedora / RHEL)
+- `mingw32-pkg-config` (Fedora / RHEL)
+- `mingw64-gcc` (Fedora / RHEL)
+- `mingw64-gcc-c++` (Fedora / RHEL)
+- `mingw64-pkg-config` (Fedora / RHEL)
 - `openssl`
 - `rsync`
 
@@ -175,7 +179,7 @@ You may need the following packages in order to build the software on your syste
 
 **Q: Which platforms can I run this software on?**
 
-**A:** We currently provide binaries for Linux on x86-64 / amd64 (typically PCs), Linux on ARM (typically embedded devices, like a Raspberry Pi), Windows on x86-64 / amd64 (64-bit CPUs, basically all current machines) and Windows on i686 (32-bit CPUs, PCs from pre-2004 or very ressource-limited devices like netbooks from pre-2010). Note that even though the 32-bit variant of the software will typically run on a 64-bit CPU (but not the other way round), using the native (64-bit) variant on a 64-bit machine will be both faster and able to process larger files due to the larger address space of the process. We highly recommend Linux on x86-64 / amd64 for real-time use with JACK. Based upon our own testing, current ARM-based devices will not nearly be fast enough for real-time processing, and Linux currently performs better on x86-64 / amd64 for real-time use than Windows does. We still chose to support Windows as well due to its high market share on the desktop. When running this software on Windows, use the x86-64 / amd64 binary if possible. (It should run, unless your're on a very old machine.) And, of course, you can always use the file-based batch processing mode on slower machines.
+**A:** We currently provide binaries for Linux on x86-64 / amd64 (typically PCs), Linux on ARM or AArch64 (typically embedded devices, like a Raspberry Pi), Windows on x86-64 / amd64 (64-bit CPUs, basically all current machines) and Windows on i686 (32-bit CPUs, PCs from pre-2004 or very ressource-limited devices like netbooks from pre-2010). Note that even though the 32-bit variant of the software will typically run on a 64-bit CPU (but not the other way round), using the native (64-bit) variant on a 64-bit machine will be both faster and able to process larger files due to the larger address space of the process. We highly recommend Linux on x86-64 / amd64 for real-time use with JACK. Based upon our own testing, current ARM-based devices will not nearly be fast enough for real-time processing, and Linux currently performs better on x86-64 / amd64 for real-time use than Windows does. We still chose to support Windows as well due to its high market share on the desktop. When running this software on Windows, use the x86-64 / amd64 binary if possible. (It should run, unless your're on a very old machine.) And, of course, you can always use the file-based batch processing mode on slower machines.
 
 **Q: Why do I run out of memory when batch-processing files?**
 

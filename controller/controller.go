@@ -2827,8 +2827,11 @@ func (this *controllerStruct) processFiles(scanner *bufio.Scanner, targetRate ui
 						 * Check if channel could be loaded.
 						 */
 						if err != nil {
-							buf := c.Floats()
-							inputs = append(inputs, buf)
+							inputs[fileId] = make([]float64, 0)
+							sampleRates[fileId] = DEFAULT_SAMPLE_RATE
+						} else {
+							inputs[fileId] = c.Floats()
+							sampleRates[fileId] = f.SampleRate()
 						}
 
 					} else {

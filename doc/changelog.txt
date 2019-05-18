@@ -1,20 +1,33 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.3.1
+
+Changelog:
+
+Maintenance / bugfixes / corrections:
+
+- Fix a bug which causes "go-dsp-guitar" to terminate with an index out of bounds exception when batch-processing audio files containing only a single channel.
+- Correct compiler flags for go version >= 1.10.
+- Fix several issues with the build system when cross-compiling "go-dsp-guitar".
+- Correct the changelog.
+- Increment patch version number: v1.3.0 --> v1.3.1
+
+
 v1.3.0
 
 Changelog:
 
 New features / enhancements:
 
-    Implement persistence of user patches to / from JSON files.
+- Implement persistence of user patches to / from JSON files.
 
 Maintenance / bugfixes / corrections:
 
-    Update documentation.
-    Fix minor bugs in code.
-    Improve code structure.
-    Increment version number: v1.2.0 --> v1.3.0
+- Update documentation.
+- Fix minor bugs in code.
+- Improve code structure.
+- Increment minor version number: v1.2.0 --> v1.3.0
 
 
 v1.2.0
