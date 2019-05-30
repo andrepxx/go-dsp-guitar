@@ -8,39 +8,58 @@ CGO_FLAGS_WIN_AMD64 := "-m64 --sysroot=$(WIN_SYSROOT) -I$(WIN_SYSROOT)/include"
 CGO_FLAGS_WIN_I686 := "-m32 --sysroot=$(WIN_SYSROOT) -I$(WIN_SYSROOT)/include"
 CGO_LDFLAGS_ALLOW_WIN := ".*"
 CGO_LDFLAGS_WIN := "--sysroot=$(WIN_SYSROOT) -L$(WIN_SYSROOT)/lib"
-GCFLAGS := 'all=-N -l'
+GCFLAGS_DEBUG := 'all=-N -l'
+LDFLAGS_RELEASE := 'all=-w -s'
 GOPATH := `pwd`/../../../..
 PACKAGE_BIN := config ir keys webroot `ls dsp*`
 
-all: dsp
+all: dsp dsp-debug
 
 .PHONY: clean clean-all fmt keys test
 
 clean:
 	rm -rf dist/
-	rm -f dsp
+	rm -f dsp dsp-debug
 
 clean-all:
 	rm -rf dist/
-	rm -f dsp dsp-linux-aarch64 dsp-linux-amd64 dsp-linux-arm dsp-win-amd64.exe dsp-win-i686.exe
+	rm -f dsp dsp-debug dsp-linux-aarch64 dsp-linux-aarch64-debug dsp-linux-amd64 dsp-linux-amd64-debug dsp-linux-arm dsp-linux-arm-debug dsp-win-amd64.exe dsp-win-amd64-debug.exe dsp-win-i686.exe dsp-win-i686-debug.exe
 
 dsp:
-	GOPATH=$(GOPATH) go build -o dsp -gcflags $(GCFLAGS)
+	GOPATH=$(GOPATH) go build -o dsp -ldflags $(LDFLAGS_RELEASE)
+
+dsp-debug:
+	GOPATH=$(GOPATH) go build -o dsp-debug -gcflags $(GCFLAGS_DEBUG)
 
 dsp-linux-aarch64:
-	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_AARCH64) CC=aarch64-linux-gnu-gcc GOOS=linux GOARCH=arm64 go build -o dsp-linux-aarch64 -gcflags $(GCFLAGS)
+	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_AARCH64) CC=aarch64-linux-gnu-gcc GOOS=linux GOARCH=arm64 go build -o dsp-linux-aarch64 -ldflags $(LDFLAGS_RELEASE)
+
+dsp-linux-aarch64-debug:
+	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_AARCH64) CC=aarch64-linux-gnu-gcc GOOS=linux GOARCH=arm64 go build -o dsp-linux-aarch64-debug -gcflags $(GCFLAGS_DEBUG)
 
 dsp-linux-amd64:
-	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_AMD64) CC=x86_64-linux-gnu-gcc GOOS=linux GOARCH=amd64 go build -o dsp-linux-amd64 -gcflags $(GCFLAGS)
+	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_AMD64) CC=x86_64-linux-gnu-gcc GOOS=linux GOARCH=amd64 go build -o dsp-linux-amd64 -ldflags $(LDFLAGS_RELEASE)
+
+dsp-linux-amd64-debug:
+	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_AMD64) CC=x86_64-linux-gnu-gcc GOOS=linux GOARCH=amd64 go build -o dsp-linux-amd64-debug -gcflags $(GCFLAGS_DEBUG)
 
 dsp-linux-arm:
-	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_ARM) CC=arm-linux-gnu-gcc GOOS=linux GOARCH=arm GOARM=7 go build -o dsp-linux-arm -gcflags $(GCFLAGS)
+	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_ARM) CC=arm-linux-gnu-gcc GOOS=linux GOARCH=arm GOARM=7 go build -o dsp-linux-arm -ldflags $(LDFLAGS_RELEASE)
+
+dsp-linux-arm-debug:
+	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_ARM) CC=arm-linux-gnu-gcc GOOS=linux GOARCH=arm GOARM=7 go build -o dsp-linux-arm-debug -gcflags $(GCFLAGS_DEBUG)
 
 dsp-win-amd64.exe:
-	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_WIN_AMD64) CGO_LDFLAGS=$(CGO_LDFLAGS_WIN) CGO_CFLAGS_ALLOW=$(CGO_FLAGS_ALLOW_WIN) CGO_LDFLAGS_ALLOW=$(CGO_LDFLAGS_ALLOW_WIN) CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 go build -o dsp-win-amd64.exe -gcflags $(GCFLAGS)
+	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_WIN_AMD64) CGO_LDFLAGS=$(CGO_LDFLAGS_WIN) CGO_CFLAGS_ALLOW=$(CGO_FLAGS_ALLOW_WIN) CGO_LDFLAGS_ALLOW=$(CGO_LDFLAGS_ALLOW_WIN) CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 go build -o dsp-win-amd64.exe -ldflags $(LDFLAGS_RELEASE)
+
+dsp-win-amd64-debug.exe:
+	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_WIN_AMD64) CGO_LDFLAGS=$(CGO_LDFLAGS_WIN) CGO_CFLAGS_ALLOW=$(CGO_FLAGS_ALLOW_WIN) CGO_LDFLAGS_ALLOW=$(CGO_LDFLAGS_ALLOW_WIN) CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 go build -o dsp-win-amd64-debug.exe -gcflags $(GCFLAGS_DEBUG)
 
 dsp-win-i686.exe:
-	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_WIN_I686) CGO_LDFLAGS=$(CGO_LDFLAGS_WIN) CGO_CFLAGS_ALLOW=$(CGO_FLAGS_ALLOW_WIN) CGO_LDFLAGS_ALLOW=$(CGO_LDFLAGS_ALLOW_WIN) CC=i686-w64-mingw32-gcc GOOS=windows GOARCH=386 go build -o dsp-win-i686.exe -gcflags $(GCFLAGS)
+	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_WIN_I686) CGO_LDFLAGS=$(CGO_LDFLAGS_WIN) CGO_CFLAGS_ALLOW=$(CGO_FLAGS_ALLOW_WIN) CGO_LDFLAGS_ALLOW=$(CGO_LDFLAGS_ALLOW_WIN) CC=i686-w64-mingw32-gcc GOOS=windows GOARCH=386 go build -o dsp-win-i686.exe -ldflags $(LDFLAGS_RELEASE)
+
+dsp-win-i686-debug.exe:
+	GOPATH=$(GOPATH) CGO_ENABLED=1 CGO_CFLAGS=$(CGO_FLAGS_WIN_I686) CGO_LDFLAGS=$(CGO_LDFLAGS_WIN) CGO_CFLAGS_ALLOW=$(CGO_FLAGS_ALLOW_WIN) CGO_LDFLAGS_ALLOW=$(CGO_LDFLAGS_ALLOW_WIN) CC=i686-w64-mingw32-gcc GOOS=windows GOARCH=386 go build -o dsp-win-i686-debug.exe -gcflags $(GCFLAGS_DEBUG)
 
 dist:
 	mkdir dist

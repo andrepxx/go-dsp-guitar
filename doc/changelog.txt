@@ -1,6 +1,17 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.3.2
+
+Changelog:
+
+Maintenance / bugfixes / corrections:
+
+- Modify Makefile to build optimized as well as unoptimized (*-debug) binaries. Optimized binaries should be used in production as these allow you to achieve much lower latency without audio dropouts. Unoptimized binaries should be used for debugging and for reporting issues.
+- Update the changelog.
+- Increment patch version number: v1.3.1 --> v1.3.2
+
+
 v1.3.1
 
 Changelog:
