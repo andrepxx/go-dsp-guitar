@@ -251,9 +251,8 @@ func (this *reverb) Process(in []float64, out []float64, sampleRate uint32) {
 			 * Calculate delay line taps in samples.
 			 */
 			for i, tapSeconds := range delayLineTapsTime {
-				tapSamplesFloat := math.Round(tapSeconds * sampleRateFloat)
-				tapSamples := uint32(tapSamplesFloat)
-				delayLineTapsSamples[i] = tapSamples
+				tapSamples := math.Round(tapSeconds * sampleRateFloat)
+				delayLineTapsSamples[i] = uint32(tapSamples)
 			}
 
 			/*

@@ -99,7 +99,8 @@ func (this *flanger) Process(in []float64, out []float64, sampleRate uint32) {
 	bufferSizeFloat := float64(bufferSize)
 	duration := bufferSizeFloat * sampleRateFloatInv
 	phaseIncrement := angularSpeed * duration
-	this.previousPhase = math.Mod(previousPhase+phaseIncrement, MATH_TWO_PI)
+	updatedPhase := previousPhase + phaseIncrement
+	this.previousPhase = math.Mod(updatedPhase, MATH_TWO_PI)
 	numSamples := len(in)
 	boundary := bufferSize - numSamples
 

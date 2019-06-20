@@ -727,7 +727,7 @@ func Import(descriptorFilePath string) (ImpulseResponses, error) {
 	content, err := ioutil.ReadFile(descriptorFilePath)
 
 	/*
-	 * Check if file could be red.
+	 * Check if file could be read.
 	 */
 	if err != nil {
 		return nil, fmt.Errorf("Failed to read descriptor file: '%s'", descriptorFilePath)
