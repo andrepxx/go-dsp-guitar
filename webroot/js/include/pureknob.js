@@ -4,7 +4,7 @@
  * Canvas-based JavaScript UI element implementing touch,
  * keyboard, mouse and scroll wheel support.
  *
- * Copyright 2018 Andre Plötze
+ * Copyright 2018 - 2019 Andre Plötze
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -954,13 +954,13 @@ function PureKnob() {
 				if (!readonly) {					
 					var touches = e.touches;
 					var numTouches = touches.length;
-					var singleTouch = (numTouches === 1);
+					var noMoreTouches = (numTouches === 0);
 					
 					/*
-					 * Only process single touches, not multi-touch
-					 * gestures.
+					 * Only commit value after the last finger has
+					 * been lifted off.
 					 */
-					if (singleTouch) {
+					if (noMoreTouches) {
 						e.preventDefault();
 						knob._mousebutton = false;
 						knob.commit();
