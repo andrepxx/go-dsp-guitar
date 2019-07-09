@@ -88,7 +88,7 @@ function Storage() {
 			/*
 			 * If inner map is now empty, remove it from outer map.
 			 */
-			if (map.size == 0) {
+			if (map.size === 0) {
 				g_map.delete(elem);
 			}
 			
@@ -123,7 +123,7 @@ function Helper() {
 		/*
 		 * Apply style if the site has a blocker.
 		 */
-		if (blocker != null)
+		if (blocker !== null)
 			blocker.style.display = displayStyle;
 		
 	};
@@ -199,7 +199,7 @@ function Ajax() {
 			 * If we got a response, pass the response text to
 			 * the callback function.
 			 */
-			if (this.readyState == 4) {
+			if (this.readyState === 4) {
 				
 				/*
 				 * If we blocked the site on the request,
@@ -211,7 +211,7 @@ function Ajax() {
 				/*
 				 * Check if callback is registered.
 				 */
-				if (callback != null) {
+				if (callback !== null) {
 					var content = xhr.responseText;
 					callback(content);
 				}
@@ -225,7 +225,7 @@ function Ajax() {
 		/*
 		 * Set MIME type if requested.
 		 */
-		if (mimeType != null)
+		if (mimeType !== null)
 			xhr.setRequestHeader('Content-type', mimeType);
 		
 		xhr.send(data);
@@ -466,10 +466,10 @@ function UI() {
 		/*
 		 * Check if we want a blue or green color scheme.
 		 */
-		if (colorScheme == 'blue') {
+		if (colorScheme === 'blue') {
 			fgColor = '#8888ff';
 			bgColor = '#181830';
-		} else if (colorScheme == 'green') {
+		} else if (colorScheme === 'green') {
 			fgColor = '#88ff88';
 			bgColor = '#181830';
 		}
@@ -514,7 +514,7 @@ function UI() {
 		/*
 		 * Check if we should apply a label.
 		 */
-		if (label != null) {
+		if (label !== null) {
 			var labelDiv = document.createElement('div');
 			labelDiv.classList.add('dropdownlabel');
 			var labelNode = document.createTextNode(label);
@@ -869,13 +869,13 @@ function UI() {
 			 * Only handle 'ordinary' (non-special) parameters on the first pass.
 			 */
 			if (!isSpecial) {
-				var isFloating = (i != 0);
+				var isFloating = (i !== 0);
 				var label = ui.getString(paramName);
 				
 				/*
 				 * Handle numeric parameter.
 				 */
-				if (paramType == 'numeric') {
+				if (paramType === 'numeric') {
 					
 					/*
 					 * Parameters for the knob.
@@ -918,7 +918,7 @@ function UI() {
 				/*
 				 * Handle discrete parameter.
 				 */
-				if (paramType == 'discrete') {
+				if (paramType === 'discrete') {
 					
 					/*
 					 * Parameters for the drop down menu.
@@ -967,7 +967,7 @@ function UI() {
 			/*
 			 * Only handle special discrete parameters on the second pass.
 			 */
-			if (isSpecial & (paramType == 'discrete')) {
+			if (isSpecial & (paramType === 'discrete')) {
 				var label = ui.getString(paramName);
 				
 				/*
@@ -1017,7 +1017,7 @@ function UI() {
 			/*
 			 * Only handle special numeric parameters on the third pass.
 			 */
-			if (isSpecial & (paramType == 'numeric')) {
+			if (isSpecial & (paramType === 'numeric')) {
 				var label = ui.getString(paramName);
 					
 				/*
@@ -1336,7 +1336,7 @@ function UI() {
 			/*
 			 * If we have a match, store index.
 			 */
-			if (framesPerPeriod == currentValue)
+			if (framesPerPeriod === currentValue)
 				valueIdx = i;
 			
 		}
@@ -1562,7 +1562,7 @@ function UI() {
 			 * Handle special case of no channel and register timer
 			 * for updating readings for the UI.
 			 */
-			if (value == '- NONE -')
+			if (value === '- NONE -')
 				value = '-1';
 			else {
 				var intervalNew = window.setInterval(callback, 250);
@@ -1971,13 +1971,13 @@ function UI() {
 			/*
 			 * If we found the tick sound, store index.
 			 */
-			if (sound == tickSound)
+			if (sound === tickSound)
 				tickIdx = i;
 			
 			/*
 			 * If we found the tock sound, store index.
 			 */
-			if (sound == tockSound)
+			if (sound === tockSound)
 				tockIdx = i;
 			
 		}
@@ -2159,7 +2159,7 @@ function UI() {
 							var numNames = channelNames.length;
 							var channelControls = unit.channelControls;
 							var idx = 0;
-							var mismatch = (dspLoadControl == null);
+							var mismatch = (dspLoadControl === null);
 							
 							/*
 							 * Iterate over all categories ("Inputs", "Outputs",
@@ -2196,7 +2196,7 @@ function UI() {
 											 * Check if name of the response matches name
 											 * of the control.
 											 */
-											if (channelNameResponse != channelNameControls)
+											if (channelNameResponse !== channelNameControls)
 												mismatch = true;
 											
 										}
@@ -2290,7 +2290,7 @@ function UI() {
 							/*
 							 * Display DSP load.
 							 */
-							if (dspLoadControl != null) {
+							if (dspLoadControl !== null) {
 								var dspLoad = response.DSPLoad;
 								dspLoadControl.setValue(dspLoad);
 							}
@@ -2345,7 +2345,7 @@ function UI() {
 					/*
 					 * If a timer is registered, clear it.
 					 */
-					if (timer != null)
+					if (timer !== null)
 						window.clearInterval(timer);
 					
 					unit.timer = null;
@@ -2387,7 +2387,7 @@ function UI() {
 				/*
 				 * Check if there are listeners resistered.
 				 */
-				if (listeners != null) {
+				if (listeners !== null) {
 					var numListeners = listeners.length;
 					
 					/*
@@ -2569,12 +2569,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt, otherwise refresh rack.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Adding new unit failed: ' + reason;
 					console.log(msg);
@@ -2611,7 +2611,7 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (levels != null)
+			if (levels !== null)
 				callback(levels);
 			
 		};
@@ -2638,12 +2638,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Moving unit down failed: ' + reason;
 					console.log(msg);
@@ -2680,12 +2680,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Moving unit up failed: ' + reason;
 					console.log(msg);
@@ -2722,12 +2722,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Removing unit failed: ' + reason;
 					console.log(msg);
@@ -2764,12 +2764,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Setting azimuth value failed: ' + reason;
 					console.log(msg);
@@ -2805,12 +2805,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Setting bypass value failed: ' + reason;
 					console.log(msg);
@@ -2848,12 +2848,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Setting distance value failed: ' + reason;
 					console.log(msg);
@@ -2889,12 +2889,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Setting discrete value failed: ' + reason;
 					console.log(msg);
@@ -2934,12 +2934,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Setting frames per period failed: ' + reason;
 					console.log(msg);
@@ -2973,12 +2973,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Setting level value failed: ' + reason;
 					console.log(msg);
@@ -3014,12 +3014,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Setting metronome value failed: ' + reason;
 					console.log(msg);
@@ -3055,12 +3055,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Setting tuner value failed: ' + reason;
 					console.log(msg);
@@ -3096,12 +3096,12 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (webResponse != null) {
+			if (webResponse !== null) {
 				
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
-				if (webResponse.Success != true) {
+				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var msg = 'Setting numeric value failed: ' + reason;
 					console.log(msg);
@@ -3141,7 +3141,7 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (configuration != null) {
+			if (configuration !== null) {
 				ui.renderSignalChains(configuration);
 				ui.renderPersistence(configuration);
 				ui.renderLatency(configuration);
@@ -3176,7 +3176,7 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (analysis != null) {
+			if (analysis !== null) {
 				ui.updateTuner(analysis);
 			}
 			
@@ -3288,7 +3288,7 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (unitTypes != null) {
+			if (unitTypes !== null) {
 				var numUnitTypes = unitTypes.length;
 				
 				/*
