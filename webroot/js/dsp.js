@@ -98,6 +98,9 @@ function Storage() {
 	
 }
 
+/*
+ * The global storage object.
+ */
 var storage = new Storage();
 
 /*
@@ -706,7 +709,7 @@ function UI() {
 		/*
 		 * This is called when a user clicks on the label div.
 		 */
-		labelDiv.onclick = function(event) {
+		labelDiv.onclick = function(e) {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		}
@@ -793,7 +796,7 @@ function UI() {
 		/*
 		 * This is invoked when someone clicks on the 'bypass' button.
 		 */
-		btnBypass.onclick = function(event) {
+		btnBypass.onclick = function(e) {
 			var chainId = storage.get(this, 'chain');
 			var unitId = storage.get(this, 'unit');
 			var active = !storage.get(this, 'active');
@@ -820,7 +823,7 @@ function UI() {
 		/*
 		 * This is invoked when someone clicks on the 'move up' button.
 		 */
-		btnMoveUp.onclick = function(event) {
+		btnMoveUp.onclick = function(e) {
 			var chainId = storage.get(this, 'chain');
 			var unitId = storage.get(this, 'unit');
 			handler.moveUp(chainId, unitId);
@@ -833,7 +836,7 @@ function UI() {
 		/*
 		 * This is invoked when someone clicks on the 'move down' button.
 		 */
-		btnMoveDown.onclick = function(event) {
+		btnMoveDown.onclick = function(e) {
 			var chainId = storage.get(this, 'chain');
 			var unitId = storage.get(this, 'unit');
 			handler.moveDown(chainId, unitId);
@@ -847,7 +850,7 @@ function UI() {
 		/*
 		 * This is invoked when someone clicks on the 'remove' button.
 		 */
-		btnRemove.onclick = function(event) {
+		btnRemove.onclick = function(e) {
 			var chainId = storage.get(this, 'chain');
 			var unitId = storage.get(this, 'unit');
 			handler.removeUnit(chainId, unitId);
@@ -938,7 +941,7 @@ function UI() {
 					/*
 					 * This is called when a discrete value changes.
 					 */
-					dropDownInput.onchange = function(event) {
+					dropDownInput.onchange = function(e) {
 						var chain = storage.get(this, 'chain');
 						var unit = storage.get(this, 'unit');
 						var param = storage.get(this, 'param');
@@ -988,7 +991,7 @@ function UI() {
 				/*
 				 * This is called when a discrete value changes.
 				 */
-				dropDownInput.onchange = function(event) {
+				dropDownInput.onchange = function(e) {
 					var chain = storage.get(this, 'chain');
 					var unit = storage.get(this, 'unit');
 					var param = storage.get(this, 'param');
@@ -1136,7 +1139,7 @@ function UI() {
 		/*
 		 * What happens when we click on the 'add' button.
 		 */
-		buttonElem.onclick = function(event) {
+		buttonElem.onclick = function(e) {
 			var chainId = storage.get(this, 'chain');
 			var dropdown = storage.get(this, 'dropdown');
 			var unitType = dropdown.selectedIndex;
@@ -1289,7 +1292,7 @@ function UI() {
 		/*
 		 * This is called when a user clicks on the label div.
 		 */
-		labelDiv.onclick = function(event) {
+		labelDiv.onclick = function(e) {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		}
@@ -1356,7 +1359,7 @@ function UI() {
 		/*
 		 * This is called when the period size changes.
 		 */
-		dropDownFramesPerPeriodElem.onchange = function(event) {
+		dropDownFramesPerPeriodElem.onchange = function(e) {
 			var idx = this.selectedIndex;
 			var option = this.options[idx];
 			var value = option.text;
@@ -1411,7 +1414,7 @@ function UI() {
 		/*
 		 * This is called when a user clicks on the label div.
 		 */
-		labelDiv.onclick = function(event) {
+		labelDiv.onclick = function(e) {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		}
@@ -1544,7 +1547,7 @@ function UI() {
 		/*
 		 * This is called when the channel number changes.
 		 */
-		dropDownChannelElem.onchange = function(event) {
+		dropDownChannelElem.onchange = function(e) {
 			var idx = this.selectedIndex;
 			var option = this.options[idx];
 			var value = option.text;
@@ -1622,7 +1625,7 @@ function UI() {
 		/*
 		 * This is called when a user clicks on the label div.
 		 */
-		labelDiv.onclick = function(event) {
+		labelDiv.onclick = function(e) {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		}
@@ -1822,7 +1825,7 @@ function UI() {
 		/*
 		 * This is called when a user clicks on the label div.
 		 */
-		labelDiv.onclick = function(event) {
+		labelDiv.onclick = function(e) {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		}
@@ -1859,7 +1862,7 @@ function UI() {
 		/*
 		 * This is called when the user clicks on the 'master' button of the metronome.
 		 */
-		buttonElem.onclick = function(event) {
+		buttonElem.onclick = function(e) {
 			var active = !storage.get(this, 'active');
 			
 			/*
@@ -2011,7 +2014,7 @@ function UI() {
 		/*
 		 * This is called when the tick sound changes.
 		 */
-		dropDownTickElem.onchange = function(event) {
+		dropDownTickElem.onchange = function(e) {
 			var idx = this.selectedIndex;
 			var option = this.options[idx];
 			var value = option.text;
@@ -2021,7 +2024,7 @@ function UI() {
 		/*
 		 * This is called when the tock sound changes.
 		 */
-		dropDownTockElem.onchange = function(event) {
+		dropDownTockElem.onchange = function(e) {
 			var idx = this.selectedIndex;
 			var option = this.options[idx];
 			var value = option.text;
@@ -2080,7 +2083,7 @@ function UI() {
 		/*
 		 * This is called when a user clicks on the label div.
 		 */
-		labelDiv.onclick = function(event) {
+		labelDiv.onclick = function(e) {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		}
@@ -2420,7 +2423,7 @@ function UI() {
 			/*
 			 * This is called when a user clicks on the label div.
 			 */
-			labelDiv.onclick = function(event) {
+			labelDiv.onclick = function(e) {
 				var unit = storage.get(this, 'unit');
 				unit.toggleExpanded();
 			}
@@ -2463,7 +2466,7 @@ function UI() {
 			/*
 			 * This is called when the user clicks on the 'process' button.
 			 */
-			buttonElem.onclick = function(event) {
+			buttonElem.onclick = function(e) {
 				var active = storage.get(this, 'active');
 			
 				/*
@@ -2535,7 +2538,7 @@ function UI() {
 			/*
 			 * This is called when a user clicks on the label div.
 			 */
-			labelDiv.onclick = function(event) {
+			labelDiv.onclick = function(e) {
 				var unit = storage.get(this, 'unit');
 				unit.toggleExpanded();
 			}
