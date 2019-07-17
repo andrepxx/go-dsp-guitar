@@ -1,9 +1,19 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
-v1.3.2
+v1.3.3
 
-Changelog:
+Maintenance / bugfixes / corrections:
+
+- Updated to latest version of "pure-knob".
+- Make JavaScript comparison more specific.
+- Name all JavaScript event parameters "e".
+- Add comment for global variable.
+- Several other improvements to the code.
+- Increment patch version number: v1.3.2 --> v1.3.3
+
+
+v1.3.2
 
 Maintenance / bugfixes / corrections:
 
@@ -13,8 +23,6 @@ Maintenance / bugfixes / corrections:
 
 
 v1.3.1
-
-Changelog:
 
 Maintenance / bugfixes / corrections:
 
@@ -26,8 +34,6 @@ Maintenance / bugfixes / corrections:
 
 
 v1.3.0
-
-Changelog:
 
 New features / enhancements:
 
