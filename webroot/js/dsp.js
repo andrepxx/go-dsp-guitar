@@ -276,7 +276,7 @@ function Request() {
 	this.append = function(key, value) {
 		var kv = new KeyValuePair(key, value);
 		g_keyValues.push(kv);
-	}
+	};
 	
 	/*
 	 * Returns the URL encoded data for this request.
@@ -435,7 +435,7 @@ function UI() {
 		} else
 			return key;
 		
-	}
+	};
 
 	/*
 	 * Creates a turnable knob.
@@ -501,7 +501,7 @@ function UI() {
 		};
 		
 		return knob;
-	}
+	};
 	
 	/*
 	 * Creates a drop down menu.
@@ -549,7 +549,7 @@ function UI() {
 		};
 		
 		return dropdown;
-	}
+	};
 	
 	/*
 	 * Creates a button.
@@ -579,7 +579,7 @@ function UI() {
 		};
 		
 		return button;
-	}
+	};
 	
 	/*
 	 * Creates a unit.
@@ -651,7 +651,7 @@ function UI() {
 		unit.addControl = function(control) {
 			var controlDiv = control.div;
 			this.controls.appendChild(controlDiv);
-		}
+		};
 		
 		/*
 		 * Adds a row with controls to a unit.
@@ -670,7 +670,7 @@ function UI() {
 			}
 			
 			this.controls.appendChild(rowDiv);
-		}
+		};
 		
 		/*
 		 * Expands or collapses a unit.
@@ -689,14 +689,14 @@ function UI() {
 			
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
-		}
+		};
 		
 		/*
 		 * Returns whether a unit is expanded.
 		 */
 		unit.getExpanded = function() {
 			return this.expanded;
-		}
+		};
 		
 		/*
 		 * Toggles a unit between expanded and collapsed state.
@@ -704,7 +704,7 @@ function UI() {
 		unit.toggleExpanded = function() {
 			var state = this.getExpanded();
 			this.setExpanded(!state);
-		}
+		};
 		
 		/*
 		 * This is called when a user clicks on the label div.
@@ -712,11 +712,11 @@ function UI() {
 		labelDiv.onclick = function(e) {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
-		}
+		};
 		
 		storage.put(labelDiv, 'unit', unit);
 		return unit;
-	}
+	};
 	
 	/*
 	 * Checks whether a certain combination of unit type and parameter name requires special handling.
@@ -741,7 +741,7 @@ function UI() {
 				return false;
 		}
 		
-	}
+	};
 	
 	/*
 	 * Renders a unit given chain and unit ID, as well as a description returned from the server.
@@ -1064,7 +1064,7 @@ function UI() {
 		}
 		
 		return unit;
-	}
+	};
 	
 	/*
 	 * Renders a signal chain, given its ID and a chain description returned from the server.
@@ -1144,7 +1144,7 @@ function UI() {
 			var dropdown = storage.get(this, 'dropdown');
 			var unitType = dropdown.selectedIndex;
 			handler.addUnit(unitType, chainId);
-		}
+		};
 		
 		storage.put(buttonElem, 'chain', id);
 		storage.put(buttonElem, 'dropdown', dropDown.input);
@@ -1201,7 +1201,7 @@ function UI() {
 			elem.appendChild(spacerDiv);
 		}
 		
-	}
+	};
 
 	/*
 	 * Renders the persistence area given a configuration returned from the server.
@@ -1272,14 +1272,14 @@ function UI() {
 		
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
-		}
+		};
 	
 		/*
 		 * Returns whether a unit is expanded.
 		 */
 		unit.getExpanded = function() {
 			return this.expanded;
-		}
+		};
 	
 		/*
 		 * Toggles a unit between expanded and collapsed state.
@@ -1287,7 +1287,7 @@ function UI() {
 		unit.toggleExpanded = function() {
 			var state = this.getExpanded();
 			this.setExpanded(!state);
-		}
+		};
 	
 		/*
 		 * This is called when a user clicks on the label div.
@@ -1295,10 +1295,10 @@ function UI() {
 		labelDiv.onclick = function(e) {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
-		}
+		};
 	
 		storage.put(labelDiv, 'unit', unit);
-	}
+	};
 	
 	/*
 	 * Renders the latency configuration given a configuration returned from the server.
@@ -1394,14 +1394,14 @@ function UI() {
 			
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
-		}
+		};
 		
 		/*
 		 * Returns whether a unit is expanded.
 		 */
 		unit.getExpanded = function() {
 			return this.expanded;
-		}
+		};
 		
 		/*
 		 * Toggles a unit between expanded and collapsed state.
@@ -1409,7 +1409,7 @@ function UI() {
 		unit.toggleExpanded = function() {
 			var state = this.getExpanded();
 			this.setExpanded(!state);
-		}
+		};
 		
 		/*
 		 * This is called when a user clicks on the label div.
@@ -1417,10 +1417,10 @@ function UI() {
 		labelDiv.onclick = function(e) {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
-		}
+		};
 		
 		storage.put(labelDiv, 'unit', unit);
-	}
+	};
 	
 	/*
 	 * Updates the tuner display based on information returned from the server.
@@ -1438,7 +1438,7 @@ function UI() {
 		var noteDiv = document.querySelector('.tunernotediv');
 		var noteString = note.toString();
 		noteDiv.innerHTML = noteString;
-	}
+	};
 	
 	/*
 	 * Renders the tuner given a configuration returned from the server.
@@ -1559,7 +1559,7 @@ function UI() {
 			 */
 			var callback = function() {
 				handler.refreshTuner();
-			}
+			};
 			
 			/*
 			 * Handle special case of no channel and register timer
@@ -1605,14 +1605,14 @@ function UI() {
 			
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
-		}
+		};
 		
 		/*
 		 * Returns whether a unit is expanded.
 		 */
 		unit.getExpanded = function() {
 			return this.expanded;
-		}
+		};
 		
 		/*
 		 * Toggles a unit between expanded and collapsed state.
@@ -1620,7 +1620,7 @@ function UI() {
 		unit.toggleExpanded = function() {
 			var state = this.getExpanded();
 			this.setExpanded(!state);
-		}
+		};
 		
 		/*
 		 * This is called when a user clicks on the label div.
@@ -1805,14 +1805,14 @@ function UI() {
 			
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
-		}
+		};
 		
 		/*
 		 * Returns whether a unit is expanded.
 		 */
 		unit.getExpanded = function() {
 			return this.expanded;
-		}
+		};
 		
 		/*
 		 * Toggles a unit between expanded and collapsed state.
@@ -1820,7 +1820,7 @@ function UI() {
 		unit.toggleExpanded = function() {
 			var state = this.getExpanded();
 			this.setExpanded(!state);
-		}
+		};
 		
 		/*
 		 * This is called when a user clicks on the label div.
@@ -1828,10 +1828,10 @@ function UI() {
 		labelDiv.onclick = function(e) {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
-		}
+		};
 		
 		storage.put(labelDiv, 'unit', unit);
-	}
+	};
 	
 	/*
 	 * Renders the metronome given a configuration returned from the server.
@@ -1878,7 +1878,7 @@ function UI() {
 			
 			storage.put(this, 'active', active);
 			handler.setMetronomeValue('master-output', active);
-		}
+		};
 		
 		headerDiv.appendChild(buttonElem);
 		var labelDiv = document.createElement('div');
@@ -2063,14 +2063,14 @@ function UI() {
 			
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
-		}
+		};
 		
 		/*
 		 * Returns whether a unit is expanded.
 		 */
 		unit.getExpanded = function() {
 			return this.expanded;
-		}
+		};
 		
 		/*
 		 * Toggles a unit between expanded and collapsed state.
@@ -2078,7 +2078,7 @@ function UI() {
 		unit.toggleExpanded = function() {
 			var state = this.getExpanded();
 			this.setExpanded(!state);
-		}
+		};
 		
 		/*
 		 * This is called when a user clicks on the label div.
@@ -2086,10 +2086,10 @@ function UI() {
 		labelDiv.onclick = function(e) {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
-		}
+		};
 		
 		storage.put(labelDiv, 'unit', unit);
-	}
+	};
 	
 	/*
 	 * Renders the signal level analysis section given a configuration returned from the server.
@@ -2335,7 +2335,7 @@ function UI() {
 							unit.dspLoadControl = dspLoadControl;
 							unit.channelNames = channelNames;
 							unit.channelControls = channelControls;
-						}
+						};
 						
 						handler.getLevelAnalysis(responseListener);
 					};
@@ -2403,14 +2403,14 @@ function UI() {
 					
 				}
 				
-			}
+			};
 		
 			/*
 			 * Returns whether a unit is expanded.
 			 */
 			unit.getExpanded = function() {
 				return this.expanded;
-			}
+			};
 		
 			/*
 			 * Toggles a unit between expanded and collapsed state.
@@ -2418,7 +2418,7 @@ function UI() {
 			unit.toggleExpanded = function() {
 				var state = this.getExpanded();
 				this.setExpanded(!state);
-			}
+			};
 		
 			/*
 			 * This is called when a user clicks on the label div.
@@ -2426,12 +2426,12 @@ function UI() {
 			labelDiv.onclick = function(e) {
 				var unit = storage.get(this, 'unit');
 				unit.toggleExpanded();
-			}
+			};
 		
 			storage.put(labelDiv, 'unit', unit);
 		}
 		
-	}
+	};
 	
 	/*
 	 * Renders the 'processing' button given a configuration returned from the server.
@@ -2475,7 +2475,7 @@ function UI() {
 				if (active)
 					handler.process();
 			
-			}
+			};
 		
 			headerDiv.appendChild(buttonElem);
 			var labelDiv = document.createElement('div');
@@ -2518,14 +2518,14 @@ function UI() {
 			
 				controlsDiv.style.display = displayValue;
 				this.expanded = value;
-			}
+			};
 		
 			/*
 			 * Returns whether a unit is expanded.
 			 */
 			unit.getExpanded = function() {
 				return this.expanded;
-			}
+			};
 		
 			/*
 			 * Toggles a unit between expanded and collapsed state.
@@ -2533,7 +2533,7 @@ function UI() {
 			unit.toggleExpanded = function() {
 				var state = this.getExpanded();
 				this.setExpanded(!state);
-			}
+			};
 		
 			/*
 			 * This is called when a user clicks on the label div.
@@ -2541,12 +2541,12 @@ function UI() {
 			labelDiv.onclick = function(e) {
 				var unit = storage.get(this, 'unit');
 				unit.toggleExpanded();
-			}
+			};
 		
 			storage.put(labelDiv, 'unit', unit);
 		}
 		
-	}
+	};
 	
 }
 
@@ -2598,7 +2598,7 @@ function Handler() {
 		request.append('chain', chainString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when a new level analysis should be obtained.
@@ -2625,7 +2625,7 @@ function Handler() {
 		request.append('cgi', 'get-level-analysis');
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, false);
-	}
+	};
 	
 	/*
 	 * This is called when a unit should be moved down the chain.
@@ -2667,7 +2667,7 @@ function Handler() {
 		request.append('unit', unitString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when a unit should be moved up the chain.
@@ -2709,7 +2709,7 @@ function Handler() {
 		request.append('unit', unitString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when a unit should be removed from a chain.
@@ -2751,7 +2751,7 @@ function Handler() {
 		request.append('unit', unitString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when a new azimuth value should be set.
@@ -2792,7 +2792,7 @@ function Handler() {
 		request.append('value', valueString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when a unit should be bypassed or bypass should be disabled for a unit.
@@ -2835,7 +2835,7 @@ function Handler() {
 		request.append('value', valueString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when a new distance value should be set.
@@ -2876,7 +2876,7 @@ function Handler() {
 		request.append('value', valueString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when a discrete value should be set.
@@ -2921,7 +2921,7 @@ function Handler() {
 		request.append('value', valueString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when period size should be changed.
@@ -2960,7 +2960,7 @@ function Handler() {
 		request.append('value', valueString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when a new level value should be set.
@@ -3001,7 +3001,7 @@ function Handler() {
 		request.append('value', valueString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when a metronome value should be changed.
@@ -3042,7 +3042,7 @@ function Handler() {
 		request.append('value', valueString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when a tuner value should be changed.
@@ -3083,7 +3083,7 @@ function Handler() {
 		request.append('value', valueString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when a numeric value should be set.
@@ -3128,7 +3128,7 @@ function Handler() {
 		request.append('value', valueString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when the configuration needs to be refreshed.
@@ -3163,7 +3163,7 @@ function Handler() {
 		request.append('cgi', 'get-configuration');
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 	/*
 	 * This is called when a new analysis should be performed by the tuner.
@@ -3191,7 +3191,7 @@ function Handler() {
 		request.append('cgi', 'get-tuner-analysis');
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, false);
-	}
+	};
 	
 	/*
 	 * This is called when the user clicks on the 'process' button.
@@ -3211,7 +3211,7 @@ function Handler() {
 		request.append('cgi', 'process');
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, false);
-	}
+	};
 	
 	/*
 	 * This is used to prevent the default action from occuring.
@@ -3220,7 +3220,7 @@ function Handler() {
 		e.stopPropagation();
 		e.preventDefault();
 		return false;
-	}
+	};
 	
 	/*
 	 * This is used to prevent the default action from occuring.
@@ -3231,7 +3231,7 @@ function Handler() {
 		var elem = e.target;
 		elem.classList.add('dragover');
 		return false;
-	}
+	};
 	
 	/*
 	 * This is used to prevent the default action from occuring.
@@ -3242,7 +3242,7 @@ function Handler() {
 		var elem = e.target;
 		elem.classList.remove('dragover');
 		return false;
-	}
+	};
 	
 	/*
 	 * This is called when the user drops a patch file into the upload area.
@@ -3275,7 +3275,7 @@ function Handler() {
 		}
 		
 		return false;
-	}
+	};
 	
 	/*
 	 * This is called when the user interface initializes.
@@ -3313,7 +3313,7 @@ function Handler() {
 		request.append('cgi', 'get-unit-types');
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
-	}
+	};
 	
 }
 
