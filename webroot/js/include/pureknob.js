@@ -834,7 +834,7 @@ function PureKnob() {
 			 * If knob is not read-only, process touch event.
 			 */
 			if (!readonly) {
-				var touches = e.touches;
+				var touches = e.targetTouches;
 				var numTouches = touches.length;
 				var singleTouch = (numTouches === 1);
 				
@@ -915,7 +915,7 @@ function PureKnob() {
 				 * If knob is not read-only, process touch event.
 				 */
 				if (!readonly) {
-					var touches = e.touches;
+					var touches = e.targetTouches;
 					var numTouches = touches.length;
 					var singleTouch = (numTouches === 1);
 					
@@ -952,7 +952,7 @@ function PureKnob() {
 				 * If knob is not read only, process touch event.
 				 */
 				if (!readonly) {					
-					var touches = e.touches;
+					var touches = e.targetTouches;
 					var numTouches = touches.length;
 					var noMoreTouches = (numTouches === 0);
 					
