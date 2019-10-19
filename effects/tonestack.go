@@ -114,6 +114,7 @@ func createToneStack() Unit {
 				Parameter{
 					Name:               "low",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -30,
 					Maximum:            0,
 					NumericValue:       0,
@@ -123,6 +124,7 @@ func createToneStack() Unit {
 				Parameter{
 					Name:               "middle",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -30,
 					Maximum:            0,
 					NumericValue:       -2,
@@ -132,6 +134,7 @@ func createToneStack() Unit {
 				Parameter{
 					Name:               "presence",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -30,
 					Maximum:            0,
 					NumericValue:       -5,
@@ -141,6 +144,7 @@ func createToneStack() Unit {
 				Parameter{
 					Name:               "high",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -30,
 					Maximum:            0,
 					NumericValue:       -5,

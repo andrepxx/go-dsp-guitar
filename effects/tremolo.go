@@ -79,6 +79,7 @@ func createTremolo() Unit {
 				Parameter{
 					Name:               "frequency",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "0.1 Hz",
 					Minimum:            10,
 					Maximum:            100,
 					NumericValue:       100,
@@ -88,6 +89,7 @@ func createTremolo() Unit {
 				Parameter{
 					Name:               "phase",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "%",
 					Minimum:            0,
 					Maximum:            100,
 					NumericValue:       50,
@@ -97,6 +99,7 @@ func createTremolo() Unit {
 				Parameter{
 					Name:               "depth",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       -10,

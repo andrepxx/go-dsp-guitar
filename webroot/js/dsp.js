@@ -327,6 +327,7 @@ function UI() {
 		'beats_per_period': 'Beats per period',
 		'bias': 'Bias',
 		'boost': 'Boost',
+		'bpm': 'BPM',
 		'bypass': 'Bypass',
 		'cents': 'Cents',
 		'channel': 'Channel',
@@ -442,6 +443,7 @@ function UI() {
 	 */
 	this.createKnob = function(params) {
 		var label = params.label;
+		var physicalUnit = params.physicalUnit;
 		var valueMin = params.valueMin;
 		var valueMax = params.valueMax;
 		var valueDefault = params.valueDefault;
@@ -465,6 +467,7 @@ function UI() {
 		knobDiv.classList.add('knobdiv');
 		var fgColor = '#ff8800';
 		var bgColor = '#181818';
+		var labelColor = '#666666';
 		
 		/*
 		 * Check if we want a blue or green color scheme.
@@ -472,9 +475,11 @@ function UI() {
 		if (colorScheme === 'blue') {
 			fgColor = '#8888ff';
 			bgColor = '#181830';
+			labelColor = '#4444cc';
 		} else if (colorScheme === 'green') {
 			fgColor = '#88ff88';
 			bgColor = '#181830';
+			labelColor = '#ffffff';
 		}
 		
 		var knobElem = pureknob.createKnob(valueHeight, valueWidth);
@@ -482,6 +487,8 @@ function UI() {
 		knobElem.setProperty('angleEnd', halfAngleArc);
 		knobElem.setProperty('colorBG', bgColor);
 		knobElem.setProperty('colorFG', fgColor);
+		knobElem.setProperty('colorLabel', labelColor);
+		knobElem.setProperty('label', physicalUnit);
 		knobElem.setProperty('needle', valueCursor);
 		knobElem.setProperty('readonly', valueReadonly);
 		knobElem.setProperty('valMin', valueMin);
@@ -863,9 +870,15 @@ function UI() {
 		 * Iterate over the parameters and add all 'ordinary' (non-special) ones to the unit.
 		 */
 		for (var i = 0; i < numParams; i++) {
-			var currentParam = unitParams[i];
-			var paramType = currentParam.Type;
-			var paramName = currentParam.Name;
+			var param = unitParams[i];
+			var paramType = param.Type;
+			var paramName = param.Name;
+			var paramPhysicalUnit = param.PhysicalUnit;
+			var paramMinimum = param.Minimum;
+			var paramMaximum = param.Maximum;
+			var paramNumericValue = param.NumericValue;
+			var paramDiscreteValues = param.DiscreteValues;
+			var paramDiscreteValueIndex = param.DiscreteValueIndex;
 			var isSpecial = this.isSpecialParameter(unitType, paramName);
 			
 			/*
@@ -885,9 +898,10 @@ function UI() {
 					 */
 					var params = {
 						'label': label,
-						'valueMin': currentParam.Minimum,
-						'valueMax': currentParam.Maximum,
-						'valueDefault': currentParam.NumericValue,
+						'physicalUnit': paramPhysicalUnit,
+						'valueMin': paramMinimum,
+						'valueMax': paramMaximum,
+						'valueDefault': paramNumericValue,
 						'valueWidth': 150,
 						'valueHeight': 150,
 						'angle': 270,
@@ -928,8 +942,8 @@ function UI() {
 					 */
 					var params = {
 						'label': label,
-						'options': currentParam.DiscreteValues,
-						'selectedIndex': currentParam.DiscreteValueIndex
+						'options': paramDiscreteValues,
+						'selectedIndex': paramDiscreteValueIndex
 					};
 					
 					var dropDown = ui.createDropDown(params);
@@ -965,6 +979,8 @@ function UI() {
 			var param = unitParams[i];
 			var paramType = param.Type;
 			var paramName = param.Name;
+			var paramDiscreteValues = param.DiscreteValues;
+			var paramDiscreteValueIndex = param.DiscreteValueIndex;
 			var isSpecial = this.isSpecialParameter(unitType, paramName);
 			
 			/*
@@ -978,8 +994,8 @@ function UI() {
 				 */
 				var params = {
 					'label': label,
-					'options': param.DiscreteValues,
-					'selectedIndex': param.DiscreteValueIndex
+					'options': paramDiscreteValues,
+					'selectedIndex': paramDiscreteValueIndex
 				};
 				
 				var dropDown = ui.createDropDown(params);
@@ -1015,6 +1031,10 @@ function UI() {
 			var param = unitParams[i];
 			var paramType = param.Type;
 			var paramName = param.Name;
+			var paramPhysicalUnit = param.PhysicalUnit;
+			var paramMinimum = param.Minimum;
+			var paramMaximum = param.Maximum;
+			var paramNumericValue = param.NumericValue;
 			var isSpecial = this.isSpecialParameter(unitType, paramName);
 			
 			/*
@@ -1028,9 +1048,10 @@ function UI() {
 				 */
 				var params = {
 					'label': label,
-					'valueMin': param.Minimum,
-					'valueMax': param.Maximum,
-					'valueDefault': param.NumericValue,
+					'physicalUnit': paramPhysicalUnit,
+					'valueMin': paramMinimum,
+					'valueMax': paramMaximum,
+					'valueDefault': paramNumericValue,
 					'valueWidth': 150,
 					'valueHeight': 150,
 					'angle': 270,
@@ -1477,6 +1498,7 @@ function UI() {
 		 */
 		var centsParams = {
 			'label': centsString,
+			'physicalUnit': null,
 			'valueMin': -50,
 			'valueMax': 50,
 			'valueDefault': 0,
@@ -1678,6 +1700,7 @@ function UI() {
 			 */
 			var azimuthParams = {
 				'label': azimuthLabel,
+				'physicalUnit': '°',
 				'valueMin': -90,
 				'valueMax': 90,
 				'valueDefault': azimuth,
@@ -1700,6 +1723,7 @@ function UI() {
 			 */
 			var distanceParams = {
 				'label': distanceLabel,
+				'physicalUnit': 'dm',
 				'valueMin': 0,
 				'valueMax': 100,
 				'valueDefault': distance,
@@ -1722,6 +1746,7 @@ function UI() {
 			 */
 			var levelParams = {
 				'label': levelLabel,
+				'physicalUnit': '%',
 				'valueMin': 0,
 				'valueMax': 100,
 				'valueDefault': level,
@@ -1903,6 +1928,7 @@ function UI() {
 		 */
 		var beatsParams = {
 			'label': beatsString,
+			'physicalUnit': '',
 			'valueMin': 1,
 			'valueMax': 16,
 			'valueDefault': beatsValue,
@@ -1918,6 +1944,7 @@ function UI() {
 		var beatsKnobDiv = beatsKnob.div;
 		controlsDiv.appendChild(beatsKnobDiv);
 		var speedString = ui.getString('speed');
+		var bpmString = ui.getString('bpm');
 		var speedValue = metronomeConfiguration.Speed;
 		
 		/*
@@ -1925,6 +1952,7 @@ function UI() {
 		 */
 		var speedParams = {
 			'label': speedString,
+			'physicalUnit': bpmString,
 			'valueMin': 40,
 			'valueMax': 360,
 			'valueDefault': speedValue,

@@ -58,6 +58,7 @@ func createRingModulator() Unit {
 			params: []Parameter{
 				Parameter{
 					Name:               "frequency",
+					PhysicalUnit:       "Hz",
 					Type:               PARAMETER_TYPE_NUMERIC,
 					Minimum:            1,
 					Maximum:            100,

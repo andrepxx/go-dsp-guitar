@@ -167,6 +167,7 @@ func createSignalGenerator() Unit {
 				Parameter{
 					Name:               "input_amplitude",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "%",
 					Minimum:            0,
 					Maximum:            100,
 					NumericValue:       100,
@@ -176,6 +177,7 @@ func createSignalGenerator() Unit {
 				Parameter{
 					Name:               "input_gain",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       0,
@@ -185,6 +187,7 @@ func createSignalGenerator() Unit {
 				Parameter{
 					Name:               "signal_type",
 					Type:               PARAMETER_TYPE_DISCRETE,
+					PhysicalUnit:       "",
 					Minimum:            -1,
 					Maximum:            -1,
 					NumericValue:       -1,
@@ -200,6 +203,7 @@ func createSignalGenerator() Unit {
 				Parameter{
 					Name:               "signal_frequency",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "Hz",
 					Minimum:            1,
 					Maximum:            20000,
 					NumericValue:       440,
@@ -209,6 +213,7 @@ func createSignalGenerator() Unit {
 				Parameter{
 					Name:               "signal_amplitude",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "%",
 					Minimum:            0,
 					Maximum:            100,
 					NumericValue:       100,
@@ -218,6 +223,7 @@ func createSignalGenerator() Unit {
 				Parameter{
 					Name:               "signal_gain",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       0,

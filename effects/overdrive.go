@@ -56,6 +56,7 @@ func createOverdrive() Unit {
 				Parameter{
 					Name:               "boost",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            0,
 					Maximum:            30,
 					NumericValue:       0,
@@ -65,6 +66,7 @@ func createOverdrive() Unit {
 				Parameter{
 					Name:               "gain",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -30,
 					Maximum:            30,
 					NumericValue:       0,
@@ -74,6 +76,7 @@ func createOverdrive() Unit {
 				Parameter{
 					Name:               "drive",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "%",
 					Minimum:            0,
 					Maximum:            100,
 					NumericValue:       100,
@@ -83,6 +86,7 @@ func createOverdrive() Unit {
 				Parameter{
 					Name:               "level",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -30,
 					Maximum:            0,
 					NumericValue:       0,

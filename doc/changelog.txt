@@ -1,6 +1,17 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.4.0
+
+New features / enhancements:
+
+- Added support for physical units on numeric parameters.
+
+Maintenance / bugfixes / corrections:
+
+- Update to latest version of "pure-knob".
+- Increment minor version number: v1.3.3 --> v1.4.0
+
 v1.3.3
 
 Maintenance / bugfixes / corrections:

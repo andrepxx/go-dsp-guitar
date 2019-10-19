@@ -98,6 +98,7 @@ func createCompressor() Unit {
 				Parameter{
 					Name:               "follow",
 					Type:               PARAMETER_TYPE_DISCRETE,
+					PhysicalUnit:       "",
 					Minimum:            -1,
 					Maximum:            -1,
 					NumericValue:       -1,
@@ -110,6 +111,7 @@ func createCompressor() Unit {
 				Parameter{
 					Name:               "gain_limit",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            0,
 					Maximum:            30,
 					NumericValue:       30,
@@ -119,6 +121,7 @@ func createCompressor() Unit {
 				Parameter{
 					Name:               "target_level",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -30,
 					Maximum:            0,
 					NumericValue:       -20,

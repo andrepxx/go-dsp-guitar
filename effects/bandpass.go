@@ -112,6 +112,7 @@ func createBandpass() Unit {
 				Parameter{
 					Name:               "filter_order",
 					Type:               PARAMETER_TYPE_DISCRETE,
+					PhysicalUnit:       "",
 					Minimum:            -1,
 					Maximum:            -1,
 					NumericValue:       -1,
@@ -126,6 +127,7 @@ func createBandpass() Unit {
 				Parameter{
 					Name:               "frequency_1",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "Hz",
 					Minimum:            1,
 					Maximum:            20000,
 					NumericValue:       300,
@@ -135,6 +137,7 @@ func createBandpass() Unit {
 				Parameter{
 					Name:               "frequency_2",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "Hz",
 					Minimum:            1,
 					Maximum:            20000,
 					NumericValue:       3000,

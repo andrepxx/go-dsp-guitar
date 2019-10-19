@@ -368,8 +368,10 @@ function PureKnob() {
 				'angleStart': 0,
 				'colorBG': '#181818',
 				'colorFG': '#ff8800',
+				'colorLabel': '#ffffff',
 				'fnStringToValue': function(string) { return parseInt(string); },
 				'fnValueToString': function(value) { return value.toString(); },
+				'label': null,
 				'needle': false,
 				'readonly': false,
 				'textScale': 1.0,
@@ -446,6 +448,7 @@ function PureKnob() {
 				var angleEnd = properties.angleEnd;
 				var actualStart = angleStart + angleOffset;
 				var actualEnd = angleEnd + angleOffset;
+				var label = properties.label;
 				var value = properties.val;
 				var valueToString = properties.fnValueToString;
 				var valueStr = valueToString(value);
@@ -456,6 +459,7 @@ function PureKnob() {
 				var angleVal = actualStart + relAngle;
 				var colorTrack = properties.colorBG;
 				var colorFilling = properties.colorFG;
+				var colorLabel = properties.colorLabel;
 				var textScale = properties.textScale;
 				var trackWidth = properties.trackWidth;
 				var height = this._height;
@@ -464,7 +468,10 @@ function PureKnob() {
 				var centerX = 0.5 * width;
 				var centerY = 0.5 * height;
 				var radius = 0.4 * smaller;
+				var labelY = centerY + radius;
 				var lineWidth = Math.round(trackWidth * radius);
+				var labelSize = Math.round(0.8 * lineWidth);
+				var labelSizeString = labelSize.toString();
 				var fontSize = (0.2 * smaller) * textScale;
 				var fontSizeString = fontSize.toString();
 				var canvas = this._canvas;
@@ -511,6 +518,17 @@ function PureKnob() {
 				ctx.textAlign = 'center';
 				ctx.textBaseline = 'middle';
 				ctx.fillText(valueStr, centerX, centerY);
+				
+				/*
+				 * Draw the label
+				 */
+				if (label !== null) {
+					ctx.font = labelSizeString + 'px sans-serif';
+					ctx.fillStyle = colorLabel;
+					ctx.textAlign = 'center';
+					ctx.textBaseline = 'middle';
+					ctx.fillText(label, centerX, labelY);
+				}
 				
 				/*
 				 * Set the color and font size of the input element.

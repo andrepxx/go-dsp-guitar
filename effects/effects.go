@@ -75,6 +75,7 @@ type compilationResult struct {
 type Parameter struct {
 	Name               string
 	Type               int32
+	PhysicalUnit       string
 	Minimum            int32
 	Maximum            int32
 	NumericValue       int32

@@ -153,6 +153,7 @@ func createOctaver() Unit {
 				Parameter{
 					Name:               "follow",
 					Type:               PARAMETER_TYPE_DISCRETE,
+					PhysicalUnit:       "",
 					Minimum:            -1,
 					Maximum:            -1,
 					NumericValue:       -1,
@@ -165,6 +166,7 @@ func createOctaver() Unit {
 				Parameter{
 					Name:               "level_octave_up",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       -20,
@@ -174,6 +176,7 @@ func createOctaver() Unit {
 				Parameter{
 					Name:               "level_clean",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       -20,
@@ -183,6 +186,7 @@ func createOctaver() Unit {
 				Parameter{
 					Name:               "level_dist",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       -20,
@@ -192,6 +196,7 @@ func createOctaver() Unit {
 				Parameter{
 					Name:               "level_octave_down_first",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       -20,
@@ -201,6 +206,7 @@ func createOctaver() Unit {
 				Parameter{
 					Name:               "level_octave_down_second",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       -20,
@@ -210,6 +216,7 @@ func createOctaver() Unit {
 				Parameter{
 					Name:               "level_hysteresis",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       -20,

@@ -144,6 +144,7 @@ func createChorus() Unit {
 				Parameter{
 					Name:               "depth",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "%",
 					Minimum:            0,
 					Maximum:            100,
 					NumericValue:       100,
@@ -153,6 +154,7 @@ func createChorus() Unit {
 				Parameter{
 					Name:               "speed",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "%",
 					Minimum:            1,
 					Maximum:            100,
 					NumericValue:       30,

@@ -110,6 +110,7 @@ func createNoiseGate() Unit {
 				Parameter{
 					Name:               "threshold_open",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       -20,
@@ -119,6 +120,7 @@ func createNoiseGate() Unit {
 				Parameter{
 					Name:               "threshold_close",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       -40,
@@ -128,6 +130,7 @@ func createNoiseGate() Unit {
 				Parameter{
 					Name:               "hold_time",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "ms",
 					Minimum:            0,
 					Maximum:            1000,
 					NumericValue:       50,

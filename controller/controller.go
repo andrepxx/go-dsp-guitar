@@ -65,6 +65,7 @@ type webResponseStruct struct {
 type webParameterStruct struct {
 	Name               string
 	Type               string
+	PhysicalUnit       string
 	Minimum            int32
 	Maximum            int32
 	NumericValue       int32
@@ -327,7 +328,8 @@ func (this *controllerStruct) addUnitHandler(request webserver.HttpRequest) webs
  * Returns the current rack configuration.
  */
 func (this *controllerStruct) getConfigurationHandler(request webserver.HttpRequest) webserver.HttpResponse {
-	numChannels := len(this.effects)
+	fx := this.effects
+	numChannels := len(fx)
 	framesPerPeriod := uint32(0)
 
 	/*
@@ -344,7 +346,7 @@ func (this *controllerStruct) getConfigurationHandler(request webserver.HttpRequ
 	/*
 	 * Iterate over the channels and the associated signal chains.
 	 */
-	for idChannel, chain := range this.effects {
+	for idChannel, chain := range fx {
 		numUnits := chain.Length()
 		webUnits := make([]webUnitStruct, numUnits)
 
@@ -362,15 +364,20 @@ func (this *controllerStruct) getConfigurationHandler(request webserver.HttpRequ
 			 * Iterate over the parameters and copy all values.
 			 */
 			for idParam, param := range params {
+				paramTypeId := param.Type
+				paramType := paramTypes[paramTypeId]
 				webParams[idParam].Name = param.Name
-				webParams[idParam].Type = paramTypes[param.Type]
+				webParams[idParam].Type = paramType
+				webParams[idParam].PhysicalUnit = param.PhysicalUnit
 				webParams[idParam].Minimum = param.Minimum
 				webParams[idParam].Maximum = param.Maximum
 				webParams[idParam].NumericValue = param.NumericValue
 				webParams[idParam].DiscreteValueIndex = param.DiscreteValueIndex
 				nValues := len(param.DiscreteValues)
-				webParams[idParam].DiscreteValues = make([]string, nValues)
-				copy(webParams[idParam].DiscreteValues, param.DiscreteValues)
+				discreteValuesSource := param.DiscreteValues
+				discreteValuesTarget := make([]string, nValues)
+				copy(discreteValuesTarget, discreteValuesSource)
+				webParams[idParam].DiscreteValues = discreteValuesTarget
 			}
 
 			webUnits[idUnit].Type = unitType

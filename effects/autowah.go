@@ -144,6 +144,7 @@ func createAutoWah() Unit {
 				Parameter{
 					Name:               "follow",
 					Type:               PARAMETER_TYPE_DISCRETE,
+					PhysicalUnit:       "",
 					Minimum:            -1,
 					Maximum:            -1,
 					NumericValue:       -1,
@@ -156,6 +157,7 @@ func createAutoWah() Unit {
 				Parameter{
 					Name:               "level_1",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       -40,
@@ -165,6 +167,7 @@ func createAutoWah() Unit {
 				Parameter{
 					Name:               "level_2",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       -10,
@@ -174,6 +177,7 @@ func createAutoWah() Unit {
 				Parameter{
 					Name:               "frequency_1",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "Hz",
 					Minimum:            1,
 					Maximum:            20000,
 					NumericValue:       300,
@@ -183,6 +187,7 @@ func createAutoWah() Unit {
 				Parameter{
 					Name:               "frequency_2",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "Hz",
 					Minimum:            1,
 					Maximum:            20000,
 					NumericValue:       6000,

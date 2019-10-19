@@ -291,6 +291,7 @@ func PreparePowerAmp(unit Unit, responses filter.ImpulseResponses) error {
 			paramType := Parameter{
 				Name:               "filter_" + sIdxInc,
 				Type:               PARAMETER_TYPE_DISCRETE,
+				PhysicalUnit:       "",
 				Minimum:            -1,
 				Maximum:            -1,
 				NumericValue:       -1,
@@ -304,6 +305,7 @@ func PreparePowerAmp(unit Unit, responses filter.ImpulseResponses) error {
 			paramLevel := Parameter{
 				Name:               "level_" + sIdxInc,
 				Type:               PARAMETER_TYPE_NUMERIC,
+				PhysicalUnit:       "dB",
 				Minimum:            -60,
 				Maximum:            0,
 				NumericValue:       0,
@@ -337,6 +339,7 @@ func createPowerAmp() Unit {
 				Parameter{
 					Name:               "filter_order",
 					Type:               PARAMETER_TYPE_DISCRETE,
+					PhysicalUnit:       "",
 					Minimum:            -1,
 					Maximum:            -1,
 					NumericValue:       -1,

@@ -117,6 +117,7 @@ func createFuzz() Unit {
 				Parameter{
 					Name:               "follow",
 					Type:               PARAMETER_TYPE_DISCRETE,
+					PhysicalUnit:       "",
 					Minimum:            -1,
 					Maximum:            -1,
 					NumericValue:       -1,
@@ -129,6 +130,7 @@ func createFuzz() Unit {
 				Parameter{
 					Name:               "bias",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "%",
 					Minimum:            -100,
 					Maximum:            100,
 					NumericValue:       50,
@@ -138,6 +140,7 @@ func createFuzz() Unit {
 				Parameter{
 					Name:               "boost",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            0,
 					Maximum:            30,
 					NumericValue:       0,
@@ -147,6 +150,7 @@ func createFuzz() Unit {
 				Parameter{
 					Name:               "gain",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -30,
 					Maximum:            30,
 					NumericValue:       0,
@@ -156,6 +160,7 @@ func createFuzz() Unit {
 				Parameter{
 					Name:               "fuzz",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "%",
 					Minimum:            0,
 					Maximum:            100,
 					NumericValue:       100,
@@ -165,6 +170,7 @@ func createFuzz() Unit {
 				Parameter{
 					Name:               "level",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -30,
 					Maximum:            0,
 					NumericValue:       0,

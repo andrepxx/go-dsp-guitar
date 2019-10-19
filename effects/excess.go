@@ -75,6 +75,7 @@ func createExcess() Unit {
 				Parameter{
 					Name:               "gain",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -30,
 					Maximum:            30,
 					NumericValue:       0,
@@ -84,6 +85,7 @@ func createExcess() Unit {
 				Parameter{
 					Name:               "level",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -30,
 					Maximum:            0,
 					NumericValue:       0,

@@ -352,6 +352,7 @@ func createReverb() Unit {
 				Parameter{
 					Name:               "mix",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "%",
 					Minimum:            0,
 					Maximum:            100,
 					NumericValue:       50,

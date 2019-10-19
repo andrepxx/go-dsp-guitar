@@ -103,6 +103,7 @@ func createDelay() Unit {
 				Parameter{
 					Name:               "delay_time",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "ms",
 					Minimum:            0,
 					Maximum:            1000,
 					NumericValue:       200,
@@ -112,6 +113,7 @@ func createDelay() Unit {
 				Parameter{
 					Name:               "feedback",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -60,
 					Maximum:            0,
 					NumericValue:       -5,
@@ -121,6 +123,7 @@ func createDelay() Unit {
 				Parameter{
 					Name:               "level",
 					Type:               PARAMETER_TYPE_NUMERIC,
+					PhysicalUnit:       "dB",
 					Minimum:            -30,
 					Maximum:            0,
 					NumericValue:       -5,
