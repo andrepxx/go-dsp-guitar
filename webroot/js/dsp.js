@@ -393,6 +393,7 @@ function UI() {
 		'note': 'Note',
 		'octaver': 'Octaver',
 		'overdrive': 'Overdrive',
+		'oversampling': 'Oversampling',
 		'persistence': 'Persistence',
 		'phase': 'Phase',
 		'phaser': 'Phaser',

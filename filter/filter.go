@@ -329,12 +329,16 @@ func (this *filterStruct) Multiply(scalar float64) Filter {
 		coeffsResult[i] = scalar * coeff
 	}
 
+	sr := ir.sampleRate
+	irName := ir.name
+	irNewName := scalarString + " * (" + irName + ")"
+
 	/*
 	 * Create a new impulse response structure.
 	 */
 	irResult := impulseResponseStruct{
-		name:             scalarString + " * (" + ir.name + ")",
-		sampleRate:       ir.sampleRate,
+		name:             irNewName,
+		sampleRate:       sr,
 		gainCompensation: 0.0,
 		data:             coeffsResult,
 	}
@@ -481,8 +485,9 @@ func (this *filterStruct) Process(inputBuffer []float64, outputBuffer []float64)
 					numSamples := uBound - lBound
 					copy(this.inputBuffer[0:numSamples], currentInputBuffer)
 					fft.ZeroFloat(this.inputBuffer[numSamples:])
-					fft.RealFourier(this.inputBuffer, this.filteredComplex, fft.SCALING_DEFAULT)
-					err := hadamardComplex(this.filteredComplex, this.filteredComplex, this.filterComplex)
+					filteredComplex := this.filteredComplex
+					fft.RealFourier(this.inputBuffer, filteredComplex, fft.SCALING_DEFAULT)
+					err := hadamardComplex(filteredComplex, filteredComplex, this.filterComplex)
 
 					/*
 					 * Check if hadamard product was calculated successfully.
@@ -490,14 +495,15 @@ func (this *filterStruct) Process(inputBuffer []float64, outputBuffer []float64)
 					if err != nil {
 						return err
 					} else {
-						fft.RealInverseFourier(this.filteredComplex, this.outputBuffer, fft.SCALING_DEFAULT)
+						fft.RealInverseFourier(filteredComplex, this.outputBuffer, fft.SCALING_DEFAULT)
+						tailBuffer := this.tailBuffer
 
 						/*
 						 * Calculate the total output by overlapping with the tail of the
 						 * previous calculation.
 						 */
 						for j, elem := range this.outputBuffer {
-							tailElem := this.tailBuffer[j]
+							tailElem := tailBuffer[j]
 							pre := elem + tailElem
 							j64 := uint64(j)
 
@@ -520,13 +526,13 @@ func (this *filterStruct) Process(inputBuffer []float64, outputBuffer []float64)
 
 							} else {
 								idx := j64 - numSamples
-								this.tailBuffer[idx] = pre
+								tailBuffer[idx] = pre
 							}
 
 						}
 
 						tailSize64 := fftSize64 - numSamples
-						fft.ZeroFloat(this.tailBuffer[tailSize64:])
+						fft.ZeroFloat(tailBuffer[tailSize64:])
 					}
 
 				}
@@ -837,6 +843,49 @@ func Empty(sampleRate uint32) Filter {
 		gainCompensation: 0.0,
 		sampleRate:       sampleRate,
 		data:             coeffs,
+	}
+
+	bufFilterC := make([]complex128, 0)
+	bufFilteredC := make([]complex128, 0)
+	bufInput := make([]float64, 0)
+	bufInputC := make([]complex128, 0)
+	bufOutput := make([]float64, 0)
+	bufOutputC := make([]complex128, 0)
+	bufTail := make([]float64, 0)
+
+	/*
+	 * Create a new filter.
+	 */
+	fltFilter := filterStruct{
+		impulseResponse:     ir,
+		filterComplex:       bufFilterC,
+		filteredComplex:     bufFilteredC,
+		inputBuffer:         bufInput,
+		inputBufferComplex:  bufInputC,
+		outputBuffer:        bufOutput,
+		outputBufferComplex: bufOutputC,
+		tailBuffer:          bufTail,
+	}
+
+	return &fltFilter
+}
+
+/*
+ * Creates a filter from a list of coefficients.
+ */
+func FromCoefficients(coeffs []float64, sampleRate uint32, name string) Filter {
+	numCoeffs := len(coeffs)
+	coeffsCopy := make([]float64, numCoeffs)
+	copy(coeffsCopy, coeffs)
+
+	/*
+	 * Create impulse response.
+	 */
+	ir := impulseResponseStruct{
+		name:             name,
+		gainCompensation: 0.0,
+		sampleRate:       sampleRate,
+		data:             coeffsCopy,
 	}
 
 	bufFilterC := make([]complex128, 0)

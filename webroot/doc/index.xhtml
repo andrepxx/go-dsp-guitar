@@ -225,6 +225,264 @@
 			To configure your signal chains, open the web interface in your web browser. The web interface consists of a number of <span class="emphasis">channels</span>, as well as a global <span class="emphasis">master section</span>. Each of these can contain a number of <span class="emphasis">effects units</span>, which process or alter the signal flowing through them. When running in <span class="emphasis">real-time mode</span>, there are normally two channels. When running in <span class="emphasis">batch-processing mode</span>, the desired number of channels is passed as an argument to the <span class="emphasis">dsp</span> executable.
 		</div>
 		<div class="section heading">
+			Oversampling
+		</div>
+		<div class="section">
+			The simulation process inside <span class="emphasis">go-dsp-guitar</span> normally runs in lockstep with the audio sample rate in order to achieve perfect real-time performance and synchronisation. Some processing units permit the use of <span class="emphasis">oversampling</span> to raise the number of timesteps the simulation performs beyond the sampling rate of the rest of the simulation. Oversampling normally increases the rate (and therefore reduces the step width) to either twice (2x oversampling) or four times (4x oversampling) the audio sample rate. This is useful when running amplifier circuits which include feedback, since the feedback loops in an amplifier will normally react much more quickly than an audio signal itself will change.
+		</div>
+		<div class="section">
+			When upsampling from the input sample rate to the oversampled rate, an bandlimited interpolation scheme is used in order to preserve the spectrum of the signal while raising the sample rate. After the signal has passed through the &quot;critical section&quot; in the amplifier circuit, its sample rate is reduced again in what is called the <span class="emphasis">decimation step</span>. As part of the decimation step, frequency components beyond the Nyquist-limit of the actual (slower) audio sample rate have to be removed by a high-order low-pass filter to avoid unwanted aliasing distortion. This filtering (in addition to running the amplifier circuit at a smaller time step and therefore with more iterations) is computationally very expensive. Therefore, we recommend that you use oversampling only when running <span class="emphasis">go-dsp-guitar</span> in <span class="emphasis">batch-processing mode</span>, unless you really have CPU power to spare.
+		</div>
+		<div class="section">
+			The following tables show the properties of the oversampling scheme and anti-aliasing filter used.
+		</div>
+		<div class="section">
+			<table class="table">
+				<thead>
+					<tr>
+						<th class="tablehead">
+							Factor
+						</th>
+						<th class="tablehead">
+							Filter order
+						</th>
+						<th class="tablehead">
+							Passband ripple
+						</th>
+						<th class="tablehead">
+							Stopband attenuation
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="tablecell">
+							2
+						</td>
+						<td class="tablecell">
+							77
+						</td>
+						<td class="tablecell">
+							&#177; &lt; 0.5 dB
+						</td>
+						<td class="tablecell">
+							&gt; 120 dB
+						</td>
+					</tr>
+					<tr>
+						<td class="tablecell">
+							4
+						</td>
+						<td class="tablecell">
+							155
+						</td>
+						<td class="tablecell">
+							&#177; &lt; 0.5 dB
+						</td>
+						<td class="tablecell">
+							&gt; 120 dB
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="section">
+			<table class="table">
+				<thead>
+					<tr>
+						<th class="tablehead">
+							Sample rate
+						</th>
+						<th class="tablehead">
+							Factor
+						</th>
+						<th class="tablehead">
+							Oversampled rate
+						</th>
+						<th class="tablehead">
+							Passband
+						</th>
+						<th class="tablehead">
+							Stopband
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="tablecell" rowspan="2">
+							44.1 kHz
+						</td>
+						<td class="tablecell">
+							2
+						</td>
+						<td class="tablecell">
+							88.2 kHz
+						</td>
+						<td class="tablecell" rowspan="2">
+							&lt; 17.64 kHz
+						</td>
+						<td class="tablecell" rowspan="2">
+							&gt; 22.05 kHz
+						</td>
+					</tr>
+					<tr>
+						<!-- merged -->
+						<td class="tablecell">
+							4
+						</td>
+						<td class="tablecell">
+							176.4 kHz
+						</td>
+						<!-- merged -->
+						<!-- merged -->
+					</tr>
+					<tr>
+						<td class="tablecell" rowspan="2">
+							48 kHz
+						</td>
+						<td class="tablecell">
+							2
+						</td>
+						<td class="tablecell">
+							96 kHz
+						</td>
+						<td class="tablecell" rowspan="2">
+							&lt; 19.2 kHz
+						</td>
+						<td class="tablecell" rowspan="2">
+							&gt; 24 kHz
+						</td>
+					</tr>
+					<tr>
+						<!-- merged -->
+						<td class="tablecell">
+							4
+						</td>
+						<td class="tablecell">
+							192 kHz
+						</td>
+						<!-- merged -->
+						<!-- merged -->
+					</tr>
+					<tr>
+						<td class="tablecell" rowspan="2">
+							88.2 kHz
+						</td>
+						<td class="tablecell">
+							2
+						</td>
+						<td class="tablecell">
+							176.4 kHz
+						</td>
+						<td class="tablecell" rowspan="2">
+							&lt; 35.28 kHz
+						</td>
+						<td class="tablecell" rowspan="2">
+							&gt; 44.1 kHz
+						</td>
+					</tr>
+					<tr>
+						<!-- merged -->
+						<td class="tablecell">
+							4
+						</td>
+						<td class="tablecell">
+							352.8 kHz
+						</td>
+						<!-- merged -->
+						<!-- merged -->
+					</tr>
+					<tr>
+						<td class="tablecell" rowspan="2">
+							96 kHz
+						</td>
+						<td class="tablecell">
+							2
+						</td>
+						<td class="tablecell">
+							192 kHz
+						</td>
+						<td class="tablecell" rowspan="2">
+							&lt; 38.4 kHz
+						</td>
+						<td class="tablecell" rowspan="2">
+							&gt; 48 kHz
+						</td>
+					</tr>
+					<tr>
+						<!-- merged -->
+						<td class="tablecell">
+							4
+						</td>
+						<td class="tablecell">
+							384 kHz
+						</td>
+						<!-- merged -->
+						<!-- merged -->
+					</tr>
+					<tr>
+						<td class="tablecell" rowspan="2">
+							176.4 kHz
+						</td>
+						<td class="tablecell">
+							2
+						</td>
+						<td class="tablecell">
+							352.8 kHz
+						</td>
+						<td class="tablecell" rowspan="2">
+							&lt; 70.56 kHz
+						</td>
+						<td class="tablecell" rowspan="2">
+							&gt; 88.2 kHz
+						</td>
+					</tr>
+					<tr>
+						<!-- merged -->
+						<td class="tablecell">
+							4
+						</td>
+						<td class="tablecell">
+							705.6 kHz
+						</td>
+						<!-- merged -->
+						<!-- merged -->
+					</tr>
+					<tr>
+						<td class="tablecell" rowspan="2">
+							192 kHz
+						</td>
+						<td class="tablecell">
+							2
+						</td>
+						<td class="tablecell">
+							384 kHz
+						</td>
+						<td class="tablecell" rowspan="2">
+							&lt; 76.8 kHz
+						</td>
+						<td class="tablecell" rowspan="2">
+							&gt; 96 kHz
+						</td>
+					</tr>
+					<tr>
+						<!-- merged -->
+						<td class="tablecell">
+							4
+						</td>
+						<td class="tablecell">
+							768 kHz
+						</td>
+						<!-- merged -->
+						<!-- merged -->
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="section">
+			In order to prevent clipping, the passband ripple of the filter is compensated by attenuating the filter output by 0.5 dB.
+		</div>
+		<div class="section heading">
 			Signal flow
 		</div>
 		<div class="section">
@@ -415,6 +673,9 @@
 				<li class="item">
 					<span class="highlight">Level:</span> The level of the maximum signal output from the effects unit in <span class="emphasis">dBFS</span>.
 				</li>
+				<li class="item">
+					<span class="highlight">Oversampling:</span> The oversampling factor to use. Oversampling non-linear processes reduces aliasing errors by running the simulation of the relevant components at a smaller time step, resulting in a more detailed and &quot;open&quot; sound, especially when running at a lower base sample rate. Since oversampling not only requires the effects unit itself to process more data points, but also requires both bandlimited interpolation of the signal when upconverting and a very steep (and therefore high-order) anti-aliasing filter when decimating, the amount of processing power required for oversampling is very large. In addition, both the interpolation and decimation filter introduce a slight, frequency-dependant phase shift into the signal, therefore increasing (perceived) latency. Therefore, we recommend oversampling to be used when batch-processing, where the increased time to render an audio track will usually not matter nearly as much as latency matters when processing audio in real-time.
+				</li>
 			</ul>
 		</div>
 		<div class="section heading">
@@ -446,6 +707,9 @@
 				<li class="item">
 					<span class="highlight">Level:</span> Determines the amount of signal attenuation (in <span class="emphasis">dB</span>) at the output stage. This enables you to reduce the output level of the effects unit in order to better match the level of other signals or to avoid clipping the input of the next effects unit. A level of zero means, that the entire range of [-1; 1] is used to represent the output signal values.
 				</li>
+				<li class="item">
+					<span class="highlight">Oversampling:</span> The oversampling factor to use. Oversampling non-linear processes reduces aliasing errors by running the simulation of the relevant components at a smaller time step, resulting in a more detailed and &quot;open&quot; sound, especially when running at a lower base sample rate. Since oversampling not only requires the effects unit itself to process more data points, but also requires both bandlimited interpolation of the signal when upconverting and a very steep (and therefore high-order) anti-aliasing filter when decimating, the amount of processing power required for oversampling is very large. In addition, both the interpolation and decimation filter introduce a slight, frequency-dependant phase shift into the signal, therefore increasing (perceived) latency. Therefore, we recommend oversampling to be used when batch-processing, where the increased time to render an audio track will usually not matter nearly as much as latency matters when processing audio in real-time.
+				</li>
 			</ul>
 		</div>
 		<div class="section heading">
@@ -471,6 +735,9 @@
 				<li class="item">
 					<span class="highlight">Level:</span> Determines the amount of signal attenuation (in <span class="emphasis">dB</span>) at the output stage. This enables you to reduce the output level of the effects unit in order to better match the level of other signals or to avoid clipping the input of the next effects unit. A level of zero means, that the entire range of [-1; 1] is used to represent the output signal values.
 				</li>
+				<li class="item">
+					<span class="highlight">Oversampling:</span> The oversampling factor to use. Oversampling non-linear processes reduces aliasing errors by running the simulation of the relevant components at a smaller time step, resulting in a more detailed and &quot;open&quot; sound, especially when running at a lower base sample rate. Since oversampling not only requires the effects unit itself to process more data points, but also requires both bandlimited interpolation of the signal when upconverting and a very steep (and therefore high-order) anti-aliasing filter when decimating, the amount of processing power required for oversampling is very large. In addition, both the interpolation and decimation filter introduce a slight, frequency-dependant phase shift into the signal, therefore increasing (perceived) latency. Therefore, we recommend oversampling to be used when batch-processing, where the increased time to render an audio track will usually not matter nearly as much as latency matters when processing audio in real-time.
+				</li>
 			</ul>
 		</div>
 		<div class="section heading">
@@ -492,6 +759,9 @@
 				</li>
 				<li class="item">
 					<span class="highlight">Level:</span> Determines the amount of signal attenuation (in <span class="emphasis">dB</span>) at the output stage. This enables you to reduce the output level of the effects unit in order to better match the level of other signals or to avoid clipping the input of the next effects unit. A level of zero means, that the entire range of [-1; 1] is used to represent the output signal values.
+				</li>
+				<li class="item">
+					<span class="highlight">Oversampling:</span> The oversampling factor to use. Oversampling non-linear processes reduces aliasing errors by running the simulation of the relevant components at a smaller time step, resulting in a more detailed and &quot;open&quot; sound, especially when running at a lower base sample rate. Since oversampling not only requires the effects unit itself to process more data points, but also requires both bandlimited interpolation of the signal when upconverting and a very steep (and therefore high-order) anti-aliasing filter when decimating, the amount of processing power required for oversampling is very large. In addition, both the interpolation and decimation filter introduce a slight, frequency-dependant phase shift into the signal, therefore increasing (perceived) latency. Therefore, we recommend oversampling to be used when batch-processing, where the increased time to render an audio track will usually not matter nearly as much as latency matters when processing audio in real-time.
 				</li>
 			</ul>
 		</div>

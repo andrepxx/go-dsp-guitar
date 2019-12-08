@@ -36,10 +36,10 @@ func lanczosKernel(x float64, a float64) float64 {
 func lanczosInterpolate(s []float64, x float64, a uint16) float64 {
 	floorX := math.Floor(x)
 	idx := int(floorX)
+	idxInc := idx + 1
 	aInt := int(a)
-	aInc := aInt + 1
-	lBound := idx - aInc
-	uBound := idx + aInc
+	lBound := idxInc - aInt
+	uBound := idxInc + aInt
 	n := len(s)
 	aFloat := float64(a)
 	sum := float64(0.0)
@@ -139,4 +139,24 @@ func Frequency(bins []complex128, numTargetBins uint32) []complex128 {
 	}
 
 	return targetBins
+}
+
+/*
+ * Oversample the source signal by a factor and write the result into the
+ * target buffer.
+ */
+func Oversample(source []float64, target []float64, factor uint32) {
+	factorFloat := float64(factor)
+	dx := 1.0 / factorFloat
+
+	/*
+	 * Calculate output samples using Lanczos interpolation.
+	 */
+	for i, _ := range target {
+		iFloat := float64(i)
+		x := iFloat * dx
+		val := lanczosInterpolate(source, x, 3)
+		target[i] = val
+	}
+
 }

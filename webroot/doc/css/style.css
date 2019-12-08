@@ -54,6 +54,30 @@
 	margin-bottom: 15px;
 }
 
+.table
+{
+	background-color: #222222;
+	border-collapse: collapse;
+	border: 1px solid #ffffff;
+	color: #ffffff;
+}
+
+.tablehead
+{
+	background-color: #444444;
+	border: 1px solid #ffffff;
+	font-weight: bold;
+	padding: 5px;
+	text-align: center;
+}
+
+.tablecell
+{
+	border: 1px solid #ffffff;
+	padding: 5px;
+	text-align: right;
+}
+
 .title
 {
 	color: #ffffff;

@@ -173,3 +173,43 @@ func TestFrequencySeries(t *testing.T) {
 	}
 
 }
+
+/*
+ * Perform a unit test on the Lanczos oversampling algorithm.
+ */
+func TestOversample(t *testing.T) {
+
+	/*
+	 * Input vectors.
+	 */
+	in := [][]float64{
+		[]float64{0.87622011, 0.41920066, 0.56935138, 0.56090797, 0.0485888, 0.89798242, 0.94420837, 0.89861948},
+	}
+
+	/*
+	 * Expected output vectors for oversampling.
+	 */
+	outExpected := [][]float64{
+		[]float64{0.87622011, 0.72424457, 0.41920066, 0.40800042, 0.56935138, 0.66706275, 0.56090797, 0.20545441, 0.0485888, 0.40780951, 0.89798242, 1.00559434, 0.94420837, 1.00017368, 0.89861948},
+	}
+
+	/*
+	 * Test with each input vector.
+	 */
+	for i, currentIn := range in {
+		expected := outExpected[i]
+		expectedLength := len(expected)
+		currentResult := make([]float64, expectedLength)
+		Oversample(currentIn, currentResult, 2)
+		ok, diff := areSlicesClose(currentResult, expected)
+
+		/*
+		 * Verify components of oversampled vector.
+		 */
+		if !ok {
+			t.Errorf("Upsampling vector number %d: Result is incorrect. Expected %v, got %v, difference: %v", i, expected, currentResult, diff)
+		}
+
+	}
+
+}
