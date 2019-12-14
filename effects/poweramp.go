@@ -13,7 +13,6 @@ import (
 type poweramp struct {
 	unitStruct
 	sampleRate       uint32
-	fltChannel       chan compilationResult
 	impulseResponses filter.ImpulseResponses
 	idCompiled       uint64
 	idReceived       uint64
@@ -21,31 +20,16 @@ type poweramp struct {
 }
 
 /*
- * Post compilation result into the channel.
- */
-func (this *poweramp) postCompilationResult(result compilationResult) {
-
-	/*
-	 * Post result asynchronously.
-	 */
-	post := func(result compilationResult, c chan compilationResult) {
-		c <- result
-	}
-
-	go post(result, this.fltChannel)
-}
-
-/*
  * Compile a new filter for this power amplifier.
  */
-func (this *poweramp) compile(sampleRate uint32, id uint64) error {
+func (this *poweramp) compile(sampleRate uint32, id uint64) (filter.Filter, error) {
 	irs := this.impulseResponses
 
 	/*
 	 * Verify that impulse responses are loaded.
 	 */
 	if irs == nil {
-		return fmt.Errorf("%s", "Could not compile filter: No impulse responses were loaded.")
+		return nil, fmt.Errorf("%s", "Could not compile filter: No impulse responses were loaded.")
 	} else {
 		targetOrder := uint32(0)
 		targetOrderString, err := this.getDiscreteValue("filter_order")
@@ -60,7 +44,7 @@ func (this *poweramp) compile(sampleRate uint32, id uint64) error {
 			 * Abort if error occured during parsing.
 			 */
 			if err != nil {
-				return fmt.Errorf("Could not parse filter target order: '%s'", targetOrderString)
+				return nil, fmt.Errorf("Could not parse filter target order: '%s'", targetOrderString)
 			} else {
 				targetOrder = uint32(targetOrder64)
 			}
@@ -84,7 +68,7 @@ func (this *poweramp) compile(sampleRate uint32, id uint64) error {
 			 * Check if an error occured.
 			 */
 			if errName != nil || errLevel != nil {
-				return fmt.Errorf("Error parsing values for filter %d.", i)
+				return nil, fmt.Errorf("Error parsing values for filter %d.", i)
 			} else {
 
 				/*
@@ -98,7 +82,7 @@ func (this *poweramp) compile(sampleRate uint32, id uint64) error {
 					 * Check if filter was found.
 					 */
 					if flt == nil {
-						return fmt.Errorf("Failed to load filter '%s' for sample rate '%d'.", name, sampleRate)
+						return nil, fmt.Errorf("Failed to load filter '%s' for sample rate '%d'.", name, sampleRate)
 					} else {
 
 						/*
@@ -131,21 +115,12 @@ func (this *poweramp) compile(sampleRate uint32, id uint64) error {
 			 * Check for errors.
 			 */
 			if err != nil {
-				return fmt.Errorf("Failed to add filter: %s", err.Error())
+				return nil, fmt.Errorf("Failed to add filter: %s", err.Error())
 			}
 
 		}
 
-		/*
-		 * Create compilation result.
-		 */
-		result := compilationResult{
-			id:     id,
-			result: fltComposite,
-		}
-
-		this.postCompilationResult(result)
-		return nil
+		return fltComposite, nil
 	}
 
 }
@@ -164,7 +139,15 @@ func (this *poweramp) SetDiscreteValue(name string, value string) error {
 		sr := this.sampleRate
 		id := this.idCompiled + 1
 		this.idCompiled = id
-		err = this.compile(sr, id)
+		flt, err := this.compile(sr, id)
+
+		/*
+		 * Check if filter was compiled.
+		 */
+		if err == nil {
+			this.currentFilter = flt
+		}
+
 	}
 
 	this.mutex.Unlock()
@@ -185,7 +168,15 @@ func (this *poweramp) SetNumericValue(name string, value int32) error {
 		sr := this.sampleRate
 		id := this.idCompiled + 1
 		this.idCompiled = id
-		err = this.compile(sr, id)
+		flt, err := this.compile(sr, id)
+
+		/*
+		 * Check if filter was compiled.
+		 */
+		if err == nil {
+			this.currentFilter = flt
+		}
+
 	}
 
 	this.mutex.Unlock()
@@ -205,34 +196,13 @@ func (this *poweramp) Process(in []float64, out []float64, sampleRate uint32) {
 		sr := this.sampleRate
 		id := this.idCompiled + 1
 		this.idCompiled = id
-		this.compile(sr, id)
-	}
-
-	noFilter := false
-
-	/*
-	 * Do this as long as we have new filters in the queue.
-	 */
-	for !noFilter {
+		flt, err := this.compile(sr, id)
 
 		/*
-		 * Check if new filter has been compiled.
+		 * Check if filter was compiled.
 		 */
-		select {
-		case r := <-this.fltChannel:
-			flt := r.result
-			id := r.id
-
-			/*
-			 * Accept this filter if it is newer than the newest I have.
-			 */
-			if id > this.idReceived {
-				this.currentFilter = flt
-				this.idReceived = id
-			}
-
-		default:
-			noFilter = true
+		if err == nil {
+			this.currentFilter = flt
 		}
 
 	}
@@ -317,7 +287,6 @@ func PreparePowerAmp(unit Unit, responses filter.ImpulseResponses) error {
 		}
 
 		amp.unitStruct.params = params
-		amp.fltChannel = make(chan compilationResult)
 		amp.impulseResponses = responses
 		return nil
 	}

@@ -2,7 +2,6 @@ package effects
 
 import (
 	"fmt"
-	"github.com/andrepxx/go-dsp-guitar/filter"
 	"math"
 	"sync"
 )
@@ -60,14 +59,6 @@ const (
 	NUM_FILTERS = 8
 	STRING_NONE = "- NONE -"
 )
-
-/*
- * Data structure representing the result of a filter compilation.
- */
-type compilationResult struct {
-	id     uint64
-	result filter.Filter
-}
 
 /*
  * Data structure representing a parameter for an effects unit.

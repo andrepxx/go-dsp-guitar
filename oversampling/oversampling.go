@@ -134,13 +134,12 @@ func (this *oversamplerDecimatorStruct) Decimate(in []float64, out []float64) er
 	} else {
 		numInputSamples := len(in)
 		buffer := this.bufferPreDecimation
-		bufferSize := len(buffer)
 
 		/*
 		 * Ensure that the output buffer for the anti-aliasing filter
 		 * is as long as the input buffer.
 		 */
-		if bufferSize != numInputSamples {
+		if len(buffer) != numInputSamples {
 			buffer = make([]float64, numInputSamples)
 			this.bufferPreDecimation = buffer
 		}
@@ -155,11 +154,11 @@ func (this *oversamplerDecimatorStruct) Decimate(in []float64, out []float64) er
 			msg := err.Error()
 			return fmt.Errorf("Error while applying anti-aliasing filter for decimation: " + msg)
 		} else {
+			bufferSize := len(buffer)
 
 			/*
 			 * Decimate the output by taking one sample and dropping N - 1
 			 * samples, where N is the oversampling factor.
-			 *
 			 */
 			for i := range out {
 				idx := factor * i
