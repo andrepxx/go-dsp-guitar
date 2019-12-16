@@ -1,6 +1,24 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.5.0
+
+New features / enhancements:
+
+- Implement oversampling for effects making use of non-linear amplification. Oversampling of non-linear processes prevents aliasing distortion.
+- Implement new "oversampling" package implementing on-the-fly sample rate conversion, anti-aliasing filters, and decimation.
+- Implement unit-tests for the new package.
+- Update "excess", "fuzz", "overdrive" and "distortion" effects unit to make use of oversampling and provide a new parameter for it.
+- Update UI code to provide localized string for the new parameter.
+- Update the documentation to explain the new feature.
+
+Maintenance / bugfixes / corrections:
+
+- Fixed a race condition in the power amplifier simulation. The race condition could lead to incorrect results, especially while batch-processing files.
+- Fixed an incorrect length field in the oversampling module leading to incorrect results while processing the first block of audio.
+- Increment minor version number: v1.4.0 --> v1.5.0
+
+
 v1.4.0
 
 New features / enhancements:
@@ -11,6 +29,7 @@ Maintenance / bugfixes / corrections:
 
 - Update to latest version of "pure-knob".
 - Increment minor version number: v1.3.3 --> v1.4.0
+
 
 v1.3.3
 
