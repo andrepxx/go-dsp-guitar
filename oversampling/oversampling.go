@@ -152,7 +152,7 @@ func (this *oversamplerDecimatorStruct) Decimate(in []float64, out []float64) er
 		 */
 		if err != nil {
 			msg := err.Error()
-			return fmt.Errorf("Error while applying anti-aliasing filter for decimation: " + msg)
+			return fmt.Errorf("Error while applying anti-aliasing filter for decimation: %s", msg)
 		} else {
 			bufferSize := len(buffer)
 
