@@ -94,58 +94,6 @@ type Filter interface {
 }
 
 /*
- * Convert a buffer of floating-point numbers to a buffer of complex numbers.
- */
-func floatToComplex(out []complex128, in []float64) error {
-	M := len(in)
-	N := len(out)
-
-	/*
-	 * Verify that buffers are the same size.
-	 */
-	if M != N {
-		return fmt.Errorf("%s", "Failed to convert float to complex: Input and output buffers must be the same size.")
-	} else {
-
-		/*
-		 * Iterate over the buffer and fill in the real values.
-		 */
-		for i, val := range in {
-			out[i] = complex(val, 0.0)
-		}
-
-		return nil
-	}
-
-}
-
-/*
- * Convert a buffer of complex numbers to a buffer of floating-point numbers.
- */
-func complexToFloat(out []float64, in []complex128) error {
-	M := len(in)
-	N := len(out)
-
-	/*
-	 * Verify that buffers are the same size.
-	 */
-	if M != N {
-		return fmt.Errorf("%s", "Failed to convert float to complex: Input and output buffers must be the same size.")
-	} else {
-
-		/*
-		 * Iterate over the buffer and extract the real values.
-		 */
-		for i, val := range in {
-			out[i] = real(val)
-		}
-
-		return nil
-	}
-
-}
-
-/*
  * Calculate the complex hadamard product of two vectors.
  */
 func hadamardComplex(result []complex128, a []complex128, b []complex128) error {
@@ -569,8 +517,7 @@ func (this *filterStruct) Reduce(order uint32) Filter {
 		return this
 	} else {
 		fr := make([]complex128, nFftSource)
-		floatToComplex(fr, coefficientsPadded)
-		fft.Fourier(fr, fft.SCALING_DEFAULT, fft.MODE_INPLACE)
+		fft.RealFourier(coefficientsPadded, fr, fft.SCALING_DEFAULT)
 		numPositiveFreqsSource := (nFftSourceWord >> 1) + 1
 		frPos := fr[:numPositiveFreqsSource]
 		nFftTargetHalf := nFftTargetWord >> 1
@@ -589,9 +536,8 @@ func (this *filterStruct) Reduce(order uint32) Filter {
 			frNew[idx] = elemConj
 		}
 
-		fft.InverseFourier(frNew, fft.SCALING_DEFAULT, fft.MODE_INPLACE)
 		targetResponse := make([]float64, nFftTarget)
-		complexToFloat(targetResponse, frNew)
+		fft.RealInverseFourier(frNew, targetResponse, fft.SCALING_DEFAULT)
 		coeffsNew := targetResponse[:order]
 		nameNew := ir.name + " (" + string(order) + ")"
 		rate := ir.sampleRate

@@ -77,10 +77,11 @@ func (this *resultStruct) Peak() int32 {
  * Feed the signal from an input buffer through the level meter.
  */
 func (this *meterStruct) Process(inputBuffer []float64, sampleRate uint32) {
-	this.mutex.Lock()
+	this.mutex.RLock()
 	currentValue := this.currentValue
 	peakValue := this.peakValue
 	sampleCounter := this.sampleCounter
+	this.mutex.RUnlock()
 	sampleRateFloat := float64(sampleRate)
 	holdTimeSamples := uint64(PEAK_HOLD_TIME_SECONDS * sampleRateFloat)
 	decayExp := -1.0 / (TIME_CONSTANT * sampleRateFloat)
@@ -121,6 +122,7 @@ func (this *meterStruct) Process(inputBuffer []float64, sampleRate uint32) {
 
 	}
 
+	this.mutex.Lock()
 	this.currentValue = currentValue
 	this.peakValue = peakValue
 	this.sampleCounter = sampleCounter
