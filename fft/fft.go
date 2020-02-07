@@ -27,13 +27,21 @@ const (
 )
 
 /*
- * Global variables.
+ * Global variables and mutexes.
+ *
+ * (1) Protecting the global data structures themselves.
+ * (2) Protecting the large Fourier coefficients.
+ * (3) Protecting the large permutation coefficients.
+ * (4) Protecting the scrapspace.
  */
-var g_mutex sync.Mutex
+var g_mutex sync.RWMutex                  // (1)
+var g_mutexCoefficientsLarge sync.RWMutex // (2)
 var g_coefficientsLarge map[int][]complex128
 var g_coefficientsSmall []complex128
+var g_mutexPermutationLarge sync.RWMutex // (3)
 var g_permutationLarge map[int][]int
 var g_permutationSmall []int
+var g_mutexScrapspace sync.Mutex // (4)
 var g_scrapspace []complex128
 
 /*
@@ -123,8 +131,9 @@ func fourierCoefficients(n int) []complex128 {
 		uBound := n << 1
 		return g_coefficientsSmall[n:uBound]
 	} else {
-		g_mutex.Lock()
+		g_mutexCoefficientsLarge.RLock()
 		coefficients, ok := g_coefficientsLarge[n]
+		g_mutexCoefficientsLarge.RUnlock()
 
 		/*
 		 * If coefficients aren't already calculated, calculate them now.
@@ -143,10 +152,11 @@ func fourierCoefficients(n int) []complex128 {
 				coefficients[j] = cmplx.Exp(arg)
 			}
 
+			g_mutexCoefficientsLarge.Lock()
 			g_coefficientsLarge[n] = coefficients
+			g_mutexCoefficientsLarge.Unlock()
 		}
 
-		g_mutex.Unlock()
 		return coefficients
 	}
 
@@ -168,8 +178,9 @@ func permutationCoefficients(n int) []int {
 		uBound := n << 1
 		return g_permutationSmall[n:uBound]
 	} else {
-		g_mutex.Lock()
+		g_mutexPermutationLarge.RLock()
 		coefficients, ok := g_permutationLarge[n]
+		g_mutexPermutationLarge.RUnlock()
 
 		/*
 		 * If coefficients aren't already calculated, calculate them now.
@@ -200,10 +211,11 @@ func permutationCoefficients(n int) []int {
 
 			}
 
+			g_mutexPermutationLarge.Lock()
 			g_permutationLarge[n] = coefficients
+			g_mutexPermutationLarge.Unlock()
 		}
 
-		g_mutex.Unlock()
 		return coefficients
 	}
 
@@ -262,7 +274,7 @@ func cooleyTukey(vec []complex128) []complex128 {
 func permute(vec []complex128) {
 	n := len(vec)
 	coeff := permutationCoefficients(n)
-	g_mutex.Lock()
+	g_mutexScrapspace.Lock()
 
 	/*
 	 * Check if size for scrapspace is sufficient.
@@ -281,7 +293,7 @@ func permute(vec []complex128) {
 		vec[i] = g_scrapspace[idx]
 	}
 
-	g_mutex.Unlock()
+	g_mutexScrapspace.Unlock()
 }
 
 /*
@@ -344,37 +356,53 @@ func inplaceTransform(vec []complex128) {
  * Initialize the computation of a Fourier transform.
  */
 func initialize() {
-	g_mutex.Lock()
+	g_mutex.RLock()
 
 	/*
 	 * Generate the global Fourier coefficient slice.
 	 */
 	if g_coefficientsSmall == nil {
+		g_mutex.RUnlock()
+		g_mutex.Lock()
 		g_coefficientsSmall = generateFourierCoefficients()
+		g_mutex.Unlock()
+		g_mutex.RLock()
 	}
 
 	/*
 	 * Initialize the global Fourier coefficient map.
 	 */
 	if g_coefficientsLarge == nil {
+		g_mutex.RUnlock()
+		g_mutex.Lock()
 		g_coefficientsLarge = make(map[int][]complex128)
+		g_mutex.Unlock()
+		g_mutex.RLock()
 	}
 
 	/*
 	 * Initialize the global permutation coefficient slice.
 	 */
 	if g_permutationSmall == nil {
+		g_mutex.RUnlock()
+		g_mutex.Lock()
 		g_permutationSmall = generatePermutationCoefficients()
+		g_mutex.Unlock()
+		g_mutex.RLock()
 	}
 
 	/*
 	 * Initialize the global permutation coefficient map.
 	 */
 	if g_permutationLarge == nil {
+		g_mutex.RUnlock()
+		g_mutex.Lock()
 		g_permutationLarge = make(map[int][]int)
+		g_mutex.Unlock()
+		g_mutex.RLock()
 	}
 
-	g_mutex.Unlock()
+	g_mutex.RUnlock()
 }
 
 /*
