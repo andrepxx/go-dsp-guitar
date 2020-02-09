@@ -146,11 +146,8 @@ type webLevelMeterResultStruct struct {
  * A data structure encoding the results of the analysis performed by the level meters.
  */
 type webLevelMetersResultStruct struct {
-	DSPLoad   int32
-	Inputs    []webLevelMeterResultStruct
-	Outputs   []webLevelMeterResultStruct
-	Metronome []webLevelMeterResultStruct
-	Master    []webLevelMeterResultStruct
+	DSPLoad  int32
+	Channels []webLevelMeterResultStruct
 }
 
 /*
@@ -183,10 +180,8 @@ type controllerStruct struct {
 	config                  configStruct
 	effects                 []signal.Chain
 	impulseResponses        filter.ImpulseResponses
-	levelMetersInput        []level.Meter
-	levelMetersMaster       []level.Meter
-	levelMetersMetr         []level.Meter
-	levelMetersOutput       []level.Meter
+	buffers                 [][]float64
+	levelMeter              level.Meter
 	metr                    metronome.Metronome
 	metrMasterOutput        bool
 	running                 bool
@@ -202,7 +197,7 @@ type controllerStruct struct {
  * The controller interface.
  */
 type Controller interface {
-	Operate(numChannels int)
+	Operate(numChannels uint32)
 }
 
 /*
@@ -386,16 +381,18 @@ func (this *controllerStruct) getConfigurationHandler(request webserver.HttpRequ
 		}
 
 		webChains[idChannel].Units = webUnits
+		spat := this.spat
 
 		/*
 		 * Check if spatializer exists.
 		 */
-		if this.spat != nil {
-			azimuth, _ := this.spat.GetAzimuth(idChannel)
+		if spat != nil {
+			idChannel32 := uint32(idChannel)
+			azimuth, _ := spat.GetAzimuth(idChannel32)
 			spatChannels[idChannel].Azimuth = azimuth
-			distance, _ := this.spat.GetDistance(idChannel)
+			distance, _ := spat.GetDistance(idChannel32)
 			spatChannels[idChannel].Distance = distance
-			level, _ := this.spat.GetLevel(idChannel)
+			level, _ := spat.GetLevel(idChannel32)
 			spatChannels[idChannel].Level = level
 		}
 
@@ -488,155 +485,52 @@ func (this *controllerStruct) getLevelAnalysisHandler(request webserver.HttpRequ
 	dspLoad64 := float64(dspLoad)
 	dspLoadRounded := math.Round(dspLoad64)
 	dspLoad32 := int32(dspLoadRounded)
-	levelMetersInput := this.levelMetersInput
-	levelMetersOutput := this.levelMetersOutput
-	levelMetersMetr := this.levelMetersMetr
-	levelMetersMaster := this.levelMetersMaster
-	inputCount := len(levelMetersInput)
-	outputCount := len(levelMetersOutput)
-	metrCount := len(levelMetersMetr)
-	masterChannelCount := len(levelMetersMaster)
-	inputResultStructs := make([]webLevelMeterResultStruct, inputCount)
-	outputResultStructs := make([]webLevelMeterResultStruct, outputCount)
-	metrResultStructs := make([]webLevelMeterResultStruct, metrCount)
-	masterResultStructs := make([]webLevelMeterResultStruct, masterChannelCount)
+	levelMeter := this.levelMeter
+	channelCount := levelMeter.ChannelCount()
+	results := make([]webLevelMeterResultStruct, channelCount)
 
 	/*
-	 * Iterate over all input level meters and obtain results.
+	 * Iterate over all channels and obtain results.
 	 */
-	for i, meter := range levelMetersInput {
-		i64 := uint64(i)
-		channelNumber := strconv.FormatUint(i64, 10)
-		channelName := "in_" + channelNumber
-		result := meter.Analyze()
-		level := result.Level()
-		peak := result.Peak()
+	for i := range results {
+		channelId := uint32(i)
+		channelName, err := levelMeter.ChannelName(channelId)
 
 		/*
-		 * Fill in web result data structure.
+		 * Check if channel name could be obtained
 		 */
-		r := webLevelMeterResultStruct{
-			ChannelName: channelName,
-			Level:       level,
-			Peak:        peak,
+		if err == nil {
+			result, err := levelMeter.Analyze(channelId)
+
+			/*
+			 * Check if level analysis was successful.
+			 */
+			if err == nil {
+				level := result.Level()
+				peak := result.Peak()
+
+				/*
+				 * Fill in web result data structure.
+				 */
+				r := webLevelMeterResultStruct{
+					ChannelName: channelName,
+					Level:       level,
+					Peak:        peak,
+				}
+
+				results[i] = r
+			}
+
 		}
 
-		inputResultStructs[i] = r
-	}
-
-	/*
-	 * Iterate over all output level meters and obtain results.
-	 */
-	for i, meter := range levelMetersOutput {
-		i64 := uint64(i)
-		channelNumber := strconv.FormatUint(i64, 10)
-		channelName := "out_" + channelNumber
-		result := meter.Analyze()
-		level := result.Level()
-		peak := result.Peak()
-
-		/*
-		 * Fill in web result data structure.
-		 */
-		r := webLevelMeterResultStruct{
-			ChannelName: channelName,
-			Level:       level,
-			Peak:        peak,
-		}
-
-		outputResultStructs[i] = r
-	}
-
-	/*
-	 * The names of the metronome output channels.
-	 */
-	metrChannelNames := []string{
-		"metronome",
-	}
-
-	numMetrChannelNames := len(metrChannelNames)
-
-	/*
-	 * Iterate over all metronome level meters and obtain results.
-	 */
-	for i, meter := range levelMetersMetr {
-		i64 := uint64(i)
-		channelNumber := strconv.FormatUint(i64, 10)
-		channelName := "metr_" + channelNumber
-
-		/*
-		 * Check if this channel has a canonical name.
-		 */
-		if i < numMetrChannelNames {
-			channelName = metrChannelNames[i]
-		}
-
-		result := meter.Analyze()
-		level := result.Level()
-		peak := result.Peak()
-
-		/*
-		 * Fill in web result data structure.
-		 */
-		r := webLevelMeterResultStruct{
-			ChannelName: channelName,
-			Level:       level,
-			Peak:        peak,
-		}
-
-		metrResultStructs[i] = r
-	}
-
-	/*
-	 * The names of the master output channels.
-	 */
-	masterChannelNames := []string{
-		"master_left",
-		"master_right",
-	}
-
-	numMasterChannelNames := len(masterChannelNames)
-
-	/*
-	 * Iterate over all master output level meters and obtain results.
-	 */
-	for i, meter := range levelMetersMaster {
-		i64 := uint64(i)
-		channelNumber := strconv.FormatUint(i64, 10)
-		channelName := "master_" + channelNumber
-
-		/*
-		 * Check if this channel has a canonical name.
-		 */
-		if i < numMasterChannelNames {
-			channelName = masterChannelNames[i]
-		}
-
-		result := meter.Analyze()
-		level := result.Level()
-		peak := result.Peak()
-
-		/*
-		 * Fill in web result data structure.
-		 */
-		r := webLevelMeterResultStruct{
-			ChannelName: channelName,
-			Level:       level,
-			Peak:        peak,
-		}
-
-		masterResultStructs[i] = r
 	}
 
 	/*
 	 * Create level meters result structure.
 	 */
 	result := webLevelMetersResultStruct{
-		DSPLoad:   dspLoad32,
-		Inputs:    inputResultStructs,
-		Outputs:   outputResultStructs,
-		Metronome: metrResultStructs,
-		Master:    masterResultStructs,
+		DSPLoad:  dspLoad32,
+		Channels: results,
 	}
 
 	mimeType, buffer := this.createJSON(result)
@@ -674,7 +568,8 @@ func (this *controllerStruct) getUnitTypesHandler(request webserver.HttpRequest)
  * Perform a pitch analysis via the tuner and return the results.
  */
 func (this *controllerStruct) getTunerAnalysisHandler(request webserver.HttpRequest) webserver.HttpResponse {
-	analysis, err := this.tuner.Analyze()
+	currentTuner := this.tuner
+	analysis, err := currentTuner.Analyze()
 	response := webserver.HttpResponse{}
 
 	/*
@@ -1153,13 +1048,14 @@ func (this *controllerStruct) persistenceRestoreHandler(request webserver.HttpRe
 
 							}
 
+							channelId32 := uint32(channelId)
 							persistedSpat := channel.Spatializer
 							azimuth := persistedSpat.Azimuth
 							distance := persistedSpat.Distance
 							level := persistedSpat.Level
-							spat.SetAzimuth(channelId, azimuth)
-							spat.SetDistance(channelId, distance)
-							spat.SetLevel(channelId, level)
+							spat.SetAzimuth(channelId32, azimuth)
+							spat.SetDistance(channelId32, distance)
+							spat.SetLevel(channelId32, level)
 						}
 
 						irs := this.impulseResponses
@@ -1352,9 +1248,10 @@ func (this *controllerStruct) persistenceSaveHandler(request webserver.HttpReque
 			units[unitId] = unit
 		}
 
-		azimuth, _ := spat.GetAzimuth(chainId)
-		distance, _ := spat.GetDistance(chainId)
-		level, _ := spat.GetLevel(chainId)
+		chainId32 := uint32(chainId)
+		azimuth, _ := spat.GetAzimuth(chainId32)
+		distance, _ := spat.GetDistance(chainId32)
+		level, _ := spat.GetLevel(chainId32)
 
 		/*
 		 * Create data structure describing spatializer settings for this channel.
@@ -1586,9 +1483,10 @@ func (this *controllerStruct) setAzimuthHandler(request webserver.HttpRequest) w
 		}
 
 	} else {
-		chainId := int(chainId64)
+		chainId32 := uint32(chainId64)
 		value := float64(valueInt)
-		err := this.spat.SetAzimuth(chainId, value)
+		spat := this.spat
+		err := spat.SetAzimuth(chainId32, value)
 
 		/*
 		 * Check if azimuth was set successfully.
@@ -1875,8 +1773,9 @@ func (this *controllerStruct) setDistanceHandler(request webserver.HttpRequest) 
 		}
 
 	} else {
-		chainId := int(chainId64)
-		err := this.spat.SetDistance(chainId, value)
+		chainId32 := uint32(chainId64)
+		spat := this.spat
+		err := spat.SetDistance(chainId32, value)
 
 		/*
 		 * Check if distance was set successfully.
@@ -2001,8 +1900,9 @@ func (this *controllerStruct) setLevelHandler(request webserver.HttpRequest) web
 		}
 
 	} else {
-		chainId := int(chainId64)
-		err := this.spat.SetLevel(chainId, value)
+		chainId32 := uint32(chainId64)
+		spat := this.spat
+		err := spat.SetLevel(chainId32, value)
 
 		/*
 		 * Check if distance was set successfully.
@@ -2570,13 +2470,16 @@ func (this *controllerStruct) process(inputBuffers [][]float64, outputBuffers []
 	nOut := len(outputBuffers)
 	nMinOut := nIn + (spatializer.OUTPUT_COUNT + metronome.OUTPUT_COUNT)
 	tunerChannel := this.tunerChannel
+	buffers := this.buffers
+	levelMeter := this.levelMeter
 
 	/*
 	 * Check if an input channel should be passed to the tuner.
 	 */
 	if (tunerChannel >= 0) && (tunerChannel < nIn) {
 		tunerInput := inputBuffers[tunerChannel]
-		this.tuner.Process(tunerInput, sampleRate)
+		currentTuner := this.tuner
+		currentTuner.Process(tunerInput, sampleRate)
 	}
 
 	/*
@@ -2609,24 +2512,13 @@ func (this *controllerStruct) process(inputBuffers [][]float64, outputBuffers []
 			<-this.processingResultChannel
 		}
 
-		levelMetersInput := this.levelMetersInput
-
 		/*
-		 * Perform level analysis for each input.
+		 * If there is a level meter, save input and output buffers.
 		 */
-		for i, meter := range levelMetersInput {
-			buffer := inputBuffers[i]
-			meter.Process(buffer, sampleRate)
-		}
-
-		levelMetersOutput := this.levelMetersOutput
-
-		/*
-		 * Perform level analysis for each output.
-		 */
-		for i, meter := range levelMetersOutput {
-			buffer := outputBuffers[i]
-			meter.Process(buffer, sampleRate)
+		if levelMeter != nil {
+			copy(buffers[0:nIn], inputBuffers)
+			uBound := 2 * nIn
+			copy(buffers[nIn:uBound], outputBuffers)
 		}
 
 	}
@@ -2646,21 +2538,23 @@ func (this *controllerStruct) process(inputBuffers [][]float64, outputBuffers []
 			auxBuffer = nil
 		} else {
 			metr.Process(auxBuffer)
-			levelMetersMetr := this.levelMetersMetr
 
 			/*
-			 * Perform level analysis for the metronome.
+			 * If there is a level meter, save auxiliary buffer.
 			 */
-			for _, meter := range levelMetersMetr {
-				meter.Process(auxBuffer, sampleRate)
+			if levelMeter != nil {
+				idx := 2 * nIn
+				buffers[idx] = auxBuffer
 			}
 
 		}
 
+		spat := this.spat
+
 		/*
 		 * Check if there is a spatializer.
 		 */
-		if this.spat != nil {
+		if spat != nil {
 
 			/*
 			 * Check if metronome output should be excluded from the master output.
@@ -2672,21 +2566,22 @@ func (this *controllerStruct) process(inputBuffers [][]float64, outputBuffers []
 			uBound := nIn + spatializer.OUTPUT_COUNT
 			spatializerInputs := outputBuffers[0:nIn]
 			spatializerOutputs := outputBuffers[nIn:uBound]
-			this.spat.Process(spatializerInputs, auxBuffer, spatializerOutputs)
-			levelMetersMaster := this.levelMetersMaster
+			spat.Process(spatializerInputs, auxBuffer, spatializerOutputs)
+			lBoundBuf := (2 * nIn) + 1
+			uBoundBuf := lBoundBuf + spatializer.OUTPUT_COUNT
 
 			/*
-			 * Perform level analysis for each master output.
+			 * If there is a level meter, save spatializer output.
 			 */
-			for i, meter := range levelMetersMaster {
-				buffer := spatializerOutputs[i]
-				meter.Process(buffer, sampleRate)
+			if levelMeter != nil {
+				copy(buffers[lBoundBuf:uBoundBuf], spatializerOutputs)
 			}
 
 		}
 
 	}
 
+	levelMeter.Process(buffers, sampleRate)
 }
 
 /*
@@ -3126,7 +3021,7 @@ func (this *controllerStruct) processFiles(scanner *bufio.Scanner, targetRate ui
 /*
  * Initialize the controller.
  */
-func (this *controllerStruct) initialize(nInputs int, useHardware bool) error {
+func (this *controllerStruct) initialize(nInputs uint32, useHardware bool) error {
 	content, err := ioutil.ReadFile(CONFIG_PATH)
 
 	/*
@@ -3159,92 +3054,102 @@ func (this *controllerStruct) initialize(nInputs int, useHardware bool) error {
 				/*
 				 * Create an effects chain for each input.
 				 */
-				for i := 0; i < nInputs; i++ {
+				for i := uint32(0); i < nInputs; i++ {
 					fx[i] = signal.CreateChain(ir)
 				}
 
 				this.effects = fx
 				this.sampleRate = DEFAULT_SAMPLE_RATE
-				this.spat = spatializer.Create(nInputs)
+				spat := spatializer.Create(nInputs)
+				this.spat = spat
 				metr := metronome.Create()
 				metr.SetTick("- NONE -", nil)
 				metr.SetTock("- NONE -", nil)
 				this.metr = metr
 				this.tuner = tuner.Create()
 				this.tunerChannel = -1
-				levelMetersInput := make([]level.Meter, nInputs)
+				numPorts := (2 * nInputs) + (1 + spatializer.OUTPUT_COUNT)
+				portNames := make([]string, numPorts)
 
 				/*
-				 * Create level meter for each input channel.
+				 * Calculate names of all input ports.
 				 */
-				for i := range levelMetersInput {
-					meter := level.CreateMeter()
-					levelMetersInput[i] = meter
-				}
-
-				this.levelMetersInput = levelMetersInput
-				levelMetersOutput := make([]level.Meter, nInputs)
-
-				/*
-				 * Create level meter for each output channel.
-				 */
-				for i := range levelMetersOutput {
-					meter := level.CreateMeter()
-					levelMetersOutput[i] = meter
-				}
-
-				this.levelMetersOutput = levelMetersOutput
-				levelMetersMetr := make([]level.Meter, 1)
-
-				/*
-				 * Create level meter for each metronome channel.
-				 */
-				for i := range levelMetersMetr {
-					meter := level.CreateMeter()
-					levelMetersMetr[i] = meter
-				}
-
-				this.levelMetersMetr = levelMetersMetr
-				masterOutputs := int(spatializer.OUTPUT_COUNT)
-				levelMetersMaster := make([]level.Meter, masterOutputs)
-
-				/*
-				 * Create level meter for each master output channel.
-				 */
-				for i := range levelMetersMaster {
-					meter := level.CreateMeter()
-					levelMetersMaster[i] = meter
-				}
-
-				this.levelMetersMaster = levelMetersMaster
-				this.processingTaskChannel = make(chan processingTask, nInputs)
-				this.processingResultChannel = make(chan bool, nInputs)
-
-				/*
-				 * Start a worker thread for each input channel.
-				 */
-				for i := 0; i < nInputs; i++ {
-					go this.processAsync()
+				for i := uint32(0); i < nInputs; i++ {
+					i64 := uint64(i)
+					idString := strconv.FormatUint(i64, 10)
+					portNames[i] = "in_" + idString
 				}
 
 				/*
-				 * If we don't use hardware I/O, we are done, otherwise register hardware binding.
+				 * Calculate names of all output ports.
 				 */
-				if !useHardware {
-					return nil
+				for i := uint32(0); i < nInputs; i++ {
+					i64 := uint64(i)
+					idString := strconv.FormatUint(i64, 10)
+					idx := nInputs + i
+					portNames[idx] = "out_" + idString
+				}
+
+				/*
+				 * Calculate name of metronome port.
+				 */
+				if metr != nil {
+					idx := numPorts - 3
+					portNames[idx] = "metronome"
+				}
+
+				/*
+				 * Calculate name of master outputs.
+				 */
+				if spat != nil {
+					idxLeft := numPorts - 2
+					portNames[idxLeft] = "master_left"
+					idxRight := numPorts - 1
+					portNames[idxRight] = "master right"
+				}
+
+				buffers := make([][]float64, numPorts)
+				this.buffers = buffers
+				levelMeter, err := level.CreateMeter(numPorts, portNames)
+				this.levelMeter = levelMeter
+
+				/*
+				 * Check if level meter was created.
+				 */
+				if err != nil {
+					msg := err.Error()
+					return fmt.Errorf("Failed to create level meter: %s", msg)
 				} else {
-					this.binding, err = hwio.Register(this.process, this.sampleRateListener)
+					this.processingTaskChannel = make(chan processingTask, nInputs)
+					this.processingResultChannel = make(chan bool, nInputs)
 
 					/*
-					 * Setup JACK connections.
+					 * Start a worker thread for each input channel.
 					 */
-					for _, connection := range config.Connections {
-						source := connection.From
-						destination := connection.To
-						hwio.Connect(source, destination)
+					for i := uint32(0); i < nInputs; i++ {
+						go this.processAsync()
 					}
 
-					return err
+					/*
+					 * If we don't use hardware I/O, we are done, otherwise register hardware binding.
+					 */
+					if !useHardware {
+						return nil
+					} else {
+						this.binding, err = hwio.Register(this.process, this.sampleRateListener)
+
+						/*
+						 * Setup JACK connections.
+						 */
+						for _, connection := range config.Connections {
+							source := connection.From
+							destination := connection.To
+							hwio.Connect(source, destination)
+						}
+
+						return err
+					}
+
 				}
 
 			}
@@ -3269,7 +3174,7 @@ func (this *controllerStruct) finalize() {
 /*
  * Main routine of our controller. Performs initialization, then runs the message pump.
  */
-func (this *controllerStruct) Operate(numChannels int) {
+func (this *controllerStruct) Operate(numChannels uint32) {
 	batch := numChannels > 0
 	err := fmt.Errorf("")
 

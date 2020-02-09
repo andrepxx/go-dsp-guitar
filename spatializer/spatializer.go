@@ -28,15 +28,15 @@ const (
  * Interface type for a spatializer.
  */
 type Spatializer interface {
-	GetAzimuth(inputChannel int) (float64, error)
-	GetDistance(inputChannel int) (float64, error)
-	GetLevel(inputChannel int) (float64, error)
-	GetInputCount() int
-	GetOutputCount() int
+	GetAzimuth(inputChannel uint32) (float64, error)
+	GetDistance(inputChannel uint32) (float64, error)
+	GetLevel(inputChannel uint32) (float64, error)
+	GetInputCount() uint32
+	GetOutputCount() uint32
 	Process(inputBuffers [][]float64, auxInputBuffer []float64, outputBuffers [][]float64)
-	SetAzimuth(inputChannel int, azimuth float64) error
-	SetDistance(inputChannel int, distance float64) error
-	SetLevel(inputChannel int, level float64) error
+	SetAzimuth(inputChannel uint32, azimuth float64) error
+	SetDistance(inputChannel uint32, distance float64) error
+	SetLevel(inputChannel uint32, level float64) error
 	SetSampleRate(rate uint32)
 }
 
@@ -54,7 +54,7 @@ type position struct {
  */
 type spatializerStruct struct {
 	buffers    [][]float64
-	inputCount int
+	inputCount uint32
 	sampleRate uint32
 	mutex      sync.RWMutex
 	positions  []position
@@ -63,7 +63,7 @@ type spatializerStruct struct {
 /*
  * Returns the azimuth value associated with a channel.
  */
-func (this *spatializerStruct) GetAzimuth(inputChannel int) (float64, error) {
+func (this *spatializerStruct) GetAzimuth(inputChannel uint32) (float64, error) {
 	inputCount := this.inputCount
 
 	/*
@@ -83,7 +83,7 @@ func (this *spatializerStruct) GetAzimuth(inputChannel int) (float64, error) {
 /*
  * Returns the distance value associated with a channel.
  */
-func (this *spatializerStruct) GetDistance(inputChannel int) (float64, error) {
+func (this *spatializerStruct) GetDistance(inputChannel uint32) (float64, error) {
 	inputCount := this.inputCount
 
 	/*
@@ -103,7 +103,7 @@ func (this *spatializerStruct) GetDistance(inputChannel int) (float64, error) {
 /*
  * Returns the level value associated with a channel.
  */
-func (this *spatializerStruct) GetLevel(inputChannel int) (float64, error) {
+func (this *spatializerStruct) GetLevel(inputChannel uint32) (float64, error) {
 	inputCount := this.inputCount
 
 	/*
@@ -123,14 +123,14 @@ func (this *spatializerStruct) GetLevel(inputChannel int) (float64, error) {
 /*
  * Returns the number of input streams this spatializer processes.
  */
-func (this *spatializerStruct) GetInputCount() int {
+func (this *spatializerStruct) GetInputCount() uint32 {
 	return this.inputCount
 }
 
 /*
  * Returns the number of output streams this spatializer generates.
  */
-func (this *spatializerStruct) GetOutputCount() int {
+func (this *spatializerStruct) GetOutputCount() uint32 {
 	return OUTPUT_COUNT
 }
 
@@ -139,12 +139,13 @@ func (this *spatializerStruct) GetOutputCount() int {
  */
 func (this *spatializerStruct) Process(inputBuffers [][]float64, auxInputBuffer []float64, outputBuffers [][]float64) {
 	nInputBuffers := len(inputBuffers)
+	nInputBuffers32 := uint32(nInputBuffers)
 	nOutputBuffers := len(outputBuffers)
 
 	/*
 	 * Verify that we have as many input and output buffers as we expect.
 	 */
-	if (nInputBuffers == this.inputCount) && (nOutputBuffers == OUTPUT_COUNT) {
+	if (nInputBuffers32 == this.inputCount) && (nOutputBuffers == OUTPUT_COUNT) {
 		sampleRateFloat := float64(this.sampleRate)
 
 		/*
@@ -336,7 +337,7 @@ func (this *spatializerStruct) Process(inputBuffers [][]float64, auxInputBuffer 
 /*
  * Sets the azimuth of the audio source associated with a certain channel.
  */
-func (this *spatializerStruct) SetAzimuth(inputChannel int, azimuth float64) error {
+func (this *spatializerStruct) SetAzimuth(inputChannel uint32, azimuth float64) error {
 	inputCount := this.inputCount
 
 	/*
@@ -356,7 +357,7 @@ func (this *spatializerStruct) SetAzimuth(inputChannel int, azimuth float64) err
 /*
  * Sets the distance of the audio source associated with a certain channel.
  */
-func (this *spatializerStruct) SetDistance(inputChannel int, distance float64) error {
+func (this *spatializerStruct) SetDistance(inputChannel uint32, distance float64) error {
 	inputCount := this.inputCount
 
 	/*
@@ -385,7 +386,7 @@ func (this *spatializerStruct) SetDistance(inputChannel int, distance float64) e
 /*
  * Sets the level of the audio source associated with a certain channel.
  */
-func (this *spatializerStruct) SetLevel(inputChannel int, level float64) error {
+func (this *spatializerStruct) SetLevel(inputChannel uint32, level float64) error {
 	inputCount := this.inputCount
 
 	/*
@@ -423,7 +424,7 @@ func (this *spatializerStruct) SetSampleRate(rate uint32) {
 	/*
 	 * Create each inner buffer.
 	 */
-	for i := 0; i < inputChannels; i++ {
+	for i := uint32(0); i < inputChannels; i++ {
 		this.buffers[i] = make([]float64, bufferSize)
 	}
 
@@ -432,7 +433,7 @@ func (this *spatializerStruct) SetSampleRate(rate uint32) {
 /*
  * Creates a new spatializer.
  */
-func Create(inputChannels int) Spatializer {
+func Create(inputChannels uint32) Spatializer {
 	positions := make([]position, inputChannels)
 
 	/*

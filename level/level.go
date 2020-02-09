@@ -1,6 +1,7 @@
 package level
 
 import (
+	"fmt"
 	"math"
 	"sync"
 )
@@ -32,9 +33,10 @@ type Result interface {
 }
 
 /*
- * Data structure representing a level meter.
+ * Data structure representing a level meter for a single channel.
  */
-type meterStruct struct {
+type channelMeterStruct struct {
+	channelName   string
 	mutex         sync.RWMutex
 	currentValue  float64
 	peakValue     float64
@@ -42,11 +44,20 @@ type meterStruct struct {
 }
 
 /*
- * Interface type representing a level meter.
+ * Data structure representing level meters for multiple channels.
+ */
+type meterStruct struct {
+	channelMeters []*channelMeterStruct
+}
+
+/*
+ * Interface type representing a level meter for muliple channels.
  */
 type Meter interface {
-	Process(inputBuffer []float64, sampleRate uint32)
-	Analyze() Result
+	Analyze(channelId uint32) (Result, error)
+	ChannelCount() uint32
+	ChannelName(channelId uint32) (string, error)
+	Process(inputBuffers [][]float64, sampleRate uint32) error
 }
 
 /*
@@ -74,9 +85,9 @@ func (this *resultStruct) Peak() int32 {
 }
 
 /*
- * Feed the signal from an input buffer through the level meter.
+ * Feed the signal from an input buffer through a single-channel level meter.
  */
-func (this *meterStruct) Process(inputBuffer []float64, sampleRate uint32) {
+func (this *channelMeterStruct) process(buffer []float64, sampleRate uint32) {
 	this.mutex.RLock()
 	currentValue := this.currentValue
 	peakValue := this.peakValue
@@ -90,7 +101,7 @@ func (this *meterStruct) Process(inputBuffer []float64, sampleRate uint32) {
 	/*
 	 * Process each sample.
 	 */
-	for _, sample := range inputBuffer {
+	for _, sample := range buffer {
 		currentValue *= decayFactor
 
 		/*
@@ -130,9 +141,9 @@ func (this *meterStruct) Process(inputBuffer []float64, sampleRate uint32) {
 }
 
 /*
- * Perform analysis of signal level.
+ * Perform analysis of signal level of a single channel.
  */
-func (this *meterStruct) Analyze() Result {
+func (this *channelMeterStruct) analyze() Result {
 	this.mutex.RLock()
 	currentValue := this.currentValue
 	peakValue := this.peakValue
@@ -174,18 +185,135 @@ func (this *meterStruct) Analyze() Result {
 }
 
 /*
- * Creates a new level meter.
+ * Returns the name of the channel measured by this channel meter.
  */
-func CreateMeter() Meter {
+func (this *channelMeterStruct) name() string {
+	name := this.channelName
+	return name
+}
+
+/*
+ * Analyze the level of a certain channel.
+ */
+func (this *meterStruct) Analyze(channelId uint32) (Result, error) {
+	channelMeters := this.channelMeters
+	numMeters := len(channelMeters)
+	numMeters32 := uint32(numMeters)
 
 	/*
-	 * Create a new meter struct.
+	 * Check if channel number is within range.
 	 */
-	m := meterStruct{
-		currentValue:  0.0,
-		peakValue:     0.0,
-		sampleCounter: 0,
+	if channelId >= numMeters32 {
+		return nil, fmt.Errorf("Requested analysis for channel %d, but level meter only has %d channels.", channelId, numMeters)
+	} else {
+		channelMeter := channelMeters[channelId]
+		res := channelMeter.analyze()
+		return res, nil
 	}
 
-	return &m
+}
+
+/*
+ * Returns the number of channels this meter is able to process.
+ */
+func (this *meterStruct) ChannelCount() uint32 {
+	channelMeters := this.channelMeters
+	numChannels := len(channelMeters)
+	numChannels32 := uint32(numChannels)
+	return numChannels32
+}
+
+/*
+ * Returns the name of the channel with the provided id.
+ */
+func (this *meterStruct) ChannelName(channelId uint32) (string, error) {
+	channelMeters := this.channelMeters
+	numMeters := len(channelMeters)
+	numMeters32 := uint32(numMeters)
+
+	/*
+	 * Check if channel number is within range.
+	 */
+	if channelId >= numMeters32 {
+		return "", fmt.Errorf("Requested name of channel %d, but level meter only has %d channels.", channelId, numMeters)
+	} else {
+		channelMeter := channelMeters[channelId]
+		name := channelMeter.name()
+		return name, nil
+	}
+
+}
+
+/*
+ * Process input buffers for multiple channels.
+ */
+func (this *meterStruct) Process(buffers [][]float64, sampleRate uint32) error {
+	channelMeters := this.channelMeters
+	numChannels := len(channelMeters)
+	numBuffers := len(buffers)
+
+	/*
+	 * Make sure that the correct number of buffers is provided.
+	 */
+	if numChannels != numBuffers {
+		return fmt.Errorf("Number of input buffers (%d) does not match number of channels (%d) for this level meter.", numBuffers, numChannels)
+	} else {
+
+		/*
+		 * Feed input from each channel to the corresponding level meter.
+		 */
+		for i, buffer := range buffers {
+			channelMeter := channelMeters[i]
+			channelMeter.process(buffer, sampleRate)
+		}
+
+		return nil
+	}
+
+}
+
+/*
+ * Creates a new level meter for a certain number of channels.
+ */
+func CreateMeter(numChannels uint32, names []string) (Meter, error) {
+	numNames := len(names)
+	numNames32 := uint32(numNames)
+
+	/*
+	 * Check if number of channel names matches number of channels.
+	 */
+	if numChannels != numNames32 {
+		return nil, fmt.Errorf("Failed to create channel meter. Requested channel meter for %d channels, but provided %d channel names.", numChannels, numNames)
+	} else {
+		cms := make([]*channelMeterStruct, numChannels)
+
+		/*
+		 * Create the channel meters.
+		 */
+		for i := range cms {
+			name := names[i]
+
+			/*
+			 * Create a new channel meter.
+			 */
+			cm := &channelMeterStruct{
+				channelName:   name,
+				currentValue:  0.0,
+				peakValue:     0.0,
+				sampleCounter: 0,
+			}
+
+			cms[i] = cm
+		}
+
+		/*
+		 * Create a new level meter.
+		 */
+		m := meterStruct{
+			channelMeters: cms,
+		}
+
+		return &m, nil
+	}
+
 }

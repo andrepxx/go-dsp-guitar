@@ -2190,51 +2190,32 @@ function UI() {
 							var channelNames = unit.channelNames;
 							var numNames = channelNames.length;
 							var channelControls = unit.channelControls;
-							var idx = 0;
 							var mismatch = (dspLoadControl === null);
+							var channels = response.Channels;
+							var numChannels = channels.length;
 							
 							/*
-							 * Iterate over all categories ("Inputs", "Outputs",
-							 * "Metronome", "Master", ...) in the response.
+							 * Iterate over all channels in the response.
 							 */
-							for (var key in response) {
-								var keyNative = response.hasOwnProperty(key);
+							for (var i = 0; i < numChannels; i++) {
+								var channel = channels[i];
+								var channelNameResponse = channel.ChannelName;
 								
 								/*
-								 * Verify that the key is an actual property of
-								 * the response (and not of the prototype).
+								 * If one of the channels does not match,
+								 * report mismatch.
 								 */
-								if (keyNative) {
-									var category = response[key];
-									var numChannels = category.length;
+								if (numNames <= i)
+									mismatch = true;
+								else {
+									var channelNameControl = channelNames[i];
 									
 									/*
-									 * Iterate over the channels.
+									 * Check if name of the response matches name
+									 * of the control.
 									 */
-									for (var i = 0; i < numChannels; i++) {
-										var channel = category[i];
-										var channelNameResponse = channel.ChannelName;
-										
-										/*
-										 * If one of the channels does not match,
-										 * report mismatch.
-										 */
-										if (numNames <= idx)
-											mismatch = true;
-										else {
-											var channelNameControls = channelNames[idx];
-											
-											/*
-											 * Check if name of the response matches name
-											 * of the control.
-											 */
-											if (channelNameResponse !== channelNameControls)
-												mismatch = true;
-											
-										}
-										
-										idx++;
-									}
+									if (channelNameResponse !== channelNameControl)
+										mismatch = true;
 									
 								}
 								
@@ -2270,53 +2251,34 @@ function UI() {
 								channelControls = [];
 								
 								/*
-								 * Iterate over all categories ("Inputs", "Outputs",
-								 * "Metronome", "Master", ...) in the response.
+								 * Iterate over all channels in the response.
 								 */
-								for (var key in response) {
-									var isProperty = response.hasOwnProperty(key);
-									
-									/*
-									 * Verify that the key is an actual property of
-									 * the response (and not of the prototype).
-									 */
-									if (isProperty) {
-										var category = response[key];
-										var numChannels = category.length;
-										
-										/*
-										 * Iterate over the channels.
-										 */
-										for (var i = 0; i < numChannels; i++) {
-											var channel = category[i];
-											var channelName = channel.ChannelName;
-											var channelControl = pureknob.createBarGraph(400, 40);
-											channelControl.setProperty('colorFG', '#44ff44');
-											channelControl.setProperty('colorMarkers', '#ffffff');
-											channelControl.setProperty('markerStart', -60);
-											channelControl.setProperty('markerEnd', 0);
-											channelControl.setProperty('markerStep', 10);
-											channelControl.setProperty('valMin', -145);
-											channelControl.setProperty('valMax', 0);
-											channelControl.setValue(-145);
-											channelNames.push(channelName);
-											channelControls.push(channelControl);
-											var channelNameDiv = document.createElement('div');
-											var channelNameNode = document.createTextNode(channelName);
-											channelNameDiv.appendChild(channelNameNode);
-											var node = channelControl.node();
-											var nodeWrapper = document.createElement('div');
-											nodeWrapper.appendChild(node);
-											var container = document.createElement('div');
-											container.appendChild(channelNameDiv);
-											container.appendChild(nodeWrapper);
-											controlsDiv.appendChild(container);
-										}
-									
-									}
-									
+								for (var i = 0; i < numChannels; i++) {
+									var channel = channels[i];
+									var channelName = channel.ChannelName;
+									var channelControl = pureknob.createBarGraph(400, 40);
+									channelControl.setProperty('colorFG', '#44ff44');
+									channelControl.setProperty('colorMarkers', '#ffffff');
+									channelControl.setProperty('markerStart', -60);
+									channelControl.setProperty('markerEnd', 0);
+									channelControl.setProperty('markerStep', 10);
+									channelControl.setProperty('valMin', -145);
+									channelControl.setProperty('valMax', 0);
+									channelControl.setValue(-145);
+									channelNames.push(channelName);
+									channelControls.push(channelControl);
+									var channelNameDiv = document.createElement('div');
+									var channelNameNode = document.createTextNode(channelName);
+									channelNameDiv.appendChild(channelNameNode);
+									var node = channelControl.node();
+									var nodeWrapper = document.createElement('div');
+									nodeWrapper.appendChild(node);
+									var container = document.createElement('div');
+									container.appendChild(channelNameDiv);
+									container.appendChild(nodeWrapper);
+									controlsDiv.appendChild(container);
 								}
-								
+							
 							}
 							
 							/*
@@ -2327,38 +2289,16 @@ function UI() {
 								dspLoadControl.setValue(dspLoad);
 							}
 							
-							idx = 0;
-							
 							/*
-							 * Iterate over all categories ("Inputs", "Outputs",
-							 * "Metronome", "Master", ...) in the response.
+							 * Iterate over all channels in the response.
 							 */
-							for (var key in response) {
-								var isProperty = response.hasOwnProperty(key);
-								
-								/*
-								 * Verify that the key is an actual property of
-								 * the response (and not of the prototype).
-								 */
-								if (isProperty) {
-									var category = response[key];
-									var numChannels = category.length;
-									
-									/*
-									 * Iterate over the channels.
-									 */
-									for (var i = 0; i < numChannels; i++) {
-										var channel = category[i];
-										var channelLevel = channel.Level;
-										var channelPeak = channel.Peak;
-										var channelControl = channelControls[idx];
-										channelControl.setValue(channelLevel);
-										channelControl.setPeaks([channelPeak]);
-										idx++;
-									}
-								
-								}
-								
+							for (var i = 0; i < numChannels; i++) {
+								var channel = channels[i];
+								var channelLevel = channel.Level;
+								var channelPeak = channel.Peak;
+								var channelControl = channelControls[i];
+								channelControl.setValue(channelLevel);
+								channelControl.setPeaks([channelPeak]);
 							}
 							
 							unit.dspLoadControl = dspLoadControl;

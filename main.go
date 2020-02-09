@@ -10,7 +10,7 @@ import (
  * The entry point of our program.
  */
 func main() {
-	numChannels := flag.Int("channels", 0, "Number of channels for batch processing")
+	numChannels := flag.Uint64("channels", 0, "Number of channels for batch processing")
 	versionFlag := flag.Bool("version", false, "Print version information and exit")
 	flag.Parse()
 
@@ -30,8 +30,9 @@ func main() {
 
 		fmt.Printf("%s\n", msg)
 	} else {
+		numChannels32 := uint32(*numChannels)
 		cn := controller.CreateController()
-		cn.Operate(*numChannels)
+		cn.Operate(numChannels32)
 	}
 
 }
