@@ -46,13 +46,14 @@ type Result interface {
  * Data structure representing a tuner.
  */
 type tunerStruct struct {
-	notes          []noteStruct
-	mutexBuffer    sync.RWMutex
-	buffer         circular.Buffer
-	sampleRate     uint32
-	mutexAnalyze   sync.Mutex
-	bufCorrelation []float64
-	bufFFT         []complex128
+	notes            []noteStruct
+	mutexBuffer      sync.RWMutex
+	buffer           circular.Buffer
+	sampleRate       uint32
+	mutexAnalyze     sync.Mutex
+	fourierTransform fft.FourierTransform
+	bufCorrelation   []float64
+	bufFFT           []complex128
 }
 
 /*
@@ -418,9 +419,10 @@ func (this *tunerStruct) Analyze() (Result, error) {
 		this.mutexAnalyze.Unlock()
 		return nil, fmt.Errorf("Failed to retrieve contents of circular buffer: %s", msg)
 	} else {
+		ft := this.fourierTransform
 		tailBuffer := bufCorrelation[n:fftSize]
 		fft.ZeroFloat(tailBuffer)
-		err = fft.RealFourier(bufCorrelation, bufFFT, fft.SCALING_DEFAULT)
+		err = ft.RealFourier(bufCorrelation, bufFFT, fft.SCALING_DEFAULT)
 
 		/*
 		 * Verify that the forward FFT was calculated successfully.
@@ -439,7 +441,7 @@ func (this *tunerStruct) Analyze() (Result, error) {
 				bufFFT[i] = elem * elemConj
 			}
 
-			err = fft.RealInverseFourier(bufFFT, bufCorrelation, fft.SCALING_DEFAULT)
+			err = ft.RealInverseFourier(bufFFT, bufCorrelation, fft.SCALING_DEFAULT)
 
 			/*
 			 * Verify that the inverse FFT was calculated successfully.
@@ -590,13 +592,15 @@ func (this *tunerStruct) Process(samples []float64, sampleRate uint32) {
 func Create() Tuner {
 	notes := generateNotes()
 	buffer := circular.CreateBuffer(NUM_SAMPLES)
+	ft := fft.CreateFourierTransform()
 
 	/*
 	 * Create data structure for a guitar tuner.
 	 */
 	t := tunerStruct{
-		notes:  notes,
-		buffer: buffer,
+		notes:            notes,
+		buffer:           buffer,
+		fourierTransform: ft,
 	}
 
 	return &t

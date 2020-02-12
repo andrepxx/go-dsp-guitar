@@ -71,6 +71,7 @@ type ImpulseResponses interface {
  */
 type filterStruct struct {
 	impulseResponse     impulseResponseStruct
+	fourierTransform    fft.FourierTransform
 	filterComplex       []complex128
 	filteredComplex     []complex128
 	inputBuffer         []float64
@@ -220,6 +221,7 @@ func (this *filterStruct) Add(other Filter) (Filter, error) {
 				data:             coeffsResult,
 			}
 
+			ft := fft.CreateFourierTransform()
 			bufFilterC := make([]complex128, 0)
 			bufFilteredC := make([]complex128, 0)
 			bufInput := make([]float64, 0)
@@ -233,6 +235,7 @@ func (this *filterStruct) Add(other Filter) (Filter, error) {
 			 */
 			fltFilter := filterStruct{
 				impulseResponse:     irResult,
+				fourierTransform:    ft,
 				filterComplex:       bufFilterC,
 				filteredComplex:     bufFilteredC,
 				inputBuffer:         bufInput,
@@ -291,6 +294,7 @@ func (this *filterStruct) Multiply(scalar float64) Filter {
 		data:             coeffsResult,
 	}
 
+	ft := fft.CreateFourierTransform()
 	bufFilterC := make([]complex128, 0)
 	bufFilteredC := make([]complex128, 0)
 	bufInput := make([]float64, 0)
@@ -304,6 +308,7 @@ func (this *filterStruct) Multiply(scalar float64) Filter {
 	 */
 	fltFilter := filterStruct{
 		impulseResponse:     irResult,
+		fourierTransform:    ft,
 		filterComplex:       bufFilterC,
 		filteredComplex:     bufFilteredC,
 		inputBuffer:         bufInput,
@@ -359,6 +364,7 @@ func (this *filterStruct) Process(inputBuffer []float64, outputBuffer []float64)
 			if L == 0 {
 				fft.ZeroFloat(outputBuffer)
 			} else {
+				ft := this.fourierTransform
 				N64 := uint64(N)
 				L64 := uint64(L)
 				Npower, _ := fft.NextPowerOfTwo(N64)
@@ -387,7 +393,7 @@ func (this *filterStruct) Process(inputBuffer []float64, outputBuffer []float64)
 						coefficientsPadded := make([]float64, fftSize)
 						copy(coefficientsPadded[0:L], coefficients)
 						this.filterComplex = make([]complex128, fftSize)
-						fft.RealFourier(coefficientsPadded, this.filterComplex, fft.SCALING_DEFAULT)
+						ft.RealFourier(coefficientsPadded, this.filterComplex, fft.SCALING_DEFAULT)
 					}
 
 					/*
@@ -434,7 +440,7 @@ func (this *filterStruct) Process(inputBuffer []float64, outputBuffer []float64)
 					copy(this.inputBuffer[0:numSamples], currentInputBuffer)
 					fft.ZeroFloat(this.inputBuffer[numSamples:])
 					filteredComplex := this.filteredComplex
-					fft.RealFourier(this.inputBuffer, filteredComplex, fft.SCALING_DEFAULT)
+					ft.RealFourier(this.inputBuffer, filteredComplex, fft.SCALING_DEFAULT)
 					err := hadamardComplex(filteredComplex, filteredComplex, this.filterComplex)
 
 					/*
@@ -443,7 +449,7 @@ func (this *filterStruct) Process(inputBuffer []float64, outputBuffer []float64)
 					if err != nil {
 						return err
 					} else {
-						fft.RealInverseFourier(filteredComplex, this.outputBuffer, fft.SCALING_DEFAULT)
+						ft.RealInverseFourier(filteredComplex, this.outputBuffer, fft.SCALING_DEFAULT)
 						tailBuffer := this.tailBuffer
 
 						/*
@@ -516,8 +522,9 @@ func (this *filterStruct) Reduce(order uint32) Filter {
 	if nWord <= orderWord {
 		return this
 	} else {
+		ft := this.fourierTransform
 		fr := make([]complex128, nFftSource)
-		fft.RealFourier(coefficientsPadded, fr, fft.SCALING_DEFAULT)
+		ft.RealFourier(coefficientsPadded, fr, fft.SCALING_DEFAULT)
 		numPositiveFreqsSource := (nFftSourceWord >> 1) + 1
 		frPos := fr[:numPositiveFreqsSource]
 		nFftTargetHalf := nFftTargetWord >> 1
@@ -537,7 +544,7 @@ func (this *filterStruct) Reduce(order uint32) Filter {
 		}
 
 		targetResponse := make([]float64, nFftTarget)
-		fft.RealInverseFourier(frNew, targetResponse, fft.SCALING_DEFAULT)
+		ft.RealInverseFourier(frNew, targetResponse, fft.SCALING_DEFAULT)
 		coeffsNew := targetResponse[:order]
 		nameNew := ir.name + " (" + string(order) + ")"
 		rate := ir.sampleRate
@@ -553,6 +560,7 @@ func (this *filterStruct) Reduce(order uint32) Filter {
 			data:             coeffsNew,
 		}
 
+		ftNewFilter := fft.CreateFourierTransform()
 		bufFilterC := make([]complex128, 0)
 		bufFilteredC := make([]complex128, 0)
 		bufInput := make([]float64, 0)
@@ -565,6 +573,7 @@ func (this *filterStruct) Reduce(order uint32) Filter {
 		 * Create a new filter.
 		 */
 		fltFilter := filterStruct{
+			fourierTransform:    ftNewFilter,
 			impulseResponse:     irNew,
 			filterComplex:       bufFilterC,
 			filteredComplex:     bufFilteredC,
@@ -603,6 +612,7 @@ func (this *impulseResponsesStruct) CreateFilter(name string, sampleRate uint32)
 		 * Check if both name and sample rate match.
 		 */
 		if (ir.name == name) && (ir.sampleRate == sampleRate) {
+			ft := fft.CreateFourierTransform()
 			bufFilterC := make([]complex128, 0)
 			bufFilteredC := make([]complex128, 0)
 			bufInput := make([]float64, 0)
@@ -616,6 +626,7 @@ func (this *impulseResponsesStruct) CreateFilter(name string, sampleRate uint32)
 			 */
 			fltFilter := filterStruct{
 				impulseResponse:     ir,
+				fourierTransform:    ft,
 				filterComplex:       bufFilterC,
 				filteredComplex:     bufFilteredC,
 				inputBuffer:         bufInput,
@@ -791,6 +802,7 @@ func Empty(sampleRate uint32) Filter {
 		data:             coeffs,
 	}
 
+	ft := fft.CreateFourierTransform()
 	bufFilterC := make([]complex128, 0)
 	bufFilteredC := make([]complex128, 0)
 	bufInput := make([]float64, 0)
@@ -804,6 +816,7 @@ func Empty(sampleRate uint32) Filter {
 	 */
 	fltFilter := filterStruct{
 		impulseResponse:     ir,
+		fourierTransform:    ft,
 		filterComplex:       bufFilterC,
 		filteredComplex:     bufFilteredC,
 		inputBuffer:         bufInput,
@@ -834,6 +847,7 @@ func FromCoefficients(coeffs []float64, sampleRate uint32, name string) Filter {
 		data:             coeffsCopy,
 	}
 
+	ft := fft.CreateFourierTransform()
 	bufFilterC := make([]complex128, 0)
 	bufFilteredC := make([]complex128, 0)
 	bufInput := make([]float64, 0)
@@ -847,6 +861,7 @@ func FromCoefficients(coeffs []float64, sampleRate uint32, name string) Filter {
 	 */
 	fltFilter := filterStruct{
 		impulseResponse:     ir,
+		fourierTransform:    ft,
 		filterComplex:       bufFilterC,
 		filteredComplex:     bufFilteredC,
 		inputBuffer:         bufInput,

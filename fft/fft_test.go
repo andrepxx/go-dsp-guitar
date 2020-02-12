@@ -270,6 +270,8 @@ func TestRealFFT(t *testing.T) {
 		[]float64{0.0, 0.3759122, 0.64770012, 0.26019674, 0.0, -0.26019674, -0.64770012, -0.3759122},
 	}
 
+	ft := CreateFourierTransform()
+
 	/*
 	 * Test with each input vector.
 	 */
@@ -289,7 +291,7 @@ func TestRealFFT(t *testing.T) {
 			t.Errorf("Expected imaginary result vector %d is of incorrect size: Expected %d, got %d.", i, n, nImag)
 		} else {
 			currentResult := make([]complex128, nReal)
-			err := RealFourier(currentIn, currentResult, SCALING_DEFAULT)
+			err := ft.RealFourier(currentIn, currentResult, SCALING_DEFAULT)
 
 			/*
 			 * Check if forward transform was calculated successfully.
@@ -330,7 +332,7 @@ func TestRealFFT(t *testing.T) {
 			}
 
 			currentInverse := make([]float64, nReal)
-			err = RealInverseFourier(currentResult, currentInverse, SCALING_DEFAULT)
+			err = ft.RealInverseFourier(currentResult, currentInverse, SCALING_DEFAULT)
 
 			/*
 			 * Check if inverse transform was calculated successfully.
@@ -421,6 +423,8 @@ func TestComplexFFT(t *testing.T) {
 		MODE_INPLACE,
 	}
 
+	ft := CreateFourierTransform()
+
 	/*
 	 * Test with each mode of operation.
 	 */
@@ -465,7 +469,7 @@ func TestComplexFFT(t *testing.T) {
 				} else {
 					currentResult := make([]complex128, n)
 					copy(currentResult, currentComplexIn)
-					currentResult = Fourier(currentResult, SCALING_DEFAULT, mode)
+					currentResult = ft.Fourier(currentResult, SCALING_DEFAULT, mode)
 					currentResultReal := make([]float64, nReal)
 					currentResultImag := make([]float64, nImag)
 
@@ -497,7 +501,7 @@ func TestComplexFFT(t *testing.T) {
 
 					currentInverse := make([]complex128, n)
 					copy(currentInverse, currentResult)
-					currentInverse = InverseFourier(currentInverse, SCALING_DEFAULT, mode)
+					currentInverse = ft.InverseFourier(currentInverse, SCALING_DEFAULT, mode)
 					currentInverseReal := make([]float64, nReal)
 					currentInverseImag := make([]float64, nImag)
 
@@ -565,7 +569,8 @@ func TestOrthonormalScaling(t *testing.T) {
 
 	n := len(in)
 	result := make([]complex128, n)
-	err := RealFourier(in, result, SCALING_ORTHONORMAL)
+	ft := CreateFourierTransform()
+	err := ft.RealFourier(in, result, SCALING_ORTHONORMAL)
 
 	/*
 	 * Check if forward transform was calculated successfully.
@@ -606,7 +611,7 @@ func TestOrthonormalScaling(t *testing.T) {
 	}
 
 	inverse := make([]float64, n)
-	err = RealInverseFourier(result, inverse, SCALING_ORTHONORMAL)
+	err = ft.RealInverseFourier(result, inverse, SCALING_ORTHONORMAL)
 
 	/*
 	 * Check if inverse transform was calculated successfully.
@@ -649,7 +654,8 @@ func TestSingleElementFFT(t *testing.T) {
 
 	outReal := make([]float64, 1)
 	outComplex := make([]complex128, 1)
-	err := RealFourier(inReal, outComplex, SCALING_DEFAULT)
+	ft := CreateFourierTransform()
+	err := ft.RealFourier(inReal, outComplex, SCALING_DEFAULT)
 
 	/*
 	 * Check if forward transform was calculated successfully.
@@ -666,7 +672,7 @@ func TestSingleElementFFT(t *testing.T) {
 			t.Errorf("Single-element real FFT did not return expected result.")
 		}
 
-		err = RealInverseFourier(inComplex, outReal, SCALING_DEFAULT)
+		err = ft.RealInverseFourier(inComplex, outReal, SCALING_DEFAULT)
 
 		/*
 		 * Check if inverse transform was calculated successfully.
@@ -697,7 +703,8 @@ func TestFailureCases(t *testing.T) {
 	rEight := make([]float64, 8)
 	cThree := make([]complex128, 3)
 	cFour := make([]complex128, 4)
-	err := RealFourier(rThree, cThree, SCALING_DEFAULT)
+	ft := CreateFourierTransform()
+	err := ft.RealFourier(rThree, cThree, SCALING_DEFAULT)
 
 	/*
 	 * Verify that the transform failed.
@@ -706,7 +713,7 @@ func TestFailureCases(t *testing.T) {
 		t.Errorf("Real FFT of size three did not fail!")
 	}
 
-	err = RealInverseFourier(cThree, rThree, SCALING_DEFAULT)
+	err = ft.RealInverseFourier(cThree, rThree, SCALING_DEFAULT)
 
 	/*
 	 * Verify that the transform failed.
@@ -715,7 +722,7 @@ func TestFailureCases(t *testing.T) {
 		t.Errorf("Real IFFT of size three did not fail!")
 	}
 
-	err = RealFourier(rEight, cFour, SCALING_DEFAULT)
+	err = ft.RealFourier(rEight, cFour, SCALING_DEFAULT)
 
 	/*
 	 * Verify that the transform failed.
@@ -724,7 +731,7 @@ func TestFailureCases(t *testing.T) {
 		t.Errorf("Real FFT of unequal size did not fail!")
 	}
 
-	err = RealInverseFourier(cFour, rEight, SCALING_DEFAULT)
+	err = ft.RealInverseFourier(cFour, rEight, SCALING_DEFAULT)
 
 	/*
 	 * Verify that the transform failed.

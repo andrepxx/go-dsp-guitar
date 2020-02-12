@@ -32,7 +32,6 @@ const (
  * (1) Protecting the global data structures themselves.
  * (2) Protecting the large Fourier coefficients.
  * (3) Protecting the large permutation coefficients.
- * (4) Protecting the scrapspace.
  */
 var g_mutex sync.RWMutex                  // (1)
 var g_mutexCoefficientsLarge sync.RWMutex // (2)
@@ -41,8 +40,27 @@ var g_coefficientsSmall []complex128
 var g_mutexPermutationLarge sync.RWMutex // (3)
 var g_permutationLarge map[int][]int
 var g_permutationSmall []int
-var g_mutexScrapspace sync.Mutex // (4)
-var g_scrapspace []complex128
+
+/*
+ * A Fourier transform.
+ *
+ * A single transform is not safe for concurrent use!
+ */
+type FourierTransform interface {
+	Fourier(vec []complex128, scaling int, mode int) []complex128
+	InverseFourier(vec []complex128, scaling int, mode int) []complex128
+	RealFourier(in []float64, out []complex128, scaling int) error
+	RealInverseFourier(in []complex128, out []float64, scaling int) error
+}
+
+/*
+ * Data structure representing a Fourier transform.
+ *
+ * This data structure is not safe for concurrent use!
+ */
+type fourierTransformStruct struct {
+	scrapspace []complex128
+}
 
 /*
  * Generates Fourier coefficients for n = 1, 2, 4, 8, ..., 8192.
@@ -269,90 +287,6 @@ func cooleyTukey(vec []complex128) []complex128 {
 }
 
 /*
- * Perform the Fourier input permutation on a vector.
- */
-func permute(vec []complex128) {
-	n := len(vec)
-	coeff := permutationCoefficients(n)
-	g_mutexScrapspace.Lock()
-
-	/*
-	 * Check if size for scrapspace is sufficient.
-	 */
-	if g_scrapspace == nil || len(g_scrapspace) < n {
-		g_scrapspace = make([]complex128, n)
-	}
-
-	copy(g_scrapspace, vec)
-
-	/*
-	 * Permute the elements.
-	 */
-	for i := 0; i < n; i++ {
-		idx := coeff[i]
-		vec[i] = g_scrapspace[idx]
-	}
-
-	g_mutexScrapspace.Unlock()
-}
-
-/*
- * Compute the fast Fourier transform using an (unnamed?) in-place algorithm.
- */
-func inplaceTransform(vec []complex128) {
-	permute(vec)
-	n := len(vec)
-	coeffs := fourierCoefficients(n)
-	size := 1
-	stride := n
-	n64 := uint64(n)
-	npp := n64 + 1
-	_, p := NextPowerOfTwo(npp)
-	pmm := int(p - 1)
-
-	/*
-	 * Fourier rounds.
-	 */
-	for i := 1; i <= pmm; i++ {
-		size <<= 1
-		stride >>= 1
-		blocks := n / size // The number of blocks.
-
-		/*
-		 * Process each block.
-		 */
-		for j := 0; j < blocks; j++ {
-			halfBlocks := blocks << 1
-			half := n / halfBlocks // The length of a half-block.
-			dj := j << 1
-			offset := dj * half // The offset into the current block.
-
-			/*
-			 * Perform the butterfly operations.
-			 */
-			for k := 0; k < half; k++ {
-				i := k + offset
-				j := i + half
-				vi := vec[i]
-				vj := vec[j]
-				l := k * stride
-				m := half * stride
-				n := l + m
-				cl := coeffs[l]
-				cn := coeffs[n]
-				left := vi + (cl * vj)
-				right := vi + (cn * vj)
-				vec[i] = left
-				vec[j] = right
-			}
-
-		}
-
-	}
-
-}
-
-/*
  * Initialize the computation of a Fourier transform.
  */
 func initialize() {
@@ -503,9 +437,179 @@ func ZeroFloat(buffer []float64) {
 }
 
 /*
+ * Shift negative frequencies to lower indices than the DC component or invert the
+ * shifting process.
+ */
+func Shift(vec []complex128, inverse bool) {
+	n := len(vec)
+	nNegative := n >> 1
+	nPositive := nNegative
+	isOdd := (n & 1) != 0
+
+	/*
+	 * If the number of frequency bins is odd, there is one more bin for positive
+	 * frequencies than there are bins for negative frequencies.
+	 */
+	if isOdd {
+		nPositive++
+	}
+
+	ptrA := 0
+	ptrB := 0
+
+	/*
+	 * During the forward operation, the second pointer is offset from the first
+	 * pointer by the number of positive coefficients.
+	 *
+	 * During the inverse operation, the second pointer is offset from the first
+	 * pointer by the number of negative coefficients.
+	 */
+	if inverse {
+		ptrB = nNegative
+	} else {
+		ptrB = nPositive
+	}
+
+	/*
+	 * Do this until the second pointer reaches the end of the slice.
+	 */
+	for ptrB < n {
+		swapComplexElements(vec, ptrA, ptrB)
+		ptrA++
+		ptrB++
+	}
+
+	/*
+	 * If the number of frequency bins is odd, we have to perform further post-
+	 * processing. We have to rotate the entire "right half" of the vector,
+	 * including the central element, by one position to the left (during the
+	 * forward transform) or to the right (during the inverse transform).
+	 */
+	if isOdd {
+
+		/*
+		 * During the forward transform, we have to rotate to the left.
+		 * During the inverse transform, we have to rotate to the right.
+		 */
+		if inverse {
+			ptrB = n - 1
+			ptrA = ptrB - 1
+
+			/*
+			 * Do this until the first pointer reaches the positive elements.
+			 */
+			for ptrA >= nPositive {
+				swapComplexElements(vec, ptrA, ptrB)
+				ptrA--
+				ptrB--
+			}
+
+		} else {
+			ptrB = ptrA + 1
+
+			/*
+			 * Do this until the second pointer reaches the end of the slice.
+			 */
+			for ptrB < n {
+				swapComplexElements(vec, ptrA, ptrB)
+				ptrA++
+				ptrB++
+			}
+
+		}
+
+	}
+
+}
+
+/*
+ * Perform the Fourier input permutation on a vector.
+ */
+func (this *fourierTransformStruct) permute(vec []complex128) {
+	n := len(vec)
+	coeff := permutationCoefficients(n)
+	scrap := this.scrapspace
+
+	/*
+	 * Check if size for scrapspace is sufficient.
+	 */
+	if scrap == nil || len(scrap) < n {
+		scrap = make([]complex128, n)
+		this.scrapspace = scrap
+	}
+
+	copy(scrap, vec)
+
+	/*
+	 * Permute the elements.
+	 */
+	for i := 0; i < n; i++ {
+		idx := coeff[i]
+		vec[i] = scrap[idx]
+	}
+
+}
+
+/*
+ * Compute the fast Fourier transform using an (unnamed?) in-place algorithm.
+ */
+func (this *fourierTransformStruct) inplaceTransform(vec []complex128) {
+	this.permute(vec)
+	n := len(vec)
+	coeffs := fourierCoefficients(n)
+	size := 1
+	stride := n
+	n64 := uint64(n)
+	npp := n64 + 1
+	_, p := NextPowerOfTwo(npp)
+	pmm := int(p - 1)
+
+	/*
+	 * Fourier rounds.
+	 */
+	for i := 1; i <= pmm; i++ {
+		size <<= 1
+		stride >>= 1
+		blocks := n / size // The number of blocks.
+
+		/*
+		 * Process each block.
+		 */
+		for j := 0; j < blocks; j++ {
+			halfBlocks := blocks << 1
+			half := n / halfBlocks // The length of a half-block.
+			dj := j << 1
+			offset := dj * half // The offset into the current block.
+
+			/*
+			 * Perform the butterfly operations.
+			 */
+			for k := 0; k < half; k++ {
+				i := k + offset
+				j := i + half
+				vi := vec[i]
+				vj := vec[j]
+				l := k * stride
+				m := half * stride
+				n := l + m
+				cl := coeffs[l]
+				cn := coeffs[n]
+				left := vi + (cl * vj)
+				right := vi + (cn * vj)
+				vec[i] = left
+				vec[j] = right
+			}
+
+		}
+
+	}
+
+}
+
+/*
  * Calculates the Fourier transform of a vector.
  */
-func Fourier(vec []complex128, scaling int, mode int) []complex128 {
+func (this *fourierTransformStruct) Fourier(vec []complex128, scaling int, mode int) []complex128 {
 	initialize()
 	result := vec
 
@@ -524,7 +628,7 @@ func Fourier(vec []complex128, scaling int, mode int) []complex128 {
 	 * In-place mode - avoids copies of data elements, faster.
 	 */
 	case MODE_INPLACE:
-		inplaceTransform(result)
+		this.inplaceTransform(result)
 
 	/*
 	 * This should never happen.
@@ -565,7 +669,7 @@ func Fourier(vec []complex128, scaling int, mode int) []complex128 {
 /*
  * Calculates the inverse Fourier transform of a vector.
  */
-func InverseFourier(vec []complex128, scaling int, mode int) []complex128 {
+func (this *fourierTransformStruct) InverseFourier(vec []complex128, scaling int, mode int) []complex128 {
 	initialize()
 	n := len(vec)
 	nFloat := float64(n)
@@ -613,7 +717,7 @@ func InverseFourier(vec []complex128, scaling int, mode int) []complex128 {
 	 */
 	case MODE_INPLACE:
 		swapComplexInPlace(vec)
-		inplaceTransform(vec)
+		this.inplaceTransform(vec)
 		swapComplexInPlace(vec)
 
 		/*
@@ -637,7 +741,7 @@ func InverseFourier(vec []complex128, scaling int, mode int) []complex128 {
 /*
  * Performs a (forward) Fourier transform of a real-valued vector.
  */
-func RealFourier(in []float64, out []complex128, scaling int) error {
+func (this *fourierTransformStruct) RealFourier(in []float64, out []complex128, scaling int) error {
 	nIn := len(in)
 	nOut := len(out)
 
@@ -684,7 +788,7 @@ func RealFourier(in []float64, out []complex128, scaling int) error {
 
 			lower := out[0:nHalf]
 			upper := out[nHalf:nOut]
-			Fourier(lower, scaling, MODE_INPLACE)
+			this.Fourier(lower, scaling, MODE_INPLACE)
 			copy(upper, lower)
 			j := complex(0.0, 1.0)
 			coeffs := fourierCoefficients(nIn)
@@ -756,7 +860,7 @@ func RealFourier(in []float64, out []complex128, scaling int) error {
  *
  * This function will destroy the contents of the input vector in the process.
  */
-func RealInverseFourier(in []complex128, out []float64, scaling int) error {
+func (this *fourierTransformStruct) RealInverseFourier(in []complex128, out []float64, scaling int) error {
 	nIn := len(in)
 	nOut := len(out)
 
@@ -847,7 +951,7 @@ func RealInverseFourier(in []complex128, out []float64, scaling int) error {
 			/* END MAGIC */
 
 			ZeroComplex(upper)
-			InverseFourier(lower, scaling, MODE_INPLACE)
+			this.InverseFourier(lower, scaling, MODE_INPLACE)
 
 			/*
 			 * Extract the real components from the lower half of the
@@ -886,87 +990,9 @@ func RealInverseFourier(in []complex128, out []float64, scaling int) error {
 }
 
 /*
- * Shift negative frequencies to lower indices than the DC component or invert the
- * shifting process.
+ * Creates a Fourier transform.
  */
-func Shift(vec []complex128, inverse bool) {
-	n := len(vec)
-	nNegative := n >> 1
-	nPositive := nNegative
-	isOdd := (n & 1) != 0
-
-	/*
-	 * If the number of frequency bins is odd, there is one more bin for positive
-	 * frequencies than there are bins for negative frequencies.
-	 */
-	if isOdd {
-		nPositive++
-	}
-
-	ptrA := 0
-	ptrB := 0
-
-	/*
-	 * During the forward operation, the second pointer is offset from the first
-	 * pointer by the number of positive coefficients.
-	 *
-	 * During the inverse operation, the second pointer is offset from the first
-	 * pointer by the number of negative coefficients.
-	 */
-	if inverse {
-		ptrB = nNegative
-	} else {
-		ptrB = nPositive
-	}
-
-	/*
-	 * Do this until the second pointer reaches the end of the slice.
-	 */
-	for ptrB < n {
-		swapComplexElements(vec, ptrA, ptrB)
-		ptrA++
-		ptrB++
-	}
-
-	/*
-	 * If the number of frequency bins is odd, we have to perform further post-
-	 * processing. We have to rotate the entire "right half" of the vector,
-	 * including the central element, by one position to the left (during the
-	 * forward transform) or to the right (during the inverse transform).
-	 */
-	if isOdd {
-
-		/*
-		 * During the forward transform, we have to rotate to the left.
-		 * During the inverse transform, we have to rotate to the right.
-		 */
-		if inverse {
-			ptrB = n - 1
-			ptrA = ptrB - 1
-
-			/*
-			 * Do this until the first pointer reaches the positive elements.
-			 */
-			for ptrA >= nPositive {
-				swapComplexElements(vec, ptrA, ptrB)
-				ptrA--
-				ptrB--
-			}
-
-		} else {
-			ptrB = ptrA + 1
-
-			/*
-			 * Do this until the second pointer reaches the end of the slice.
-			 */
-			for ptrB < n {
-				swapComplexElements(vec, ptrA, ptrB)
-				ptrA++
-				ptrB++
-			}
-
-		}
-
-	}
-
+func CreateFourierTransform() FourierTransform {
+	f := fourierTransformStruct{}
+	return &f
 }
