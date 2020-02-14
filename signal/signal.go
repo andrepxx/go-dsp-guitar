@@ -75,8 +75,10 @@ func (this *chainStruct) AppendUnit(unitType int) (int, error) {
 		}
 
 		this.mutex.Lock()
-		nPre := len(this.slots)
-		this.slots = append(this.slots, slot)
+		slots := this.slots
+		nPre := len(slots)
+		slots = append(slots, slot)
+		this.slots = slots
 		this.mutex.Unlock()
 		return nPre, nil
 	}
@@ -88,7 +90,8 @@ func (this *chainStruct) AppendUnit(unitType int) (int, error) {
  */
 func (this *chainStruct) RemoveUnit(id int) error {
 	this.mutex.Lock()
-	n := len(this.slots)
+	slots := this.slots
+	n := len(slots)
 
 	/*
 	 * Check if index is out of range.
@@ -98,7 +101,8 @@ func (this *chainStruct) RemoveUnit(id int) error {
 		return fmt.Errorf("Cannot remove unit %d.", id)
 	} else {
 		idInc := id + 1
-		this.slots = append(this.slots[:id], this.slots[idInc:]...)
+		slots = append(slots[:id], slots[idInc:]...)
+		this.slots = slots
 		this.mutex.Unlock()
 		return nil
 	}
@@ -110,7 +114,8 @@ func (this *chainStruct) RemoveUnit(id int) error {
  */
 func (this *chainStruct) MoveUp(id int) error {
 	this.mutex.Lock()
-	n := len(this.slots)
+	slots := this.slots
+	n := len(slots)
 
 	/*
 	 * Check if index is out of range.
@@ -120,7 +125,7 @@ func (this *chainStruct) MoveUp(id int) error {
 		return fmt.Errorf("Cannot move unit %d up.", id)
 	} else {
 		idDec := id - 1
-		this.slots[id], this.slots[idDec] = this.slots[idDec], this.slots[id]
+		slots[id], slots[idDec] = slots[idDec], slots[id]
 		this.mutex.Unlock()
 		return nil
 	}
@@ -132,7 +137,8 @@ func (this *chainStruct) MoveUp(id int) error {
  */
 func (this *chainStruct) MoveDown(id int) error {
 	this.mutex.Lock()
-	n := len(this.slots)
+	slots := this.slots
+	n := len(slots)
 	nDec := n - 1
 
 	/*
@@ -143,7 +149,7 @@ func (this *chainStruct) MoveDown(id int) error {
 		return fmt.Errorf("Cannot move unit %d down.", id)
 	} else {
 		idInc := id + 1
-		this.slots[id], this.slots[idInc] = this.slots[idInc], this.slots[id]
+		slots[id], slots[idInc] = slots[idInc], slots[id]
 		this.mutex.Unlock()
 		return nil
 	}
@@ -155,7 +161,8 @@ func (this *chainStruct) MoveDown(id int) error {
  */
 func (this *chainStruct) UnitType(id int) (int, error) {
 	this.mutex.RLock()
-	n := len(this.slots)
+	slots := this.slots
+	n := len(slots)
 
 	/*
 	 * Check if index is out of range.
@@ -164,11 +171,12 @@ func (this *chainStruct) UnitType(id int) (int, error) {
 		this.mutex.RUnlock()
 		return -1, fmt.Errorf("Cannot get unit type: No unit %d.", id)
 	} else {
-		unit := this.slots[id].unit
+		unit := slots[id].unit
 		unitType := unit.Type()
 		this.mutex.RUnlock()
 		return unitType, nil
 	}
+
 }
 
 /*
@@ -176,7 +184,8 @@ func (this *chainStruct) UnitType(id int) (int, error) {
  */
 func (this *chainStruct) SetBypass(id int, bypass bool) error {
 	this.mutex.Lock()
-	n := len(this.slots)
+	slots := this.slots
+	n := len(slots)
 
 	/*
 	 * Check if index is out of range.
@@ -194,7 +203,7 @@ func (this *chainStruct) SetBypass(id int, bypass bool) error {
 
 		return fmt.Errorf("Cannot %s bypass: No unit %d.", action, id)
 	} else {
-		this.slots[id].bypass = bypass
+		slots[id].bypass = bypass
 		this.mutex.Unlock()
 		return nil
 	}
@@ -206,7 +215,8 @@ func (this *chainStruct) SetBypass(id int, bypass bool) error {
  */
 func (this *chainStruct) GetBypass(id int) (bool, error) {
 	this.mutex.RLock()
-	n := len(this.slots)
+	slots := this.slots
+	n := len(slots)
 
 	/*
 	 * Check if index is out of range.
@@ -215,7 +225,7 @@ func (this *chainStruct) GetBypass(id int) (bool, error) {
 		this.mutex.RUnlock()
 		return false, fmt.Errorf("Cannot get bypass value: No unit %d.", id)
 	} else {
-		bypass := this.slots[id].bypass
+		bypass := slots[id].bypass
 		this.mutex.RUnlock()
 		return bypass, nil
 	}
@@ -227,7 +237,8 @@ func (this *chainStruct) GetBypass(id int) (bool, error) {
  */
 func (this *chainStruct) SetDiscreteValue(id int, name string, value string) error {
 	this.mutex.RLock()
-	n := len(this.slots)
+	slots := this.slots
+	n := len(slots)
 
 	/*
 	 * Check if index is out of range.
@@ -236,7 +247,7 @@ func (this *chainStruct) SetDiscreteValue(id int, name string, value string) err
 		this.mutex.RUnlock()
 		return fmt.Errorf("Cannot set discrete value: No unit %d.", id)
 	} else {
-		unit := this.slots[id].unit
+		unit := slots[id].unit
 		this.mutex.RUnlock()
 		err := unit.SetDiscreteValue(name, value)
 		return err
@@ -249,7 +260,8 @@ func (this *chainStruct) SetDiscreteValue(id int, name string, value string) err
  */
 func (this *chainStruct) GetDiscreteValue(id int, name string) (string, error) {
 	this.mutex.RLock()
-	n := len(this.slots)
+	slots := this.slots
+	n := len(slots)
 
 	/*
 	 * Check if index is out of range.
@@ -258,7 +270,7 @@ func (this *chainStruct) GetDiscreteValue(id int, name string) (string, error) {
 		this.mutex.RUnlock()
 		return "", fmt.Errorf("Cannot get discrete value: No unit %d.", id)
 	} else {
-		unit := this.slots[id].unit
+		unit := slots[id].unit
 		this.mutex.RUnlock()
 		value, err := unit.GetDiscreteValue(name)
 		return value, err
@@ -271,7 +283,8 @@ func (this *chainStruct) GetDiscreteValue(id int, name string) (string, error) {
  */
 func (this *chainStruct) SetNumericValue(id int, name string, value int32) error {
 	this.mutex.RLock()
-	n := len(this.slots)
+	slots := this.slots
+	n := len(slots)
 
 	/*
 	 * Check if index is out of range.
@@ -279,7 +292,7 @@ func (this *chainStruct) SetNumericValue(id int, name string, value int32) error
 	if id < 0 || id >= n {
 		return fmt.Errorf("Cannot set numeric value: No unit %d.", id)
 	} else {
-		unit := this.slots[id].unit
+		unit := slots[id].unit
 		this.mutex.RUnlock()
 		err := unit.SetNumericValue(name, value)
 		return err
@@ -292,7 +305,8 @@ func (this *chainStruct) SetNumericValue(id int, name string, value int32) error
  */
 func (this *chainStruct) GetNumericValue(id int, name string) (int32, error) {
 	this.mutex.RLock()
-	n := len(this.slots)
+	slots := this.slots
+	n := len(slots)
 
 	/*
 	 * Check if index is out of range.
@@ -300,7 +314,7 @@ func (this *chainStruct) GetNumericValue(id int, name string) (int32, error) {
 	if id < 0 || id >= n {
 		return 0, fmt.Errorf("Cannot get numeric value: No unit %d.", id)
 	} else {
-		unit := this.slots[id].unit
+		unit := slots[id].unit
 		this.mutex.RUnlock()
 		value, err := unit.GetNumericValue(name)
 		return value, err
@@ -313,7 +327,8 @@ func (this *chainStruct) GetNumericValue(id int, name string) (int32, error) {
  */
 func (this *chainStruct) Parameters(id int) ([]effects.Parameter, error) {
 	this.mutex.RLock()
-	n := len(this.slots)
+	slots := this.slots
+	n := len(slots)
 
 	/*
 	 * Check if index is out of range.
@@ -321,7 +336,7 @@ func (this *chainStruct) Parameters(id int) ([]effects.Parameter, error) {
 	if id < 0 || id >= n {
 		return nil, fmt.Errorf("Cannot get parameters: No unit %d.", id)
 	} else {
-		unit := this.slots[id].unit
+		unit := slots[id].unit
 		this.mutex.RUnlock()
 		params := unit.Parameters()
 		return params, nil
@@ -334,7 +349,8 @@ func (this *chainStruct) Parameters(id int) ([]effects.Parameter, error) {
  */
 func (this *chainStruct) Length() int {
 	this.mutex.RLock()
-	n := len(this.slots)
+	slots := this.slots
+	n := len(slots)
 	this.mutex.RUnlock()
 	return n
 }
@@ -349,39 +365,48 @@ func (this *chainStruct) Process(in []float64, out []float64, sampleRate uint32)
 	 */
 	if len(in) == len(out) {
 		n := len(in)
+		bufferIn := this.bufferIn
 
 		/*
 		 * If size of input buffer does not match, reallocate it.
 		 */
-		if len(this.bufferIn) != n {
-			this.bufferIn = make([]float64, n)
+		if len(bufferIn) != n {
+			bufferIn = make([]float64, n)
+			this.bufferIn = bufferIn
 		}
+
+		bufferOut := this.bufferOut
 
 		/*
 		 * If size of output buffer does not match, reallocate it.
 		 */
-		if len(this.bufferOut) != n {
-			this.bufferOut = make([]float64, n)
+		if len(bufferOut) != n {
+			bufferOut = make([]float64, n)
+			this.bufferOut = bufferOut
 		}
 
-		copy(this.bufferIn, in)
+		copy(bufferIn, in)
 		this.mutex.RLock()
+		slots := this.slots
 
 		/*
 		 * Iterate over the slots.
 		 */
-		for _, slot := range this.slots {
+		for _, slot := range slots {
 
 			/*
 			 * Verify that slot is not in bypass mode.
 			 */
 			if !slot.bypass {
-				slot.unit.Process(this.bufferIn, this.bufferOut, sampleRate)
-				this.bufferIn, this.bufferOut = this.bufferOut, this.bufferIn
+				unit := slot.unit
+				unit.Process(bufferIn, bufferOut, sampleRate)
+				bufferIn, bufferOut = bufferOut, bufferIn
 			}
 
 		}
 
+		this.bufferIn = bufferIn
+		this.bufferOut = bufferOut
 		this.mutex.RUnlock()
 		copy(out, this.bufferIn)
 	}

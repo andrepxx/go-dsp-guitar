@@ -256,7 +256,8 @@ func (this *filterStruct) Add(other Filter) (Filter, error) {
  * Return filter coefficients.
  */
 func (this *filterStruct) Coefficients() []float64 {
-	coeff := this.impulseResponse.data
+	ir := this.impulseResponse
+	coeff := ir.data
 	size := len(coeff)
 	coeffCopy := make([]float64, size)
 	copy(coeffCopy, coeff)
@@ -348,7 +349,8 @@ func (this *filterStruct) Process(inputBuffer []float64, outputBuffer []float64)
 	if M != N {
 		return fmt.Errorf("%s", "Output and input buffer must be of the same size.")
 	} else {
-		coefficients := this.impulseResponse.data
+		ir := this.impulseResponse
+		coefficients := ir.data
 
 		/*
 		 * Check if impulse response exists.
@@ -385,43 +387,57 @@ func (this *filterStruct) Process(inputBuffer []float64, outputBuffer []float64)
 				for i := uint64(0); i < numBlocks; i++ {
 					fftSize64 := blockSize << 1
 					fftSize := int(fftSize64)
+					filterComplex := this.filterComplex
 
 					/*
 					 * Pre-calculate the FFT of the filter.
 					 */
-					if len(this.filterComplex) != fftSize {
+					if len(filterComplex) != fftSize {
 						coefficientsPadded := make([]float64, fftSize)
 						copy(coefficientsPadded[0:L], coefficients)
-						this.filterComplex = make([]complex128, fftSize)
-						ft.RealFourier(coefficientsPadded, this.filterComplex, fft.SCALING_DEFAULT)
+						filterComplex = make([]complex128, fftSize)
+						ft.RealFourier(coefficientsPadded, filterComplex, fft.SCALING_DEFAULT)
+						this.filterComplex = filterComplex
 					}
+
+					filteredComplex := this.filteredComplex
 
 					/*
 					 * Check if complex-valued filtered (FFT) buffer is of correct size.
 					 */
-					if len(this.filteredComplex) != fftSize {
-						this.filteredComplex = make([]complex128, fftSize)
+					if len(filteredComplex) != fftSize {
+						filteredComplex = make([]complex128, fftSize)
+						this.filteredComplex = filteredComplex
 					}
+
+					filterInputBuffer := this.inputBuffer
 
 					/*
 					 * Check if real-valued input buffer is of the correct size.
 					 */
-					if len(this.inputBuffer) != fftSize {
-						this.inputBuffer = make([]float64, fftSize)
+					if len(filterInputBuffer) != fftSize {
+						filterInputBuffer = make([]float64, fftSize)
+						this.inputBuffer = filterInputBuffer
 					}
+
+					filterOutputBuffer := this.outputBuffer
 
 					/*
 					 * Check if real-valued output buffer is of the correct size.
 					 */
-					if len(this.outputBuffer) != fftSize {
-						this.outputBuffer = make([]float64, fftSize)
+					if len(filterOutputBuffer) != fftSize {
+						filterOutputBuffer = make([]float64, fftSize)
+						this.outputBuffer = filterOutputBuffer
 					}
+
+					tailBuffer := this.tailBuffer
 
 					/*
 					 * Check if real-valued tail buffer is of the correct size.
 					 */
-					if len(this.tailBuffer) != fftSize {
-						this.tailBuffer = make([]float64, fftSize)
+					if len(tailBuffer) != fftSize {
+						tailBuffer = make([]float64, fftSize)
+						this.tailBuffer = tailBuffer
 					}
 
 					lBound := i * blockSize
@@ -437,11 +453,10 @@ func (this *filterStruct) Process(inputBuffer []float64, outputBuffer []float64)
 					currentInputBuffer := inputBuffer[lBound:uBound]
 					currentOutputBuffer := outputBuffer[lBound:uBound]
 					numSamples := uBound - lBound
-					copy(this.inputBuffer[0:numSamples], currentInputBuffer)
-					fft.ZeroFloat(this.inputBuffer[numSamples:])
-					filteredComplex := this.filteredComplex
-					ft.RealFourier(this.inputBuffer, filteredComplex, fft.SCALING_DEFAULT)
-					err := hadamardComplex(filteredComplex, filteredComplex, this.filterComplex)
+					copy(filterInputBuffer[0:numSamples], currentInputBuffer)
+					fft.ZeroFloat(filterInputBuffer[numSamples:])
+					ft.RealFourier(filterInputBuffer, filteredComplex, fft.SCALING_DEFAULT)
+					err := hadamardComplex(filteredComplex, filteredComplex, filterComplex)
 
 					/*
 					 * Check if hadamard product was calculated successfully.
@@ -449,14 +464,13 @@ func (this *filterStruct) Process(inputBuffer []float64, outputBuffer []float64)
 					if err != nil {
 						return err
 					} else {
-						ft.RealInverseFourier(filteredComplex, this.outputBuffer, fft.SCALING_DEFAULT)
-						tailBuffer := this.tailBuffer
+						ft.RealInverseFourier(filteredComplex, filterOutputBuffer, fft.SCALING_DEFAULT)
 
 						/*
 						 * Calculate the total output by overlapping with the tail of the
 						 * previous calculation.
 						 */
-						for j, elem := range this.outputBuffer {
+						for j, elem := range filterOutputBuffer {
 							tailElem := tailBuffer[j]
 							pre := elem + tailElem
 							j64 := uint64(j)
@@ -594,7 +608,8 @@ func (this *filterStruct) Reduce(order uint32) Filter {
  */
 func (this *filterStruct) SampleRate() uint32 {
 	ir := this.impulseResponse
-	return ir.sampleRate
+	sampleRate := ir.sampleRate
+	return sampleRate
 }
 
 /*
