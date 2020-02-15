@@ -189,3 +189,7 @@ You may need the following packages in order to build the software on your syste
 
 **A:** We're well aware of the fact that macOS has a high market share among the creative folks. However, we currently neither have a device for building and testing nor do we know, which changes we'd have to make to our software so that it builds for macOS. Feel free to fork our project and try to port it to macOS though. When you're done, submit a pull request and we might merge your changes into mainline. (We still won't be able to provide binaries though.) Keep in mind that we will only accept changes which do not break functionality on our currently supported platforms.
 
+**Q: You implement real-time audio processing in a garbage-collected language and use mutex locks for synchronization. Won't that be detrimental to the performance?**
+
+**A:** A performance discussion / analysis is available [here](/doc/performance.md).
+
