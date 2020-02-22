@@ -46,6 +46,7 @@ const (
 const (
 	MATH_DEGREE_TO_RADIANS = math.Pi / 180.0
 	MATH_PI_THOUSANDTH     = 0.001 * math.Pi
+	MATH_QUARTER_PI        = 0.25 * math.Pi
 	MATH_TWO_OVER_PI       = 2.0 / math.Pi
 	MATH_TWO_PI            = 2.0 * math.Pi
 	MATH_TWO_PI_FIFTH      = 0.4 * math.Pi

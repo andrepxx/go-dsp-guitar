@@ -5,6 +5,12 @@ import (
 	"math"
 )
 
+const (
+	VALVE_TYPE_INVALID = iota - 1
+	VALVE_TYPE_ECC82
+	VALVE_TYPE_ECC83
+)
+
 /*
  * Data structure representing an overdrive effect.
  */
@@ -25,6 +31,7 @@ func (this *overdrive) processOversampled(in []float64, out []float64, sampleRat
 	gain, _ := this.getNumericValue("gain")
 	drive, _ := this.getNumericValue("drive")
 	level, _ := this.getNumericValue("level")
+	valve, _ := this.getDiscreteValue("valve")
 	this.mutex.RUnlock()
 	totalGain := boost + gain
 	gainFactor := decibelsToFactor(totalGain)
@@ -32,14 +39,38 @@ func (this *overdrive) processOversampled(in []float64, out []float64, sampleRat
 	driveFactor := 0.01 * driveFloat
 	cleanFactor := 1.0 - driveFactor
 	levelFactor := decibelsToFactor(level)
+	valveType := int(VALVE_TYPE_INVALID)
+
+	/*
+	 * Select type of valve.
+	 */
+	switch valve {
+	case "ECC82 (12AU7)":
+		valveType = VALVE_TYPE_ECC82
+	case "ECC83 (12AX7)":
+		valveType = VALVE_TYPE_ECC83
+	}
 
 	/*
 	 * Process each sample.
 	 */
 	for i, sample := range in {
-		arg := -gainFactor * sample
-		x := math.Exp(arg)
-		dist := (2.0 / (1.0 + x)) - 1.0
+		arg := gainFactor * sample
+		dist := 0.0
+
+		/*
+		 * Apply valve-specific non-linear function.
+		 */
+		switch valveType {
+		case VALVE_TYPE_ECC82:
+			aarg := MATH_QUARTER_PI * arg
+			x := math.Atan(aarg)
+			dist = MATH_TWO_OVER_PI * x
+		case VALVE_TYPE_ECC83:
+			x := math.Exp(-arg)
+			dist = (2.0 / (1.0 + x)) - 1.0
+		}
+
 		mix := (driveFactor * dist) + (cleanFactor * sample)
 		out[i] = levelFactor * mix
 	}
@@ -162,6 +193,19 @@ func createOverdrive() Unit {
 					NumericValue:       0,
 					DiscreteValueIndex: -1,
 					DiscreteValues:     nil,
+				},
+				Parameter{
+					Name:               "valve",
+					Type:               PARAMETER_TYPE_DISCRETE,
+					PhysicalUnit:       "",
+					Minimum:            -1,
+					Maximum:            -1,
+					NumericValue:       -1,
+					DiscreteValueIndex: 1,
+					DiscreteValues: []string{
+						"ECC82 (12AU7)",
+						"ECC83 (12AX7)",
+					},
 				},
 				Parameter{
 					Name:               "oversampling",

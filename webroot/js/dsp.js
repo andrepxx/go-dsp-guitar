@@ -420,7 +420,8 @@ function UI() {
 		'to_output': 'To: Output',
 		'tone_stack': 'Tone stack',
 		'tremolo': 'Tremolo',
-		'tuner': 'Tuner'
+		'tuner': 'Tuner',
+		'valve': 'Valve'
 	};
 	
 	/*
