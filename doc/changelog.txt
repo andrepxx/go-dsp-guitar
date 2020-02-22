@@ -1,6 +1,26 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.5.1
+
+Maintenance / bugfixes / corrections:
+
+- Several small optimizations and corrections.
+- Make proper use of "fmt.Errorf(...)" function.
+- Make use of real FFT / IFFT for reducing filter order.
+- Remove now-dead code from filter package.
+- Make critical sections in level meters shorter.
+- Increase coverage of unit tests for oversampling package.
+- Reduce lock contention during FFT.
+- Improve code of level meter and spatializer implementation.
+- Write new test cases for new multi-channel level meter implementation.
+- Clean up other code as a result of the refactoring.
+- Make the Fourier transform instantiable to avoid locking permutation buffers.
+- Add performance analysis / discussion document.
+- Increment patch version number: v1.5.0 --> v1.5.1
+
+
+
 v1.5.0
 
 New features / enhancements:
