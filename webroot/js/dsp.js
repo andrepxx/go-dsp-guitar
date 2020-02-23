@@ -340,6 +340,7 @@ function UI() {
 		'distortion': 'Distortion',
 		'drive': 'Drive',
 		'dsp_load': 'DSP load',
+		'enabled': 'Enabled',
 		'excess': 'Excess',
 		'feedback': 'Feedback',
 		'file_transfer_instructions': 'Right-click here and select \'Save link / target as ...\' to save current patch. Drop patch file here to restore patch.',
@@ -1350,7 +1351,7 @@ function UI() {
 		var labelFramesPerPeriod = ui.getString('frames_per_period');
 		var framesPerPeriod = configuration.FramesPerPeriod;
 		var dropdownRow = document.createElement('div');
-		var values = [64, 128, 256, 512, 1024, 2048, 4096, 8192];
+		var values = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192];
 		var valueIdx = 0;
 		
 		/*
@@ -2126,6 +2127,8 @@ function UI() {
 	 */
 	this.renderSignalLevels = function(configuration) {
 		var batchProcessing = configuration.BatchProcessing;
+		var levelMeter = configuration.LevelMeter;
+		var enabled = levelMeter.Enabled;
 		var elem = document.getElementById('levels');
 		helper.clearElement(elem);
 		
@@ -2137,6 +2140,42 @@ function UI() {
 			unitDiv.classList.add('contentdiv');
 			unitDiv.classList.add('masterunitdiv');
 			var headerDiv = document.createElement('div');
+			var enabledString = ui.getString('enabled');
+			
+			/*
+			 * Parameters for metronome button.
+			 */
+			var paramsButton = {
+				caption: enabledString,
+				active: enabled
+			};
+			
+			var button = ui.createButton(paramsButton);
+			var buttonElem = button.input;
+			storage.put(buttonElem, 'active', enabled);
+			
+			/*
+			 * This is called when the user clicks on the 'enabled' button of the level meter.
+			 */
+			buttonElem.onclick = function(e) {
+				var active = !storage.get(this, 'active');
+				
+				/*
+				 * Check whether the control should be active.
+				 */
+				if (active) {
+					this.classList.remove('buttonnormal');
+					this.classList.add('buttonactive');
+				} else {
+					this.classList.remove('buttonactive');
+					this.classList.add('buttonnormal');
+				}
+				
+				storage.put(this, 'active', active);
+				handler.setLevelMeterEnabled(active);
+			};
+			
+			headerDiv.appendChild(buttonElem);
 			var labelDiv = document.createElement('div');
 			labelDiv.classList.add('labeldiv');
 			labelDiv.classList.add('active');
@@ -2968,6 +3007,54 @@ function Handler() {
 		var request = new Request();
 		request.append('cgi', 'set-level');
 		request.append('chain', chainString);
+		request.append('value', valueString);
+		var requestBody = request.getData();
+		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
+	};
+	
+	/*
+	 * This is called when the level meter should be enabled or disabled.
+	 */
+	this.setLevelMeterEnabled = function(value) {
+		
+		/*
+		 * This gets called when the server returns a response.
+		 */
+		var responseHandler = function(response) {
+			var webResponse = helper.parseJSON(response);
+			
+			/*
+			 * Check if the response is valid JSON.
+			 */
+			if (webResponse !== null) {
+				
+				/*
+				 * If we were not successful, log failed attempt.
+				 */
+				if (webResponse.Success !== true) {
+					var reason = webResponse.Reason;
+					var action = 'Enabling';
+					
+					/*
+					 * Check if we should disable the level meter.
+					 */
+					if (!value) {
+						action = 'Disabling';
+					}
+					
+					var msg = action + ' level meter failed: ' + reason;
+					console.log(msg);
+				}
+				
+			}
+			
+		};
+		
+		var url = globals.cgi;
+		var mimeType = globals.mimeDefault;
+		var valueString = value.toString();
+		var request = new Request();
+		request.append('cgi', 'set-level-meter-enabled');
 		request.append('value', valueString);
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);

@@ -134,6 +134,13 @@ type webTunerResultStruct struct {
 }
 
 /*
+ * A data structure encoding the current status of the level meter.
+ */
+type webLevelMeterStruct struct {
+	Enabled bool
+}
+
+/*
  * A data structure encoding the results of the analysis performed by a level meter.
  */
 type webLevelMeterResultStruct struct {
@@ -159,6 +166,7 @@ type webConfigurationStruct struct {
 	Tuner           webTunerStruct
 	Spatializer     webSpatializerStruct
 	Metronome       webMetronomeStruct
+	LevelMeter      webLevelMeterStruct
 	BatchProcessing bool
 }
 
@@ -450,6 +458,16 @@ func (this *controllerStruct) getConfigurationHandler(request webserver.HttpRequ
 		TockSound:      tockSound,
 	}
 
+	levelMeter := this.levelMeter
+	levelMeterEnabled := levelMeter.Enabled()
+
+	/*
+	 * Create level meters structure.
+	 */
+	meter := webLevelMeterStruct{
+		Enabled: levelMeterEnabled,
+	}
+
 	batchProcessing := (this.binding == nil)
 
 	/*
@@ -461,6 +479,7 @@ func (this *controllerStruct) getConfigurationHandler(request webserver.HttpRequ
 		Tuner:           tuner,
 		Spatializer:     spat,
 		Metronome:       metr,
+		LevelMeter:      meter,
 		BatchProcessing: batchProcessing,
 	}
 
@@ -1946,6 +1965,76 @@ func (this *controllerStruct) setLevelHandler(request webserver.HttpRequest) web
 }
 
 /*
+ * Sets the level of a channel in the spatializer.
+ */
+func (this *controllerStruct) setLevelMeterEnabledHandler(request webserver.HttpRequest) webserver.HttpResponse {
+	valueString := request.Params["value"]
+	value, err := strconv.ParseBool(valueString)
+	webResponse := webResponseStruct{}
+
+	/*
+	 * Check if boolean value is valud.
+	 */
+	if err != nil {
+
+		/*
+		 * Indicate failure.
+		 */
+		webResponse = webResponseStruct{
+			Success: true,
+			Reason:  "Failed to decode boolean value.",
+		}
+
+	} else {
+		meter := this.levelMeter
+		meter.SetEnabled(value)
+
+		/*
+		 * If level meters should be disabled, clear buffers as well.
+		 */
+		if !value {
+			buffers := this.buffers
+
+			/*
+			 * Iterate over all buffers.
+			 */
+			for _, buffer := range buffers {
+
+				/*
+				 * Clear the buffer.
+				 */
+				for i := range buffer {
+					buffer[i] = 0.0
+				}
+
+			}
+
+		}
+
+		/*
+		 * Indicate success.
+		 */
+		webResponse = webResponseStruct{
+			Success: true,
+			Reason:  "",
+		}
+
+	}
+
+	mimeType, buffer := this.createJSON(webResponse)
+
+	/*
+	 * Create HTTP response.
+	 */
+	response := webserver.HttpResponse{
+		Header: map[string]string{"Content-type": mimeType},
+		Body:   buffer,
+	}
+
+	return response
+}
+
+/*
  * Sets a value for the metronome.
  */
 func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpRequest) webserver.HttpResponse {
@@ -2427,6 +2516,8 @@ func (this *controllerStruct) dispatch(request webserver.HttpRequest) webserver.
 		response = this.setFramesPerPeriodHandler(request)
 	case "set-level":
 		response = this.setLevelHandler(request)
+	case "set-level-meter-enabled":
+		response = this.setLevelMeterEnabledHandler(request)
 	case "set-metronome-value":
 		response = this.setMetronomeValueHandler(request)
 	case "set-tuner-value":
@@ -2469,9 +2560,18 @@ func (this *controllerStruct) process(inputBuffers [][]float64, outputBuffers []
 	nIn := len(inputBuffers)
 	nOut := len(outputBuffers)
 	nMinOut := nIn + (spatializer.OUTPUT_COUNT + metronome.OUTPUT_COUNT)
-	tunerChannel := this.tunerChannel
 	buffers := this.buffers
 	levelMeter := this.levelMeter
+	levelMeterEnabled := false
+
+	/*
+	 * Check if there is a level meter and if it is enabled.
+	 */
+	if levelMeter != nil {
+		levelMeterEnabled = levelMeter.Enabled()
+	}
+
+	tunerChannel := this.tunerChannel
 
 	/*
 	 * Check if an input channel should be passed to the tuner.
@@ -2513,9 +2613,9 @@ func (this *controllerStruct) process(inputBuffers [][]float64, outputBuffers []
 		}
 
 		/*
-		 * If there is a level meter, save input and output buffers.
+		 * If level meter is enabled, save input and output buffers.
 		 */
-		if levelMeter != nil {
+		if levelMeterEnabled {
 			copy(buffers[0:nIn], inputBuffers)
 			uBound := 2 * nIn
 			copy(buffers[nIn:uBound], outputBuffers)
@@ -2540,9 +2640,9 @@ func (this *controllerStruct) process(inputBuffers [][]float64, outputBuffers []
 			metr.Process(auxBuffer)
 
 			/*
-			 * If there is a level meter, save auxiliary buffer.
+			 * If there level meter is enabled, save auxiliary buffer.
 			 */
-			if levelMeter != nil {
+			if levelMeterEnabled {
 				idx := 2 * nIn
 				buffers[idx] = auxBuffer
 			}
@@ -2571,9 +2671,9 @@ func (this *controllerStruct) process(inputBuffers [][]float64, outputBuffers []
 			uBoundBuf := lBoundBuf + spatializer.OUTPUT_COUNT
 
 			/*
-			 * If there is a level meter, save spatializer output.
+			 * If level Meter is enabled, save spatializer output.
 			 */
-			if levelMeter != nil {
+			if levelMeterEnabled {
 				copy(buffers[lBoundBuf:uBoundBuf], spatializerOutputs)
 			}
 
@@ -2581,7 +2681,13 @@ func (this *controllerStruct) process(inputBuffers [][]float64, outputBuffers []
 
 	}
 
-	levelMeter.Process(buffers, sampleRate)
+	/*
+	 * Feed buffers to level meter, if enabled.
+	 */
+	if levelMeterEnabled {
+		levelMeter.Process(buffers, sampleRate)
+	}
+
 }
 
 /*

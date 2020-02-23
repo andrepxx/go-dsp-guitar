@@ -96,6 +96,7 @@ func TestMeters(t *testing.T) {
 
 		}
 
+		m.SetEnabled(true)
 		m.Process(bufs, sampleRate)
 		resA, err := m.Analyze(0)
 
@@ -140,6 +141,67 @@ func TestMeters(t *testing.T) {
 			peak := resB.Peak()
 			expectedLevel := int32(-9)
 			expectedPeak := int32(-6)
+
+			/*
+			 * Check if the current level matches our expectations.
+			 */
+			if level != expectedLevel {
+				t.Errorf("Current level does not match! Expected %d, got %d.\n", expectedLevel, level)
+			}
+
+			/*
+			 * Check if the peak level matches our expectations.
+			 */
+			if peak != expectedPeak {
+				t.Errorf("Peak level does not match! Expected %d, got %d.\n", expectedPeak, peak)
+			}
+
+		}
+
+		m.SetEnabled(false)
+		resC, err := m.Analyze(0)
+
+		/*
+		 * Check if level analysis returned error.
+		 */
+		if err != nil {
+			msg := err.Error()
+			t.Errorf("Level meter analysis for channel %d returned error: %s", 0, msg)
+		} else {
+			level := resC.Level()
+			peak := resC.Peak()
+			expectedLevel := int32(-200)
+			expectedPeak := int32(-200)
+
+			/*
+			 * Check if the current level matches our expectations.
+			 */
+			if level != expectedLevel {
+				t.Errorf("Current level does not match! Expected %d, got %d.\n", expectedLevel, level)
+			}
+
+			/*
+			 * Check if the peak level matches our expectations.
+			 */
+			if peak != expectedPeak {
+				t.Errorf("Peak level does not match! Expected %d, got %d.\n", expectedPeak, peak)
+			}
+
+		}
+
+		resD, err := m.Analyze(1)
+
+		/*
+		 * Check if level analysis returned error.
+		 */
+		if err != nil {
+			msg := err.Error()
+			t.Errorf("Level meter analysis for channel %d returned error: %s", 0, msg)
+		} else {
+			level := resD.Level()
+			peak := resD.Peak()
+			expectedLevel := int32(-200)
+			expectedPeak := int32(-200)
 
 			/*
 			 * Check if the current level matches our expectations.

@@ -38,6 +38,7 @@ type Result interface {
 type channelMeterStruct struct {
 	channelName   string
 	mutex         sync.RWMutex
+	enabled       bool
 	currentValue  float64
 	peakValue     float64
 	sampleCounter uint64
@@ -48,6 +49,8 @@ type channelMeterStruct struct {
  */
 type meterStruct struct {
 	channelMeters []*channelMeterStruct
+	mutex         sync.RWMutex
+	enabled       bool
 }
 
 /*
@@ -57,7 +60,9 @@ type Meter interface {
 	Analyze(channelId uint32) (Result, error)
 	ChannelCount() uint32
 	ChannelName(channelId uint32) (string, error)
+	Enabled() bool
 	Process(inputBuffers [][]float64, sampleRate uint32) error
+	SetEnabled(value bool)
 }
 
 /*
@@ -82,62 +87,6 @@ func (this *resultStruct) Level() int32 {
 func (this *resultStruct) Peak() int32 {
 	value := this.peak
 	return value
-}
-
-/*
- * Feed the signal from an input buffer through a single-channel level meter.
- */
-func (this *channelMeterStruct) process(buffer []float64, sampleRate uint32) {
-	this.mutex.RLock()
-	currentValue := this.currentValue
-	peakValue := this.peakValue
-	sampleCounter := this.sampleCounter
-	this.mutex.RUnlock()
-	sampleRateFloat := float64(sampleRate)
-	holdTimeSamples := uint64(PEAK_HOLD_TIME_SECONDS * sampleRateFloat)
-	decayExp := -1.0 / (TIME_CONSTANT * sampleRateFloat)
-	decayFactor := math.Pow(10.0, decayExp)
-
-	/*
-	 * Process each sample.
-	 */
-	for _, sample := range buffer {
-		currentValue *= decayFactor
-
-		/*
-		 * If we're above the hold time, let the peak indicator decay,
-		 * otherwise increment sample counter.
-		 */
-		if sampleCounter > holdTimeSamples {
-			peakValue *= decayFactor
-		} else {
-			sampleCounter++
-		}
-
-		sampleAbs := math.Abs(sample)
-
-		/*
-		 * If we got a sample with larger amplitude, update current value.
-		 */
-		if sampleAbs > currentValue {
-			currentValue = sampleAbs
-		}
-
-		/*
-		 * If we got a sample with larger or equal amplitude, update peak value.
-		 */
-		if sampleAbs >= peakValue {
-			peakValue = sampleAbs
-			sampleCounter = 0
-		}
-
-	}
-
-	this.mutex.Lock()
-	this.currentValue = currentValue
-	this.peakValue = peakValue
-	this.sampleCounter = sampleCounter
-	this.mutex.Unlock()
 }
 
 /*
@@ -193,6 +142,99 @@ func (this *channelMeterStruct) name() string {
 }
 
 /*
+ * Feed the signal from an input buffer through a single-channel level meter.
+ */
+func (this *channelMeterStruct) process(buffer []float64, sampleRate uint32) {
+	this.mutex.RLock()
+	enabled := this.enabled
+	this.mutex.RUnlock()
+
+	/*
+	 * Only perform processing if this channel is enabled.
+	 */
+	if enabled {
+		this.mutex.RLock()
+		currentValue := this.currentValue
+		peakValue := this.peakValue
+		sampleCounter := this.sampleCounter
+		this.mutex.RUnlock()
+		sampleRateFloat := float64(sampleRate)
+		holdTimeSamples := uint64(PEAK_HOLD_TIME_SECONDS * sampleRateFloat)
+		decayExp := -1.0 / (TIME_CONSTANT * sampleRateFloat)
+		decayFactor := math.Pow(10.0, decayExp)
+
+		/*
+		 * Process each sample.
+		 */
+		for _, sample := range buffer {
+			currentValue *= decayFactor
+
+			/*
+			 * If we're above the hold time, let the peak indicator decay,
+			 * otherwise increment sample counter.
+			 */
+			if sampleCounter > holdTimeSamples {
+				peakValue *= decayFactor
+			} else {
+				sampleCounter++
+			}
+
+			sampleAbs := math.Abs(sample)
+
+			/*
+			 * If we got a sample with larger amplitude, update current value.
+			 */
+			if sampleAbs > currentValue {
+				currentValue = sampleAbs
+			}
+
+			/*
+			 * If we got a sample with larger or equal amplitude, update peak value.
+			 */
+			if sampleAbs >= peakValue {
+				peakValue = sampleAbs
+				sampleCounter = 0
+			}
+
+		}
+
+		this.mutex.Lock()
+		this.currentValue = currentValue
+		this.peakValue = peakValue
+		this.sampleCounter = sampleCounter
+		this.mutex.Unlock()
+	}
+
+}
+
+/*
+ * Enables or disables level measurements for this channel.
+ */
+func (this *channelMeterStruct) setEnabled(value bool) {
+	this.mutex.Lock()
+	enabled := this.enabled
+
+	/*
+	 * Check if status of meter must be changed.
+	 */
+	if value != enabled {
+
+		/*
+		 * If level meter should be disabled, clear state.
+		 */
+		if !value {
+			this.currentValue = 0.0
+			this.peakValue = 0.0
+			this.sampleCounter = 0
+		}
+
+		this.enabled = value
+	}
+
+	this.mutex.Unlock()
+}
+
+/*
  * Analyze the level of a certain channel.
  */
 func (this *meterStruct) Analyze(channelId uint32) (Result, error) {
@@ -245,6 +287,16 @@ func (this *meterStruct) ChannelName(channelId uint32) (string, error) {
 }
 
 /*
+ * Returns whether this level meter is enabled.
+ */
+func (this *meterStruct) Enabled() bool {
+	this.mutex.RLock()
+	enabled := this.enabled
+	this.mutex.RUnlock()
+	return enabled
+}
+
+/*
  * Process input buffers for multiple channels.
  */
 func (this *meterStruct) Process(buffers [][]float64, sampleRate uint32) error {
@@ -273,6 +325,32 @@ func (this *meterStruct) Process(buffers [][]float64, sampleRate uint32) error {
 }
 
 /*
+ * Enables or disables this level meter.
+ */
+func (this *meterStruct) SetEnabled(value bool) {
+	this.mutex.Lock()
+	enabled := this.enabled
+
+	/*
+	 * Check if value must be changed.
+	 */
+	if value != enabled {
+		channelMeters := this.channelMeters
+
+		/*
+		 * Enable or disable each channel meter.
+		 */
+		for _, channelMeter := range channelMeters {
+			channelMeter.setEnabled(value)
+		}
+
+		this.enabled = value
+	}
+
+	this.mutex.Unlock()
+}
+
+/*
  * Creates a new level meter for a certain number of channels.
  */
 func CreateMeter(numChannels uint32, names []string) (Meter, error) {
@@ -285,35 +363,37 @@ func CreateMeter(numChannels uint32, names []string) (Meter, error) {
 	if numChannels != numNames32 {
 		return nil, fmt.Errorf("Failed to create channel meter. Requested channel meter for %d channels, but provided %d channel names.", numChannels, numNames)
 	} else {
-		cms := make([]*channelMeterStruct, numChannels)
+		channelMeters := make([]*channelMeterStruct, numChannels)
 
 		/*
 		 * Create the channel meters.
 		 */
-		for i := range cms {
+		for i := range channelMeters {
 			name := names[i]
 
 			/*
 			 * Create a new channel meter.
 			 */
-			cm := &channelMeterStruct{
+			channelMeter := &channelMeterStruct{
 				channelName:   name,
+				enabled:       false,
 				currentValue:  0.0,
 				peakValue:     0.0,
 				sampleCounter: 0,
 			}
 
-			cms[i] = cm
+			channelMeters[i] = channelMeter
 		}
 
 		/*
 		 * Create a new level meter.
 		 */
-		m := meterStruct{
-			channelMeters: cms,
+		meter := meterStruct{
+			channelMeters: channelMeters,
+			enabled:       false,
 		}
 
-		return &m, nil
+		return &meter, nil
 	}
 
 }
