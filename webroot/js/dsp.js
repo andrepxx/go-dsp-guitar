@@ -19,13 +19,13 @@ var globals = new Globals();
  */
 function Storage() {
 	var g_map = new WeakMap();
-	
+
 	/*
 	 * Store a value under a key inside an element.
 	 */
 	this.put = function(elem, key, value) {
 		var map = g_map.get(elem);
-		
+
 		/*
 		 * Check if element is still unknown.
 		 */
@@ -33,16 +33,16 @@ function Storage() {
 			map = new Map();
 			g_map.set(elem, map);
 		}
-		
+
 		map.set(key, value);
 	};
-	
+
 	/*
 	 * Fetch a value from a key inside an element.
 	 */
 	this.get = function(elem, key, value) {
 		var map = g_map.get(elem);
-		
+
 		/*
 		 * Check if element is unknown.
 		 */
@@ -52,15 +52,15 @@ function Storage() {
 			var value = map.get(key);
 			return value;
 		}
-		
+
 	};
-	
+
 	/*
 	 * Check if a certain key exists inside an element.
 	 */
 	this.has = function(elem, key) {
 		var map = g_map.get(elem);
-		
+
 		/*
 		 * Check if element is unknown.
 		 */
@@ -70,32 +70,32 @@ function Storage() {
 			var value = map.has(key);
 			return value;
 		}
-		
+
 	};
-	
+
 	/*
 	 * Remove a certain key from an element.
 	 */
 	this.remove = function(elem, key) {
 		var map = g_map.get(elem);
-		
+
 		/*
 		 * Check if element is known.
 		 */
 		if (map != null) {
 			map.delete(key);
-			
+
 			/*
 			 * If inner map is now empty, remove it from outer map.
 			 */
 			if (map.size === 0) {
 				g_map.delete(elem);
 			}
-			
+
 		}
-		
+
 	};
-	
+
 }
 
 /*
@@ -107,14 +107,14 @@ var storage = new Storage();
  * A class supposed to make life a little easier.
  */
 function Helper() {
-	
+
 	/*
 	 * Blocks or unblocks the site for user interactions.
 	 */
 	this.blockSite = function(blocked) {
 		var blocker = document.getElementById('blocker');
 		var displayStyle = '';
-		
+
 		/*
 		 * If we should block the site, display blocker, otherwise hide it.
 		 */
@@ -122,20 +122,20 @@ function Helper() {
 			displayStyle = 'block';
 		else
 			displayStyle = 'none';
-		
+
 		/*
 		 * Apply style if the site has a blocker.
 		 */
 		if (blocker !== null)
 			blocker.style.display = displayStyle;
-		
+
 	};
-	
+
 	/*
 	 * Removes all child nodes from an element.
 	 */
 	this.clearElement = function(elem) {
-		
+
 		/*
 		 * As long as the element has child nodes, remove one.
 		 */
@@ -143,14 +143,14 @@ function Helper() {
 			var child = elem.firstChild;
 			elem.removeChild(child);
 		}
-		
+
 	};
-	
+
 	/*
 	 * Parse JSON string into an object without raising exceptions.
 	 */
 	this.parseJSON = function(jsonString) {
-		
+
 		/*
 		 * Try to parse JSON structure.
 		 */
@@ -160,9 +160,9 @@ function Helper() {
 		} catch (ex) {
 			return null;
 		}
-		
+
 	};
-	
+
 }
 
 /*
@@ -174,7 +174,7 @@ var helper = new Helper();
  * A class implementing an Ajax engine.
  */
 function Ajax() {
-	
+
 	/*
 	 * Sends an Ajax request to the server.
 	 *
@@ -191,26 +191,26 @@ function Ajax() {
 	 */
 	this.request = function(method, url, data, mimeType, callback, block) {
 		var xhr = new XMLHttpRequest();
-		
+
 		/*
 		 * Event handler for ReadyStateChange event.
 		 */
 		xhr.onreadystatechange = function() {
 			helper.blockSite(block);
-			
+
 			/*
 			 * If we got a response, pass the response text to
 			 * the callback function.
 			 */
 			if (this.readyState === 4) {
-				
+
 				/*
 				 * If we blocked the site on the request,
 				 * unblock it on the response.
 				 */
 				if (block)
 					helper.blockSite(false);
-				
+
 				/*
 				 * Check if callback is registered.
 				 */
@@ -218,22 +218,22 @@ function Ajax() {
 					var content = xhr.responseText;
 					callback(content);
 				}
-				
+
 			}
-			
+
 		};
-		
+
 		xhr.open(method, url, true);
-		
+
 		/*
 		 * Set MIME type if requested.
 		 */
 		if (mimeType !== null)
 			xhr.setRequestHeader('Content-type', mimeType);
-		
+
 		xhr.send(data);
 	};
-	
+
 }
 
 /*
@@ -247,21 +247,21 @@ var ajax = new Ajax();
 function KeyValuePair(key, value) {
 	var g_key = key;
 	var g_value = value;
-	
+
 	/*
 	 * Returns the key stored in this key-value pair.
 	 */
 	this.getKey = function() {
 		return g_key;
 	};
-	
+
 	/*
 	 * Returns the value stored in this key-value pair.
 	 */
 	this.getValue = function() {
 		return g_value;
 	};
-	
+
 }
 
 /*
@@ -269,7 +269,7 @@ function KeyValuePair(key, value) {
  */
 function Request() {
 	var g_keyValues = Array();
-	
+
 	/*
 	 * Append a key-value-pair to a request.
 	 */
@@ -277,14 +277,14 @@ function Request() {
 		var kv = new KeyValuePair(key, value);
 		g_keyValues.push(kv);
 	};
-	
+
 	/*
 	 * Returns the URL encoded data for this request.
 	 */
 	this.getData = function() {
 		var numPairs = g_keyValues.length;
 		var s = '';
-		
+
 		/*
 		 * Iterate over the key-value pairs.
 		 */
@@ -294,26 +294,26 @@ function Request() {
 			var keyEncoded = encodeURIComponent(key);
 			var value = keyValue.getValue();
 			var valueEncoded = encodeURIComponent(value);
-			
+
 			/*
 			 * If this is not the first key-value pair, we need a separator.
 			 */
 			if (i > 0)
 				s += '&';
-			
+
 			s += keyEncoded + '=' + valueEncoded;
 		}
-		
+
 		return s;
 	};
-	
+
 }
 
 /*
  * This class implements helper functions to build a user interface.
  */
 function UI() {
-	
+
 	/*
 	 * Strings for the user interface.
 	 */
@@ -427,12 +427,12 @@ function UI() {
 		'type': 'Type',
 		'valve': 'Valve'
 	};
-	
+
 	/*
 	 * Obtains a string for the user interface.
 	 */
 	this.getString = function(key) {
-		
+
 		/*
 		 * Check whether key is defined in strings.
 		 */
@@ -441,7 +441,7 @@ function UI() {
 			return s;
 		} else
 			return key;
-		
+
 	};
 
 	/*
@@ -474,7 +474,7 @@ function UI() {
 		var fgColor = '#ff8800';
 		var bgColor = '#181818';
 		var labelColor = '#666666';
-		
+
 		/*
 		 * Check if we want a blue or green color scheme.
 		 */
@@ -487,7 +487,7 @@ function UI() {
 			bgColor = '#181830';
 			labelColor = '#ffffff';
 		}
-		
+
 		var knobElem = pureknob.createKnob(valueHeight, valueWidth);
 		knobElem.setProperty('angleStart', -halfAngleArc);
 		knobElem.setProperty('angleEnd', halfAngleArc);
@@ -503,7 +503,7 @@ function UI() {
 		var knobNode = knobElem.node();
 		knobDiv.appendChild(knobNode);
 		paramDiv.appendChild(knobDiv);
-		
+
 		/*
 		 * Create knob.
 		 */
@@ -512,10 +512,10 @@ function UI() {
 			'node': knobNode,
 			'obj': knobElem
 		};
-		
+
 		return knob;
 	};
-	
+
 	/*
 	 * Creates a drop down menu.
 	 */
@@ -526,7 +526,7 @@ function UI() {
 		var selectedIndex = params.selectedIndex;
 		var paramDiv = document.createElement('div');
 		paramDiv.classList.add('paramdiv');
-		
+
 		/*
 		 * Check if we should apply a label.
 		 */
@@ -537,10 +537,10 @@ function UI() {
 			labelDiv.appendChild(labelNode);
 			paramDiv.appendChild(labelDiv);
 		}
-		
+
 		var selectElem = document.createElement('select');
 		selectElem.classList.add('dropdown');
-		
+
 		/*
 		 * Add all options.
 		 */
@@ -549,10 +549,10 @@ function UI() {
 			optionElem.text = options[i];
 			selectElem.add(optionElem);
 		}
-		
+
 		selectElem.selectedIndex = selectedIndex;
 		paramDiv.appendChild(selectElem);
-		
+
 		/*
 		 * Create dropdown.
 		 */
@@ -560,10 +560,10 @@ function UI() {
 			'div': paramDiv,
 			'input': selectElem
 		};
-		
+
 		return dropdown;
 	};
-	
+
 	/*
 	 * Creates a button.
 	 */
@@ -572,7 +572,7 @@ function UI() {
 		var active = params.active;
 		var elem = document.createElement('button');
 		elem.classList.add('button');
-		
+
 		/*
 		 * Check whether the button should be active
 		 */
@@ -580,20 +580,20 @@ function UI() {
 			elem.classList.add('buttonactive');
 		else
 			elem.classList.add('buttonnormal');
-		
+
 		var captionNode = document.createTextNode(caption);
 		elem.appendChild(captionNode);
-		
+
 		/*
 		 * Create button.
 		 */
 		var button = {
 			'input': elem
 		};
-		
+
 		return button;
 	};
-	
+
 	/*
 	 * Creates a unit.
 	 */
@@ -602,7 +602,7 @@ function UI() {
 		var buttonsParam = params.buttons;
 		var numButtonsParam = buttonsParam.length;
 		var buttons = [];
-		
+
 		/*
 		 * Iterate over the buttons;
 		 */
@@ -610,7 +610,7 @@ function UI() {
 			var buttonParam = buttonsParam[i];
 			var label = buttonParam.label;
 			var active = buttonParam.active;
-			
+
 			/*
 			 * Parameters for the button.
 			 */
@@ -618,17 +618,17 @@ function UI() {
 				'caption': label,
 				'active': active
 			};
-			
+
 			var button = this.createButton(params);
 			buttons.push(button);
 		}
-		
+
 		var unitDiv = document.createElement('div');
 		unitDiv.classList.add('contentdiv');
 		var headerDiv = document.createElement('div');
 		headerDiv.classList.add('headerdiv');
 		var numButtons = buttons.length;
-		
+
 		/*
 		 * Add buttons to header.
 		 */
@@ -636,7 +636,7 @@ function UI() {
 			var button = buttons[i];
 			headerDiv.appendChild(button.input);
 		}
-		
+
 		var labelDiv = document.createElement('div');
 		labelDiv.classList.add('labeldiv');
 		labelDiv.classList.add('active');
@@ -647,7 +647,7 @@ function UI() {
 		var controlsDiv = document.createElement('div');
 		controlsDiv.classList.add('controlsdiv');
 		unitDiv.appendChild(controlsDiv);
-		
+
 		/*
 		 * Create unit.
 		 */
@@ -657,7 +657,7 @@ function UI() {
 			'buttons': buttons,
 			'expanded': false
 		};
-		
+
 		/*
 		 * Adds a control to a unit.
 		 */
@@ -665,14 +665,14 @@ function UI() {
 			var controlDiv = control.div;
 			this.controls.appendChild(controlDiv);
 		};
-		
+
 		/*
 		 * Adds a row with controls to a unit.
 		 */
 		unit.addControlRow = function(controls) {
 			var rowDiv = document.createElement('div');
 			var numControls = controls.length;
-			
+
 			/*
 			 * Insert controls into the row.
 			 */
@@ -681,17 +681,17 @@ function UI() {
 				var controlDiv = control.div;
 				rowDiv.appendChild(controlDiv);
 			}
-			
+
 			this.controls.appendChild(rowDiv);
 		};
-		
+
 		/*
 		 * Expands or collapses a unit.
 		 */
 		unit.setExpanded = function(value) {
 			var controlsDiv = this.controls;
 			var displayValue = '';
-			
+
 			/*
 			 * Check whether we should expand or collapse the unit.
 			 */
@@ -699,18 +699,18 @@ function UI() {
 				displayValue = 'block';
 			else
 				displayValue = 'none';
-			
+
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
 		};
-		
+
 		/*
 		 * Returns whether a unit is expanded.
 		 */
 		unit.getExpanded = function() {
 			return this.expanded;
 		};
-		
+
 		/*
 		 * Toggles a unit between expanded and collapsed state.
 		 */
@@ -718,7 +718,7 @@ function UI() {
 			var state = this.getExpanded();
 			this.setExpanded(!state);
 		};
-		
+
 		/*
 		 * This is called when a user clicks on the label div.
 		 */
@@ -726,22 +726,22 @@ function UI() {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		};
-		
+
 		storage.put(labelDiv, 'unit', unit);
 		return unit;
 	};
-	
+
 	/*
 	 * Checks whether a certain combination of unit type and parameter name requires special handling.
 	 */
 	this.isSpecialParameter = function(unitType, paramName) {
-		
+
 		/*
 		 * Discern unit type.
 		 */
 		switch (unitType) {
 			case 'power_amp':
-				
+
 				if (paramName.startsWith('level_'))
 					return true;
 				else if (paramName.startsWith('filter_')) {
@@ -749,13 +749,13 @@ function UI() {
 					var isNumeric = isFinite(suffix);
 					return isNumeric;
 				}
-				
+
 			default:
 				return false;
 		}
-		
+
 	};
-	
+
 	/*
 	 * Renders a unit given chain and unit ID, as well as a description returned from the server.
 	 */
@@ -769,7 +769,7 @@ function UI() {
 		var unitType = unitTypes[unitTypeId];
 		var unitTypeString = ui.getString(unitType);
 		var bypassActive = description.Bypass;
-		
+
 		/*
 		 * Buttons for this unit.
 		 */
@@ -791,7 +791,7 @@ function UI() {
 				'active': false
 			}
 		];
-		
+
 		/*
 		 * Parameters for the unit UI element.
 		 */
@@ -799,13 +799,13 @@ function UI() {
 			'type': unitTypeString,
 			'buttons': buttons
 		};
-		
+
 		var unit = ui.createUnit(paramsUnit);
 		var btnBypass = unit.buttons[0].input;
 		storage.put(btnBypass, 'chain', chainId);
 		storage.put(btnBypass, 'unit', unitId);
 		storage.put(btnBypass, 'active', bypassActive);
-		
+
 		/*
 		 * This is invoked when someone clicks on the 'bypass' button.
 		 */
@@ -813,7 +813,7 @@ function UI() {
 			var chainId = storage.get(this, 'chain');
 			var unitId = storage.get(this, 'unit');
 			var active = !storage.get(this, 'active');
-			
+
 			/*
 			 * Check whether the control should be active.
 			 */
@@ -824,15 +824,15 @@ function UI() {
 				this.classList.remove('buttonactive');
 				this.classList.add('buttonnormal');
 			}
-			
+
 			storage.put(this, 'active', active);
 			handler.setBypass(chainId, unitId, active);
 		};
-		
+
 		var btnMoveUp = unit.buttons[1].input;
 		storage.put(btnMoveUp, 'chain', chainId);
 		storage.put(btnMoveUp, 'unit', unitId);
-		
+
 		/*
 		 * This is invoked when someone clicks on the 'move up' button.
 		 */
@@ -841,11 +841,11 @@ function UI() {
 			var unitId = storage.get(this, 'unit');
 			handler.moveUp(chainId, unitId);
 		};
-		
+
 		var btnMoveDown = unit.buttons[2].input;
 		storage.put(btnMoveDown, 'chain', chainId);
 		storage.put(btnMoveDown, 'unit', unitId);
-		
+
 		/*
 		 * This is invoked when someone clicks on the 'move down' button.
 		 */
@@ -854,12 +854,12 @@ function UI() {
 			var unitId = storage.get(this, 'unit');
 			handler.moveDown(chainId, unitId);
 		};
-		
+
 		var btnRemove = unit.buttons[3].input;
 		btnRemove.classList.add('buttonremove');
 		storage.put(btnRemove, 'chain', chainId);
 		storage.put(btnRemove, 'unit', unitId);
-		
+
 		/*
 		 * This is invoked when someone clicks on the 'remove' button.
 		 */
@@ -868,10 +868,10 @@ function UI() {
 			var unitId = storage.get(this, 'unit');
 			handler.removeUnit(chainId, unitId);
 		};
-		
+
 		var unitParams = description.Parameters;
 		var numParams = unitParams.length;
-		
+
 		/*
 		 * Iterate over the parameters and add all 'ordinary' (non-special) ones to the unit.
 		 */
@@ -886,19 +886,19 @@ function UI() {
 			var paramDiscreteValues = param.DiscreteValues;
 			var paramDiscreteValueIndex = param.DiscreteValueIndex;
 			var isSpecial = this.isSpecialParameter(unitType, paramName);
-			
+
 			/*
 			 * Only handle 'ordinary' (non-special) parameters on the first pass.
 			 */
 			if (!isSpecial) {
 				var isFloating = (i !== 0);
 				var label = ui.getString(paramName);
-				
+
 				/*
 				 * Handle numeric parameter.
 				 */
 				if (paramType === 'numeric') {
-					
+
 					/*
 					 * Parameters for the knob.
 					 */
@@ -915,14 +915,14 @@ function UI() {
 						'colorScheme': 'default',
 						'readonly': false
 					};
-					
+
 					var knob = ui.createKnob(params);
 					unit.addControl(knob);
 					var knobNode = knob.node;
 					storage.put(knobNode, 'chain', chainId);
 					storage.put(knobNode, 'unit', unitId);
 					storage.put(knobNode, 'param', paramName);
-					
+
 					/*
 					 * This is called when a numeric value changes.
 					 */
@@ -933,16 +933,16 @@ function UI() {
 						var param = storage.get(knobNode, 'param');
 						handler.setNumericValue(chain, unit, param, value);
 					};
-					
+
 					var knobObj = knob.obj;
 					knobObj.addListener(knobHandler);
 				}
-				
+
 				/*
 				 * Handle discrete parameter.
 				 */
 				if (paramType === 'discrete') {
-					
+
 					/*
 					 * Parameters for the drop down menu.
 					 */
@@ -951,13 +951,13 @@ function UI() {
 						'options': paramDiscreteValues,
 						'selectedIndex': paramDiscreteValueIndex
 					};
-					
+
 					var dropDown = ui.createDropDown(params);
 					var dropDownInput = dropDown.input;
 					storage.put(dropDownInput, 'chain', chainId);
 					storage.put(dropDownInput, 'unit', unitId);
 					storage.put(dropDownInput, 'param', paramName);
-					
+
 					/*
 					 * This is called when a discrete value changes.
 					 */
@@ -970,14 +970,14 @@ function UI() {
 						var value = option.text;
 						handler.setDiscreteValue(chain, unit, param, value);
 					};
-					
+
 					unit.addControl(dropDown);
 				}
-				
+
 			}
-			
+
 		}
-		
+
 		/*
 		 * Iterate over the parameters and add all special discrete ones to the unit.
 		 */
@@ -988,13 +988,13 @@ function UI() {
 			var paramDiscreteValues = param.DiscreteValues;
 			var paramDiscreteValueIndex = param.DiscreteValueIndex;
 			var isSpecial = this.isSpecialParameter(unitType, paramName);
-			
+
 			/*
 			 * Only handle special discrete parameters on the second pass.
 			 */
 			if (isSpecial & (paramType === 'discrete')) {
 				var label = ui.getString(paramName);
-				
+
 				/*
 				 * Parameters for the drop down menu.
 				 */
@@ -1003,13 +1003,13 @@ function UI() {
 					'options': paramDiscreteValues,
 					'selectedIndex': paramDiscreteValueIndex
 				};
-				
+
 				var dropDown = ui.createDropDown(params);
 				var dropDownInput = dropDown.input;
 				storage.put(dropDownInput, 'chain', chainId);
 				storage.put(dropDownInput, 'unit', unitId);
 				storage.put(dropDownInput, 'param', paramName);
-				
+
 				/*
 				 * This is called when a discrete value changes.
 				 */
@@ -1022,12 +1022,12 @@ function UI() {
 					var value = option.text;
 					handler.setDiscreteValue(chain, unit, param, value);
 				};
-				
+
 				var controlRow = Array();
 				controlRow.push(dropDown);
 				unit.addControlRow(controlRow);
 			}
-			
+
 		}
 
 		/*
@@ -1042,13 +1042,13 @@ function UI() {
 			var paramMaximum = param.Maximum;
 			var paramNumericValue = param.NumericValue;
 			var isSpecial = this.isSpecialParameter(unitType, paramName);
-			
+
 			/*
 			 * Only handle special numeric parameters on the third pass.
 			 */
 			if (isSpecial & (paramType === 'numeric')) {
 				var label = ui.getString(paramName);
-					
+
 				/*
 				 * Parameters for the knob.
 				 */
@@ -1065,14 +1065,14 @@ function UI() {
 					'colorScheme': 'default',
 					'readonly': false
 				};
-				
+
 				var knob = ui.createKnob(params);
 				unit.addControl(knob);
 				var knobNode = knob.node;
 				storage.put(knobNode, 'chain', chainId);
 				storage.put(knobNode, 'unit', unitId);
 				storage.put(knobNode, 'param', paramName);
-				
+
 				/*
 				 * This is called when a numeric value changes.
 				 */
@@ -1083,16 +1083,16 @@ function UI() {
 					var param = storage.get(knobNode, 'param');
 					handler.setNumericValue(chain, unit, param, value);
 				};
-				
+
 				var knobObj = knob.obj;
 				knobObj.addListener(knobHandler);
 			}
-			
+
 		}
-		
+
 		return unit;
 	};
-	
+
 	/*
 	 * Renders a signal chain, given its ID and a chain description returned from the server.
 	 */
@@ -1115,7 +1115,7 @@ function UI() {
 		chainDiv.appendChild(beginDiv);
 		var units = description.Units;
 		var numUnits = units.length;
-		
+
 		/*
 		 * Iterate over the units in this chain.
 		 */
@@ -1125,13 +1125,13 @@ function UI() {
 			var unitDiv = result.div;
 			chainDiv.appendChild(unitDiv);
 		}
-		
+
 		var labelDropdown = ui.getString('add_unit');
 		var labelButton = ui.getString('add');
 		var unitTypes = globals.unitTypes;
 		var numUnitTypes = unitTypes.length;
 		var unitTypeNames = new Array();
-		
+
 		/*
 		 * Look up the name of the unit types.
 		 */
@@ -1140,7 +1140,7 @@ function UI() {
 			var unitTypeName = ui.getString(unitType);
 			unitTypeNames.push(unitTypeName);
 		}
-		
+
 		/*
 		 * Parameters for the drop down menu.
 		 */
@@ -1149,9 +1149,9 @@ function UI() {
 			'options': unitTypeNames,
 			'selectedIndex': 0
 		};
-		
+
 		var dropDown = ui.createDropDown(paramsDropDown);
-		
+
 		/*
 		 * Parameters for the 'create' button.
 		 */
@@ -1159,10 +1159,10 @@ function UI() {
 			'caption': labelButton,
 			'active': false
 		};
-		
+
 		var button = ui.createButton(paramsButton);
 		var buttonElem = button.input;
-		
+
 		/*
 		 * What happens when we click on the 'add' button.
 		 */
@@ -1172,7 +1172,7 @@ function UI() {
 			var unitType = dropdown.selectedIndex;
 			handler.addUnit(unitType, chainId);
 		};
-		
+
 		storage.put(buttonElem, 'chain', id);
 		storage.put(buttonElem, 'dropdown', dropDown.input);
 		var dropDownDiv = document.createElement('div');
@@ -1195,17 +1195,17 @@ function UI() {
 		endHeaderDiv.appendChild(endLabelDiv);
 		endDiv.appendChild(endHeaderDiv);
 		chainDiv.appendChild(endDiv);
-		
+
 		/*
 		 * This object represents the signal chain.
 		 */
 		var chain = {
 			'div': chainDiv
 		};
-		
+
 		return chain;
 	}
-	
+
 	/*
 	 * Renders the signal chains given a configuration returned from the server.
 	 */
@@ -1214,7 +1214,7 @@ function UI() {
 		helper.clearElement(elem);
 		var chains = configuration.Chains;
 		var numChains = chains.length;
-		
+
 		/*
 		 * Iterate over the signal chains.
 		 */
@@ -1227,7 +1227,7 @@ function UI() {
 			spacerDiv.classList.add('spacerdiv');
 			elem.appendChild(spacerDiv);
 		}
-		
+
 	};
 
 	/*
@@ -1273,7 +1273,7 @@ function UI() {
 		downloadAnchor.appendChild(instructionsNode);
 		uploadAreaDiv.appendChild(downloadAnchor);
 		controlsDiv.appendChild(uploadAreaDiv);
-	
+
 		/*
 		 * Create unit object.
 		 */
@@ -1281,14 +1281,14 @@ function UI() {
 			'controls': controlsDiv,
 			'expanded': false
 		};
-	
+
 		/*
 		 * Expands or collapses a unit.
 		 */
 		unit.setExpanded = function(value) {
 			var controlsDiv = this.controls;
 			var displayValue = '';
-		
+
 			/*
 			 * Check whether we should expand or collapse the unit.
 			 */
@@ -1296,18 +1296,18 @@ function UI() {
 				displayValue = 'block';
 			else
 				displayValue = 'none';
-		
+
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
 		};
-	
+
 		/*
 		 * Returns whether a unit is expanded.
 		 */
 		unit.getExpanded = function() {
 			return this.expanded;
 		};
-	
+
 		/*
 		 * Toggles a unit between expanded and collapsed state.
 		 */
@@ -1315,7 +1315,7 @@ function UI() {
 			var state = this.getExpanded();
 			this.setExpanded(!state);
 		};
-	
+
 		/*
 		 * This is called when a user clicks on the label div.
 		 */
@@ -1323,10 +1323,10 @@ function UI() {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		};
-	
+
 		storage.put(labelDiv, 'unit', unit);
 	};
-	
+
 	/*
 	 * Renders the latency configuration given a configuration returned from the server.
 	 */
@@ -1356,21 +1356,21 @@ function UI() {
 		var dropdownRow = document.createElement('div');
 		var values = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192];
 		var valueIdx = 0;
-		
+
 		/*
 		 * Iterate over all possible values.
 		 */
 		for (var i = 0; i < values.length; i++) {
 			var currentValue = values[i];
-			
+
 			/*
 			 * If we have a match, store index.
 			 */
 			if (framesPerPeriod === currentValue)
 				valueIdx = i;
-			
+
 		}
-		
+
 		/*
 		 * Parameters for the frames per period drop down menu.
 		 */
@@ -1379,10 +1379,10 @@ function UI() {
 			'options': values,
 			'selectedIndex': valueIdx
 		};
-		
+
 		var dropDownFramesPerPeriod = ui.createDropDown(paramsFramesPerPeriod);
 		var dropDownFramesPerPeriodElem = dropDownFramesPerPeriod.input;
-		
+
 		/*
 		 * This is called when the period size changes.
 		 */
@@ -1392,10 +1392,10 @@ function UI() {
 			var value = option.text;
 			handler.setFramesPerPeriod(value);
 		};
-		
+
 		dropdownRow.appendChild(dropDownFramesPerPeriod.div);
 		controlsDiv.appendChild(dropdownRow);
-		
+
 		/*
 		 * Create unit object.
 		 */
@@ -1403,14 +1403,14 @@ function UI() {
 			'controls': controlsDiv,
 			'expanded': false
 		};
-		
+
 		/*
 		 * Expands or collapses a unit.
 		 */
 		unit.setExpanded = function(value) {
 			var controlsDiv = this.controls;
 			var displayValue = '';
-			
+
 			/*
 			 * Check whether we should expand or collapse the unit.
 			 */
@@ -1418,18 +1418,18 @@ function UI() {
 				displayValue = 'block';
 			else
 				displayValue = 'none';
-			
+
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
 		};
-		
+
 		/*
 		 * Returns whether a unit is expanded.
 		 */
 		unit.getExpanded = function() {
 			return this.expanded;
 		};
-		
+
 		/*
 		 * Toggles a unit between expanded and collapsed state.
 		 */
@@ -1437,7 +1437,7 @@ function UI() {
 			var state = this.getExpanded();
 			this.setExpanded(!state);
 		};
-		
+
 		/*
 		 * This is called when a user clicks on the label div.
 		 */
@@ -1445,10 +1445,10 @@ function UI() {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		};
-		
+
 		storage.put(labelDiv, 'unit', unit);
 	};
-	
+
 	/*
 	 * Updates the tuner display based on information returned from the server.
 	 */
@@ -1466,7 +1466,7 @@ function UI() {
 		var noteString = note.toString();
 		noteDiv.innerHTML = noteString;
 	};
-	
+
 	/*
 	 * Renders the tuner given a configuration returned from the server.
 	 */
@@ -1498,7 +1498,7 @@ function UI() {
 		var frequencyString = ui.getString('frequency');
 		var noteString = ui.getString('note');
 		var centsValue = tunerConfiguration.BeatsPerPeriod;
-		
+
 		/*
 		 * Parameters for the cents knob.
 		 */
@@ -1515,7 +1515,7 @@ function UI() {
 			'colorScheme': 'green',
 			'readonly': true
 		};
-		
+
 		var centsKnob = ui.createKnob(centsParams);
 		var centsKnobNode = centsKnob.node;
 		centsKnobNode.classList.add('tunercentsknob');
@@ -1548,7 +1548,7 @@ function UI() {
 		var channelRow = document.createElement('div');
 		var labelChannel = ui.getString('channel');
 		var channels = ['- NONE -'];
-		
+
 		/*
 		 * Append indices for all channels.
 		 */
@@ -1556,10 +1556,10 @@ function UI() {
 			var idxString = i.toString();
 			channels.push(idxString);
 		}
-		
+
 		var channelIdx = tunerConfiguration.Channel;
 		var channelIdxInc = channelIdx + 1;
-		
+
 		/*
 		 * Parameters for the channel drop down menu.
 		 */
@@ -1568,10 +1568,10 @@ function UI() {
 			'options': channels,
 			'selectedIndex': channelIdxInc
 		};
-		
+
 		var dropDownChannel = ui.createDropDown(paramsChannel);
 		var dropDownChannelElem = dropDownChannel.input;
-		
+
 		/*
 		 * This is called when the channel number changes.
 		 */
@@ -1581,14 +1581,14 @@ function UI() {
 			var value = option.text;
 			var interval = storage.get(this, 'interval');
 			window.clearInterval(interval);
-			
+
 			/*
 			 * This gets executed whenever the timer ticks.
 			 */
 			var callback = function() {
 				handler.refreshTuner();
 			};
-			
+
 			/*
 			 * Handle special case of no channel and register timer
 			 * for updating readings for the UI.
@@ -1599,15 +1599,15 @@ function UI() {
 				var intervalNew = window.setInterval(callback, 250);
 				storage.put(this, 'interval', intervalNew);
 			}
-			
+
 			handler.setTunerValue('channel', value);
 		};
-		
+
 		dropDownChannelElem.onchange(null);
 		var dropDownChannelDiv = dropDownChannel.div;
 		channelRow.appendChild(dropDownChannelDiv);
 		controlsDiv.appendChild(channelRow);
-		
+
 		/*
 		 * Create unit object.
 		 */
@@ -1615,14 +1615,14 @@ function UI() {
 			'controls': controlsDiv,
 			'expanded': false
 		};
-		
+
 		/*
 		 * Expands or collapses a unit.
 		 */
 		unit.setExpanded = function(value) {
 			var controlsDiv = this.controls;
 			var displayValue = '';
-			
+
 			/*
 			 * Check whether we should expand or collapse the unit.
 			 */
@@ -1630,18 +1630,18 @@ function UI() {
 				displayValue = 'block';
 			else
 				displayValue = 'none';
-			
+
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
 		};
-		
+
 		/*
 		 * Returns whether a unit is expanded.
 		 */
 		unit.getExpanded = function() {
 			return this.expanded;
 		};
-		
+
 		/*
 		 * Toggles a unit between expanded and collapsed state.
 		 */
@@ -1649,7 +1649,7 @@ function UI() {
 			var state = this.getExpanded();
 			this.setExpanded(!state);
 		};
-		
+
 		/*
 		 * This is called when a user clicks on the label div.
 		 */
@@ -1657,10 +1657,10 @@ function UI() {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		}
-		
+
 		storage.put(labelDiv, 'unit', unit);
 	}
-	
+
 	/*
 	 * Renders the spatializer given a configuration returned from the server.
 	 */
@@ -1700,7 +1700,7 @@ function UI() {
 			var level = 100 * channel.Level;
 			var azimuthString = ui.getString('azimuth');
 			var azimuthLabel = azimuthString + ' ' + iString;
-	
+
 			/*
 			 * Parameters for the azimuth knob.
 			 */
@@ -1717,13 +1717,13 @@ function UI() {
 				'colorScheme': 'blue',
 				'readonly': false
 			};
-	
+
 			var azimuthKnob = ui.createKnob(azimuthParams);
 			var azimuthKnobDiv = azimuthKnob.div;
 			controlsDiv.appendChild(azimuthKnobDiv);
 			var distanceString = ui.getString('distance');
 			var distanceLabel = distanceString + ' ' + iString;
-	
+
 			/*
 			 * Parameters for the distance knob.
 			 */
@@ -1740,13 +1740,13 @@ function UI() {
 				'colorScheme': 'blue',
 				'readonly': false
 			};
-	
+
 			var distanceKnob = ui.createKnob(distanceParams);
 			var distanceKnobDiv = distanceKnob.div;
 			controlsDiv.append(distanceKnobDiv);
 			var levelString = ui.getString('level');
 			var levelLabel = levelString + ' ' + iString;
-	
+
 			/*
 			 * Parameters for the level knob.
 			 */
@@ -1763,7 +1763,7 @@ function UI() {
 				'colorScheme': 'blue',
 				'readonly': false
 			};
-	
+
 			var levelKnob = ui.createKnob(levelParams);
 			var levelKnobDiv = levelKnob.div;
 			controlsDiv.append(levelKnobDiv);
@@ -1773,7 +1773,7 @@ function UI() {
 			storage.put(azimuthKnobNode, 'channel', i);
 			storage.put(distanceKnobNode, 'channel', i);
 			storage.put(levelKnobNode, 'channel', i);
-	
+
 			/*
 			 * This gets executed when the azimuth value changes.
 			 */
@@ -1785,24 +1785,24 @@ function UI() {
 
 			/*
 			 * This gets executed when the distance value changes.
-			 */					
+			 */
 			var distanceHandler = function(knob, value) {
 				var node = knob.node();
 				var channel = storage.get(node, 'channel');
 				var distanceValue = (0.1 * value).toFixed(1);
 				handler.setDistance(channel, distanceValue);
 			};
-			
+
 			/*
 			 * This gets executed when the level value changes.
-			 */					
+			 */
 			var levelHandler = function(knob, value) {
 				var node = knob.node();
 				var channel = storage.get(node, 'channel');
 				var levelValue = (0.01 * value).toFixed(2);
 				handler.setLevel(channel, levelValue);
 			};
-			
+
 			var azimuthKnobObj = azimuthKnob.obj;
 			azimuthKnobObj.addListener(azimuthHandler);
 			var distanceKnobObj = distanceKnob.obj;
@@ -1810,7 +1810,7 @@ function UI() {
 			var levelKnobObj = levelKnob.obj;
 			levelKnobObj.addListener(levelHandler);
 		}
-		
+
 		/*
 		 * Create unit object.
 		 */
@@ -1818,14 +1818,14 @@ function UI() {
 			'controls': controlsDiv,
 			'expanded': false
 		};
-		
+
 		/*
 		 * Expands or collapses a unit.
 		 */
 		unit.setExpanded = function(value) {
 			var controlsDiv = this.controls;
 			var displayValue = '';
-			
+
 			/*
 			 * Check whether we should expand or collapse the unit.
 			 */
@@ -1833,18 +1833,18 @@ function UI() {
 				displayValue = 'block';
 			else
 				displayValue = 'none';
-			
+
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
 		};
-		
+
 		/*
 		 * Returns whether a unit is expanded.
 		 */
 		unit.getExpanded = function() {
 			return this.expanded;
 		};
-		
+
 		/*
 		 * Toggles a unit between expanded and collapsed state.
 		 */
@@ -1852,7 +1852,7 @@ function UI() {
 			var state = this.getExpanded();
 			this.setExpanded(!state);
 		};
-		
+
 		/*
 		 * This is called when a user clicks on the label div.
 		 */
@@ -1860,10 +1860,10 @@ function UI() {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		};
-		
+
 		storage.put(labelDiv, 'unit', unit);
 	};
-	
+
 	/*
 	 * Renders the metronome given a configuration returned from the server.
 	 */
@@ -1877,7 +1877,7 @@ function UI() {
 		unitDiv.classList.add('masterunitdiv');
 		var headerDiv = document.createElement('div');
 		var masterString = ui.getString('master');
-		
+
 		/*
 		 * Parameters for metronome button.
 		 */
@@ -1885,17 +1885,17 @@ function UI() {
 			caption: masterString,
 			active: masterOutput
 		};
-		
+
 		var button = ui.createButton(paramsButton);
 		var buttonElem = button.input;
 		storage.put(buttonElem, 'active', masterOutput);
-		
+
 		/*
 		 * This is called when the user clicks on the 'master' button of the metronome.
 		 */
 		buttonElem.onclick = function(e) {
 			var active = !storage.get(this, 'active');
-			
+
 			/*
 			 * Check whether the control should be active.
 			 */
@@ -1906,11 +1906,11 @@ function UI() {
 				this.classList.remove('buttonactive');
 				this.classList.add('buttonnormal');
 			}
-			
+
 			storage.put(this, 'active', active);
 			handler.setMetronomeValue('master-output', active);
 		};
-		
+
 		headerDiv.appendChild(buttonElem);
 		var labelDiv = document.createElement('div');
 		labelDiv.classList.add('labeldiv');
@@ -1928,7 +1928,7 @@ function UI() {
 		elem.appendChild(unitDiv);
 		var beatsString = ui.getString('beats_per_period');
 		var beatsValue = metronomeConfiguration.BeatsPerPeriod;
-		
+
 		/*
 		 * Parameters for the beats per period knob.
 		 */
@@ -1945,14 +1945,14 @@ function UI() {
 			'colorScheme': 'blue',
 			'readonly': false
 		};
-		
+
 		var beatsKnob = ui.createKnob(beatsParams);
 		var beatsKnobDiv = beatsKnob.div;
 		controlsDiv.appendChild(beatsKnobDiv);
 		var speedString = ui.getString('speed');
 		var bpmString = ui.getString('bpm');
 		var speedValue = metronomeConfiguration.Speed;
-		
+
 		/*
 		 * Parameters for the speed knob.
 		 */
@@ -1969,25 +1969,25 @@ function UI() {
 			'colorScheme': 'blue',
 			'readonly': false
 		};
-		
+
 		var speedKnob = ui.createKnob(speedParams);
 		var speedKnobDiv = speedKnob.div;
 		controlsDiv.appendChild(speedKnobDiv);
-		
+
 		/*
 		 * This gets executed when the beats per period value changes.
 		 */
 		var beatsHandler = function(knob, value) {
 			handler.setMetronomeValue('beats-per-period', value);
 		};
-		
+
 		/*
 		 * This gets executed when the beats per period value changes.
 		 */
 		var speedHandler = function(knob, value) {
 			handler.setMetronomeValue('speed', value);
 		};
-		
+
 		var beatsKnobObj = beatsKnob.obj;
 		beatsKnobObj.addListener(beatsHandler);
 		var speedKnobObj = speedKnob.obj;
@@ -1998,30 +1998,30 @@ function UI() {
 		var tockSound = metronomeConfiguration.TockSound;
 		var tickIdx = 0;
 		var tockIdx = 0;
-		
+
 		/*
 		 * Iterate over all sounds and find the tick and tock sound.
 		 */
 		for (var i = 0; i < numSounds; i++) {
 			var sound = sounds[i];
-			
+
 			/*
 			 * If we found the tick sound, store index.
 			 */
 			if (sound === tickSound)
 				tickIdx = i;
-			
+
 			/*
 			 * If we found the tock sound, store index.
 			 */
 			if (sound === tockSound)
 				tockIdx = i;
-			
+
 		}
-		
+
 		var labelTick = ui.getString('tick_sound');
 		var labelTock = ui.getString('tock_sound');
-		
+
 		/*
 		 * Parameters for the tick sound drop down menu.
 		 */
@@ -2030,7 +2030,7 @@ function UI() {
 			'options': sounds,
 			'selectedIndex': tickIdx
 		};
-		
+
 		/*
 		 * Parameters for the tock sound drop down menu.
 		 */
@@ -2039,12 +2039,12 @@ function UI() {
 			'options': sounds,
 			'selectedIndex': tockIdx
 		};
-		
+
 		var dropDownTick = ui.createDropDown(paramsTick);
 		var dropDownTock = ui.createDropDown(paramsTock);
 		var dropDownTickElem = dropDownTick.input;
 		var dropDownTockElem = dropDownTock.input;
-		
+
 		/*
 		 * This is called when the tick sound changes.
 		 */
@@ -2054,7 +2054,7 @@ function UI() {
 			var value = option.text;
 			handler.setMetronomeValue('tick-sound', value);
 		};
-		
+
 		/*
 		 * This is called when the tock sound changes.
 		 */
@@ -2064,14 +2064,14 @@ function UI() {
 			var value = option.text;
 			handler.setMetronomeValue('tock-sound', value);
 		};
-		
+
 		var controlRowTick = document.createElement('div');
 		controlRowTick.appendChild(dropDownTick.div);
 		controlsDiv.appendChild(controlRowTick);
 		var controlRowTock = document.createElement('div');
 		controlRowTock.appendChild(dropDownTock.div);
 		controlsDiv.appendChild(controlRowTock);
-		
+
 		/*
 		 * Create unit object.
 		 */
@@ -2079,14 +2079,14 @@ function UI() {
 			'controls': controlsDiv,
 			'expanded': false
 		};
-		
+
 		/*
 		 * Expands or collapses a unit.
 		 */
 		unit.setExpanded = function(value) {
 			var controlsDiv = this.controls;
 			var displayValue = '';
-			
+
 			/*
 			 * Check whether we should expand or collapse the unit.
 			 */
@@ -2094,18 +2094,18 @@ function UI() {
 				displayValue = 'block';
 			else
 				displayValue = 'none';
-			
+
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
 		};
-		
+
 		/*
 		 * Returns whether a unit is expanded.
 		 */
 		unit.getExpanded = function() {
 			return this.expanded;
 		};
-		
+
 		/*
 		 * Toggles a unit between expanded and collapsed state.
 		 */
@@ -2113,7 +2113,7 @@ function UI() {
 			var state = this.getExpanded();
 			this.setExpanded(!state);
 		};
-		
+
 		/*
 		 * This is called when a user clicks on the label div.
 		 */
@@ -2121,10 +2121,10 @@ function UI() {
 			var unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		};
-		
+
 		storage.put(labelDiv, 'unit', unit);
 	};
-	
+
 	/*
 	 * Renders the signal level analysis section given a configuration returned from the server.
 	 */
@@ -2134,7 +2134,7 @@ function UI() {
 		var enabled = levelMeter.Enabled;
 		var elem = document.getElementById('levels');
 		helper.clearElement(elem);
-		
+
 		/*
 		 * Only display levels if batch processing is disabled on the server.
 		 */
@@ -2144,7 +2144,7 @@ function UI() {
 			unitDiv.classList.add('masterunitdiv');
 			var headerDiv = document.createElement('div');
 			var enabledString = ui.getString('enabled');
-			
+
 			/*
 			 * Parameters for metronome button.
 			 */
@@ -2152,17 +2152,17 @@ function UI() {
 				caption: enabledString,
 				active: enabled
 			};
-			
+
 			var button = ui.createButton(paramsButton);
 			var buttonElem = button.input;
 			storage.put(buttonElem, 'active', enabled);
-			
+
 			/*
 			 * This is called when the user clicks on the 'enabled' button of the level meter.
 			 */
 			buttonElem.onclick = function(e) {
 				var active = !storage.get(this, 'active');
-				
+
 				/*
 				 * Check whether the control should be active.
 				 */
@@ -2173,11 +2173,11 @@ function UI() {
 					this.classList.remove('buttonactive');
 					this.classList.add('buttonnormal');
 				}
-				
+
 				storage.put(this, 'active', active);
 				handler.setLevelMeterEnabled(active);
 			};
-			
+
 			headerDiv.appendChild(buttonElem);
 			var labelDiv = document.createElement('div');
 			labelDiv.classList.add('labeldiv');
@@ -2193,12 +2193,12 @@ function UI() {
 			controlsDiv.classList.add('controlsdiv');
 			unitDiv.appendChild(controlsDiv);
 			elem.appendChild(unitDiv);
-			
+
 			/*
 			 * This is called when the unit is collapsed or expanded.
 			 */
 			var expansionListener = function(unit, value) {
-				
+
 				/*
 				 * Check if unit shall expand or contract.
 				 *
@@ -2208,7 +2208,7 @@ function UI() {
 				 * If unit gets contracted, unregister timer.
 				 */
 				if (value) {
-					
+
 					/*
 					 * This is executed on each timer tick.
 					 *
@@ -2224,7 +2224,7 @@ function UI() {
 					 * from the response.
 					 */
 					var callback = function() {
-						
+
 						/*
 						 * This is called when the server returns a response.
 						 */
@@ -2236,14 +2236,14 @@ function UI() {
 							var mismatch = (dspLoadControl === null);
 							var channels = response.Channels;
 							var numChannels = channels.length;
-							
+
 							/*
 							 * Iterate over all channels in the response.
 							 */
 							for (var i = 0; i < numChannels; i++) {
 								var channel = channels[i];
 								var channelNameResponse = channel.ChannelName;
-								
+
 								/*
 								 * If one of the channels does not match,
 								 * report mismatch.
@@ -2252,18 +2252,18 @@ function UI() {
 									mismatch = true;
 								else {
 									var channelNameControl = channelNames[i];
-									
+
 									/*
 									 * Check if name of the response matches name
 									 * of the control.
 									 */
 									if (channelNameResponse !== channelNameControl)
 										mismatch = true;
-									
+
 								}
-								
+
 							}
-							
+
 							/*
 							 * If the channel mapping has changed, create new controls.
 							 */
@@ -2292,7 +2292,7 @@ function UI() {
 								controlsDiv.appendChild(container);
 								channelNames = [];
 								channelControls = [];
-								
+
 								/*
 								 * Iterate over all channels in the response.
 								 */
@@ -2321,9 +2321,9 @@ function UI() {
 									container.appendChild(nodeWrapper);
 									controlsDiv.appendChild(container);
 								}
-							
+
 							}
-							
+
 							/*
 							 * Display DSP load.
 							 */
@@ -2331,7 +2331,7 @@ function UI() {
 								var dspLoad = response.DSPLoad;
 								dspLoadControl.setValue(dspLoad);
 							}
-							
+
 							/*
 							 * Iterate over all channels in the response.
 							 */
@@ -2343,31 +2343,31 @@ function UI() {
 								channelControl.setValue(channelLevel);
 								channelControl.setPeaks([channelPeak]);
 							}
-							
+
 							unit.dspLoadControl = dspLoadControl;
 							unit.channelNames = channelNames;
 							unit.channelControls = channelControls;
 						};
-						
+
 						handler.getLevelAnalysis(responseListener);
 					};
-					
+
 					var timer = window.setInterval(callback, 200);
 					unit.timer = timer;
 				} else {
 					var timer = unit.timer;
-					
+
 					/*
 					 * If a timer is registered, clear it.
 					 */
 					if (timer !== null)
 						window.clearInterval(timer);
-					
+
 					unit.timer = null;
 				}
-				
+
 			};
-			
+
 			/*
 			 * Create unit object.
 			 */
@@ -2379,14 +2379,14 @@ function UI() {
 				'listeners': [expansionListener],
 				'timer': null
 			};
-		
+
 			/*
 			 * Expands or collapses a unit.
 			 */
 			unit.setExpanded = function(value) {
 				var controlsDiv = this.controls;
 				var displayValue = '';
-			
+
 				/*
 				 * Check whether we should expand or collapse the unit.
 				 */
@@ -2394,17 +2394,17 @@ function UI() {
 					displayValue = 'block';
 				else
 					displayValue = 'none';
-			
+
 				controlsDiv.style.display = displayValue;
 				this.expanded = value;
 				var listeners = this.listeners;
-				
+
 				/*
 				 * Check if there are listeners resistered.
 				 */
 				if (listeners !== null) {
 					var numListeners = listeners.length;
-					
+
 					/*
 					 * Invoke each listener.
 					 */
@@ -2412,18 +2412,18 @@ function UI() {
 						var listener = listeners[i];
 						listener(this, value);
 					}
-					
+
 				}
-				
+
 			};
-		
+
 			/*
 			 * Returns whether a unit is expanded.
 			 */
 			unit.getExpanded = function() {
 				return this.expanded;
 			};
-		
+
 			/*
 			 * Toggles a unit between expanded and collapsed state.
 			 */
@@ -2431,7 +2431,7 @@ function UI() {
 				var state = this.getExpanded();
 				this.setExpanded(!state);
 			};
-		
+
 			/*
 			 * This is called when a user clicks on the label div.
 			 */
@@ -2439,12 +2439,12 @@ function UI() {
 				var unit = storage.get(this, 'unit');
 				unit.toggleExpanded();
 			};
-		
+
 			storage.put(labelDiv, 'unit', unit);
 		}
-		
+
 	};
-	
+
 	/*
 	 * Renders the 'processing' button given a configuration returned from the server.
 	 */
@@ -2452,7 +2452,7 @@ function UI() {
 		var batchProcessing = configuration.BatchProcessing;
 		var elem = document.getElementById('processing');
 		helper.clearElement(elem);
-		
+
 		/*
 		 * Only display this if batch processing is enabled on the server.
 		 */
@@ -2462,7 +2462,7 @@ function UI() {
 			unitDiv.classList.add('masterunitdiv');
 			var headerDiv = document.createElement('div');
 			var processString = ui.getString('process_now');
-		
+
 			/*
 			 * Parameters for process button.
 			 */
@@ -2470,25 +2470,25 @@ function UI() {
 				caption: processString,
 				active: false
 			};
-		
+
 			var button = ui.createButton(paramsButton);
 			var buttonElem = button.input;
 			storage.put(buttonElem, 'active', batchProcessing);
-		
+
 			/*
 			 * This is called when the user clicks on the 'process' button.
 			 */
 			buttonElem.onclick = function(e) {
 				var active = storage.get(this, 'active');
-			
+
 				/*
 				 * Trigger batch processing if the control is active.
 				 */
 				if (active)
 					handler.process();
-			
+
 			};
-		
+
 			headerDiv.appendChild(buttonElem);
 			var labelDiv = document.createElement('div');
 			labelDiv.classList.add('labeldiv');
@@ -2504,7 +2504,7 @@ function UI() {
 			controlsDiv.classList.add('controlsdiv');
 			unitDiv.appendChild(controlsDiv);
 			elem.appendChild(unitDiv);
-		
+
 			/*
 			 * Create unit object.
 			 */
@@ -2512,14 +2512,14 @@ function UI() {
 				'controls': controlsDiv,
 				'expanded': false
 			};
-		
+
 			/*
 			 * Expands or collapses a unit.
 			 */
 			unit.setExpanded = function(value) {
 				var controlsDiv = this.controls;
 				var displayValue = '';
-			
+
 				/*
 				 * Check whether we should expand or collapse the unit.
 				 */
@@ -2527,18 +2527,18 @@ function UI() {
 					displayValue = 'block';
 				else
 					displayValue = 'none';
-			
+
 				controlsDiv.style.display = displayValue;
 				this.expanded = value;
 			};
-		
+
 			/*
 			 * Returns whether a unit is expanded.
 			 */
 			unit.getExpanded = function() {
 				return this.expanded;
 			};
-		
+
 			/*
 			 * Toggles a unit between expanded and collapsed state.
 			 */
@@ -2546,7 +2546,7 @@ function UI() {
 				var state = this.getExpanded();
 				this.setExpanded(!state);
 			};
-		
+
 			/*
 			 * This is called when a user clicks on the label div.
 			 */
@@ -2554,12 +2554,12 @@ function UI() {
 				var unit = storage.get(this, 'unit');
 				unit.toggleExpanded();
 			};
-		
+
 			storage.put(labelDiv, 'unit', unit);
 		}
-		
+
 	};
-	
+
 }
 
 var ui = new UI();
@@ -2569,23 +2569,23 @@ var ui = new UI();
  */
 function Handler() {
 	var self = this;
-	
+
 	/*
 	 * This is called when a new effects unit should be added.
 	 */
 	this.addUnit = function(unitType, chain) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt, otherwise refresh rack.
 				 */
@@ -2595,11 +2595,11 @@ function Handler() {
 					console.log(msg);
 				} else
 					self.refresh();
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var unitTypeString = unitType.toString();
@@ -2611,26 +2611,26 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when a new level analysis should be obtained.
 	 */
 	this.getLevelAnalysis = function(callback) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var levels = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (levels !== null)
 				callback(levels);
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var request = new Request();
@@ -2638,23 +2638,23 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, false);
 	};
-	
+
 	/*
 	 * This is called when a unit should be moved down the chain.
 	 */
 	this.moveDown = function(chain, unit) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
@@ -2664,11 +2664,11 @@ function Handler() {
 					console.log(msg);
 				} else
 					self.refresh();
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
@@ -2680,23 +2680,23 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when a unit should be moved up the chain.
 	 */
 	this.moveUp = function(chain, unit) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
@@ -2706,11 +2706,11 @@ function Handler() {
 					console.log(msg);
 				} else
 					self.refresh();
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
@@ -2722,23 +2722,23 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when a unit should be removed from a chain.
 	 */
 	this.removeUnit = function(chain, unit) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
@@ -2748,11 +2748,11 @@ function Handler() {
 					console.log(msg);
 				} else
 					self.refresh();
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
@@ -2764,23 +2764,23 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when a new azimuth value should be set.
 	 */
 	this.setAzimuth = function(chain, value) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
@@ -2789,11 +2789,11 @@ function Handler() {
 					var msg = 'Setting azimuth value failed: ' + reason;
 					console.log(msg);
 				}
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
@@ -2805,23 +2805,23 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when a unit should be bypassed or bypass should be disabled for a unit.
 	 */
 	this.setBypass = function(chain, unit, value) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
@@ -2830,11 +2830,11 @@ function Handler() {
 					var msg = 'Setting bypass value failed: ' + reason;
 					console.log(msg);
 				}
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
@@ -2848,23 +2848,23 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when a new distance value should be set.
 	 */
 	this.setDistance = function(chain, value) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
@@ -2873,11 +2873,11 @@ function Handler() {
 					var msg = 'Setting distance value failed: ' + reason;
 					console.log(msg);
 				}
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
@@ -2889,23 +2889,23 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when a discrete value should be set.
 	 */
 	this.setDiscreteValue = function(chain, unit, param, value) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
@@ -2914,11 +2914,11 @@ function Handler() {
 					var msg = 'Setting discrete value failed: ' + reason;
 					console.log(msg);
 				}
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
@@ -2934,23 +2934,23 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when period size should be changed.
 	 */
 	this.setFramesPerPeriod = function(value) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
@@ -2959,11 +2959,11 @@ function Handler() {
 					var msg = 'Setting frames per period failed: ' + reason;
 					console.log(msg);
 				}
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var valueString = value.toString();
@@ -2973,23 +2973,23 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when a new level value should be set.
 	 */
 	this.setLevel = function(chain, value) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
@@ -2998,11 +2998,11 @@ function Handler() {
 					var msg = 'Setting level value failed: ' + reason;
 					console.log(msg);
 				}
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
@@ -3014,45 +3014,45 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when the level meter should be enabled or disabled.
 	 */
 	this.setLevelMeterEnabled = function(value) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
 					var reason = webResponse.Reason;
 					var action = 'Enabling';
-					
+
 					/*
 					 * Check if we should disable the level meter.
 					 */
 					if (!value) {
 						action = 'Disabling';
 					}
-					
+
 					var msg = action + ' level meter failed: ' + reason;
 					console.log(msg);
 				}
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var valueString = value.toString();
@@ -3062,23 +3062,23 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when a metronome value should be changed.
 	 */
 	this.setMetronomeValue = function(param, value) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
@@ -3087,11 +3087,11 @@ function Handler() {
 					var msg = 'Setting metronome value failed: ' + reason;
 					console.log(msg);
 				}
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var paramString = param.toString();
@@ -3103,23 +3103,23 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when a tuner value should be changed.
 	 */
 	this.setTunerValue = function(param, value) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
@@ -3128,11 +3128,11 @@ function Handler() {
 					var msg = 'Setting tuner value failed: ' + reason;
 					console.log(msg);
 				}
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var paramString = param.toString();
@@ -3144,23 +3144,23 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when a numeric value should be set.
 	 */
 	this.setNumericValue = function(chain, unit, param, value) {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var webResponse = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (webResponse !== null) {
-				
+
 				/*
 				 * If we were not successful, log failed attempt.
 				 */
@@ -3169,11 +3169,11 @@ function Handler() {
 					var msg = 'Setting numeric value failed: ' + reason;
 					console.log(msg);
 				}
-				
+
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var chainString = chain.toString();
@@ -3189,18 +3189,18 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when the configuration needs to be refreshed.
 	 */
 	this.refresh = function() {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var configuration = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
@@ -3214,9 +3214,9 @@ function Handler() {
 				ui.renderSignalLevels(configuration);
 				ui.renderProcessing(configuration);
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var request = new Request();
@@ -3224,27 +3224,27 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 	/*
 	 * This is called when a new analysis should be performed by the tuner.
 	 */
 	this.refreshTuner = function() {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var analysis = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (analysis !== null) {
 				ui.updateTuner(analysis);
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var request = new Request();
@@ -3252,19 +3252,19 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, false);
 	};
-	
+
 	/*
 	 * This is called when the user clicks on the 'process' button.
 	 */
 	this.process = function() {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			helper.blockSite(true);
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var request = new Request();
@@ -3272,7 +3272,7 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, false);
 	};
-	
+
 	/*
 	 * This is used to prevent the default action from occuring.
 	 */
@@ -3281,7 +3281,7 @@ function Handler() {
 		e.preventDefault();
 		return false;
 	};
-	
+
 	/*
 	 * This is used to prevent the default action from occuring.
 	 */
@@ -3292,7 +3292,7 @@ function Handler() {
 		elem.classList.add('dragover');
 		return false;
 	};
-	
+
 	/*
 	 * This is used to prevent the default action from occuring.
 	 */
@@ -3303,7 +3303,7 @@ function Handler() {
 		elem.classList.remove('dragover');
 		return false;
 	};
-	
+
 	/*
 	 * This is called when the user drops a patch file into the upload area.
 	 */
@@ -3313,47 +3313,47 @@ function Handler() {
 		var transfer = e.dataTransfer;
 		var files = transfer.files;
 		var numFiles = files.length;
-		
+
 		/*
 		 * Check if there is a file.
 		 */
 		if (numFiles > 0) {
 			var file = files[0];
-			
+
 			/*
 			 * This gets called when the server returns a response.
 			 */
 			var responseHandler = function(response) {
 				handler.refresh();
 			};
-			
+
 			var url = globals.cgi;
 			var data = new FormData();
 			data.append('cgi', 'persistence-restore');
 			data.append('patchfile', file);
 			ajax.request('POST', url, data, null, responseHandler, true);
 		}
-		
+
 		return false;
 	};
-	
+
 	/*
 	 * This is called when the user interface initializes.
 	 */
 	this.initialize = function() {
-		
+
 		/*
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
 			var unitTypes = helper.parseJSON(response);
-			
+
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (unitTypes !== null) {
 				var numUnitTypes = unitTypes.length;
-				
+
 				/*
 				 * Iterate over the unit types and add them to the global list.
 				 */
@@ -3361,12 +3361,12 @@ function Handler() {
 					var t = unitTypes[i];
 					globals.unitTypes.push(t);
 				}
-				
+
 				self.refresh();
 			}
-			
+
 		};
-		
+
 		var url = globals.cgi;
 		var mimeType = globals.mimeDefault;
 		var request = new Request();
@@ -3374,7 +3374,7 @@ function Handler() {
 		var requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
-	
+
 }
 
 /*

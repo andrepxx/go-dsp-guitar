@@ -1,6 +1,6 @@
 {
 	"ImpulseResponses": "ir/index.json",
-	
+
 	"WebServer": {
 		"Name": "go-dsp-guitar/1.6.0",
 		"Port": "8080",
@@ -25,9 +25,9 @@
 		"DefaultMime": "application/octet-stream",
 		"ErrorMime": "text/plain; charset=utf-8"
 	},
-	
+
 	"Connections": [
 	]
-	
+
 }
 
