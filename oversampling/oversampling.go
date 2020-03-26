@@ -80,7 +80,8 @@ func (this *oversamplerDecimatorStruct) Oversample(in []float64, out []float64) 
 			bufferPreSize := numInputSamples + LOOKAHEAD_SAMPLES_BOTH_SIDES
 
 			/*
-			 * Make sure the pre-upsampling buffer has the correct size.
+			 * Make sure the pre-upsampling buffer has the correct
+			 * size.
 			 */
 			if len(bufferPre) != bufferPreSize {
 				bufferPre = make([]float64, bufferPreSize)
@@ -94,7 +95,8 @@ func (this *oversamplerDecimatorStruct) Oversample(in []float64, out []float64) 
 			bufferPostSize := ((bufferPreSize - 1) * factor) + 1
 
 			/*
-			 * Make sure the post-upsampling buffer has the correct size.
+			 * Make sure the post-upsampling buffer has the correct
+			 * size.
 			 */
 			if len(bufferPost) != bufferPostSize {
 				bufferPost = make([]float64, bufferPostSize)

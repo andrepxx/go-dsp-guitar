@@ -148,15 +148,29 @@ func Frequency(bins []complex128, numTargetBins uint32) []complex128 {
 func Oversample(source []float64, target []float64, factor uint32) {
 	factorFloat := float64(factor)
 	dx := 1.0 / factorFloat
+	factorInt := int(factor)
 
 	/*
 	 * Calculate output samples using Lanczos interpolation.
 	 */
 	for i, _ := range target {
-		iFloat := float64(i)
-		x := iFloat * dx
-		val := lanczosInterpolate(source, x, 3)
-		target[i] = val
+		m := i % factorInt
+
+		/*
+		 * If we hit an input sample exactly, we can save some
+		 * computation.
+		 */
+		if m == 0 {
+			idx := i / factorInt
+			val := source[idx]
+			target[i] = val
+		} else {
+			iFloat := float64(i)
+			x := iFloat * dx
+			val := lanczosInterpolate(source, x, 3)
+			target[i] = val
+		}
+
 	}
 
 }

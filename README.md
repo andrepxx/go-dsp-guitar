@@ -9,7 +9,8 @@ To manipulate the signal, the user may choose from a variety of highly customiza
 - signal / function generator
 - noise gate
 - bandpass filter
-- auto-wah / envelope follower
+- auto-wah (envelope-following bandpass filter)
+- auto-yoy (envelope-following comb filter)
 - compressor / limiter
 - (multi-)octaver
 - excess (distortion by phase-modulation)
@@ -24,7 +25,8 @@ To manipulate the signal, the user may choose from a variety of highly customiza
 - ring modulator
 - delay (echo)
 - reverb (ambience)
-- power amplifier and speaker simulation
+- power amplifier simulation
+- cabinet simulation
 
 In addition, the software provides ...
 

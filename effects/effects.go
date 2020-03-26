@@ -23,6 +23,7 @@ const (
 	UNIT_NOISEGATE
 	UNIT_BANDPASS
 	UNIT_AUTOWAH
+	UNIT_AUTOYOY
 	UNIT_COMPRESSOR
 	UNIT_OCTAVER
 	UNIT_EXCESS
@@ -38,6 +39,7 @@ const (
 	UNIT_DELAY
 	UNIT_REVERB
 	UNIT_POWERAMP
+	UNIT_CABINET
 )
 
 /*
@@ -456,6 +458,9 @@ func CreateUnit(unitType int) Unit {
 	case UNIT_AUTOWAH:
 		u := createAutoWah()
 		return u
+	case UNIT_AUTOYOY:
+		u := createAutoYoy()
+		return u
 	case UNIT_COMPRESSOR:
 		u := createCompressor()
 		return u
@@ -501,6 +506,9 @@ func CreateUnit(unitType int) Unit {
 	case UNIT_POWERAMP:
 		u := createPowerAmp()
 		return u
+	case UNIT_CABINET:
+		u := createCabinet()
+		return u
 	default:
 		return nil
 	}
@@ -537,6 +545,7 @@ func UnitTypes() []string {
 		"noise_gate",
 		"bandpass",
 		"auto_wah",
+		"auto_yoy",
 		"compressor",
 		"octaver",
 		"excess",
@@ -552,6 +561,7 @@ func UnitTypes() []string {
 		"delay",
 		"reverb",
 		"power_amp",
+		"cabinet",
 	}
 
 	return unitTypes

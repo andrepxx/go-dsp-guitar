@@ -1,6 +1,24 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.6.0
+
+New features / enhancements:
+
+- Add support for different pre-amplifier valves in the overdrive effects unit.
+- Add new auto-yoy effects unit as an envelope-following comb filter.
+- Add new cabinet effects unit for guitar cabinet emulation using IIR (infinite impulse response) filters.
+- Update UI code to provide localized strings for the new effects units and parameters.
+- Update the documentation to explain the new effects units and features.
+
+Maintenance / bugfixes / corrections:
+
+- Update to latest version of "pure-knob".
+- Speed improvements for the oversampling algorithm.
+- Automatically trim non-Golang source files during "make fmt" target.
+- Increment minor version number: v1.5.1 --> v1.6.0
+
+
 v1.5.1
 
 Maintenance / bugfixes / corrections:

@@ -37,14 +37,16 @@ func (this *chorus) Process(in []float64, out []float64, sampleRate uint32) {
 	sampleRateFloat := float64(sampleRate)
 	maxDelaySamplesFloat := math.Floor((0.05 * sampleRateFloat) + 0.5)
 	maxDelaySamples := int(maxDelaySamplesFloat)
-	bufferSize := len(this.buffer)
+	buffer := this.buffer
+	bufferSize := len(buffer)
 	previousPhase := this.previousPhase
 
 	/*
 	 * Make sure the buffer has the appropriate size.
 	 */
 	if bufferSize != maxDelaySamples {
-		this.buffer = make([]float64, maxDelaySamples)
+		buffer = make([]float64, maxDelaySamples)
+		this.buffer = buffer
 		bufferSize = maxDelaySamples
 	}
 
@@ -87,7 +89,7 @@ func (this *chorus) Process(in []float64, out []float64, sampleRate uint32) {
 				delayedSampleEarly = in[delayedIdxEarly]
 			} else {
 				bufferPtr := bufferSize + delayedIdxEarly
-				delayedSampleEarly = this.buffer[bufferPtr]
+				delayedSampleEarly = buffer[bufferPtr]
 			}
 
 			/*
@@ -121,10 +123,10 @@ func (this *chorus) Process(in []float64, out []float64, sampleRate uint32) {
 	 * Check whether our buffer is larger than the number of samples processed.
 	 */
 	if boundary >= 0 {
-		copy(this.buffer[0:boundary], this.buffer[numSamples:bufferSize])
-		copy(this.buffer[boundary:bufferSize], in)
+		copy(buffer[0:boundary], buffer[numSamples:bufferSize])
+		copy(buffer[boundary:bufferSize], in)
 	} else {
-		copy(this.buffer, in[-boundary:numSamples])
+		copy(buffer, in[-boundary:numSamples])
 	}
 
 }

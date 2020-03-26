@@ -321,6 +321,7 @@ function UI() {
 		'add': 'Add',
 		'add_unit': 'Add unit',
 		'auto_wah': 'Auto wah',
+		'auto_yoy': 'Auto yoy',
 		'azimuth': 'Azimuth',
 		'bandpass': 'Bandpass',
 		'batch_processing': 'Batch processing',
@@ -329,6 +330,7 @@ function UI() {
 		'boost': 'Boost',
 		'bpm': 'BPM',
 		'bypass': 'Bypass',
+		'cabinet': 'Cabinet',
 		'cents': 'Cents',
 		'channel': 'Channel',
 		'chorus': 'Chorus',
@@ -422,6 +424,7 @@ function UI() {
 		'tone_stack': 'Tone stack',
 		'tremolo': 'Tremolo',
 		'tuner': 'Tuner',
+		'type': 'Type',
 		'valve': 'Valve'
 	};
 	

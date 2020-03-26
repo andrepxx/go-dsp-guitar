@@ -601,6 +601,31 @@
 			</ul>
 		</div>
 		<div class="section heading">
+			Effects unit: Auto yoy
+		</div>
+		<div class="section">
+			The <span class="emphasis">auto yoy</span> is a voltage-controlled filter effect from the late 60-s / early 70-s. It implements a comb filter controlled by either the average or peak amplitude of the input signal. The effect is much more subtle than that of an <span class="emphasis">auto wah</span>, but creates a rich atmosphere, especially with an overdrive unit placed after it. Because it is an amplitude-controlled effect, the <span class="emphasis">auto yoy</span> unit should be placed <span class="emphasis">before</span> distortion effects in the signal chain, as these compress or reduce the dynamic range of the signal.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Follow:</span> This value determines, whether the voltage controlling the frequency response of the filter should be derived from the signal <span class="highlight">envelope</span> (i. e. peak amplitude) or the average signal <span class="highlight">level</span>. The <span class="highlight">envelope</span> option makes the filter follow changes in the input amplitude more closely and rapidly, while the <span class="highlight">level</span> option makes the filter work more steadily and reduces the impact of large short-term signal spikes.
+				</li>
+				<li class="item">
+					<span class="highlight">Level 1:</span> The level of the input signal (in <span class="emphasis">dBFS</span>) where the frequency response of the filter will start or stop changing. If this is the lower number, then the filter will maintain a constant frequency response when the signal falls below this threshold. If this is the higher number, then the filter will maintain a constant frequency response when the signal rises above this threshold. Swapping the numbers of <span class="emphasis">Level 1</span> and <span class="emphasis">Level 2</span> around will invert the direction of the frequency sweep.
+				</li>
+				<li class="item">
+					<span class="highlight">Level 2:</span> The level of the input signal (in <span class="emphasis">dBFS</span>) where the frequency response of the filter will start or stop changing. If this is the lower number, then the filter will maintain a constant frequency response when the signal falls below this threshold. If this is the higher number, then the filter will maintain a constant frequency response when the signal rises above this threshold. Swapping the numbers of <span class="emphasis">Level 1</span> and <span class="emphasis">Level 2</span> around will invert the direction of the frequency sweep.
+				</li>
+				<li class="item">
+					<span class="highlight">Depth:</span> Controls how far the peaks and troughs move within the frequency spectrum. A higher depth results in a more intense effect.
+				</li>
+			</ul>
+		</div>
+		<div class="section heading">
 			Effects unit: Compressor
 		</div>
 		<div class="section">
@@ -1026,6 +1051,22 @@
 		</div>
 		<div class="section">
 			Most of the time, you will probably run multiple variations of a particular speaker cabinet (i. e. different microphone placements for a guitar cabinet or all drivers of a PA cabinet) in parallel and adjust their respective levels to tune your sound. However, <span class="emphasis">go-dsp-guitar</span> will also let you combine speakers from different cabinets and/or amplifiers and run them in parallel. Specifically, by running the signal through multiple guitar amplifiers at once, you can achieve an effect similar to &quot;dual-amping&quot; a guitar.
+		</div>
+		<div class="section heading">
+			Effects unit: Cabinet
+		</div>
+		<div class="section">
+			The <span class="emphasis">cabinet</span> unit provides a very simple and highly-efficient guitar cabinet emulation based on IIR (infinite impulse response) filters. Compared to the much more complex <span class="emphasis">power amp</span> unit, it allows to trade in accuracy and flexibility for processing time.
+		</div>
+		<div class="section">
+			Parameters:
+		</div>
+		<div class="section">
+			<ul>
+				<li class="item">
+					<span class="highlight">Type:</span> Allows the type of speaker cabinet to be selected. Currently, there of only a single setting called <span class="highlight">- DEFAULT -</span>.
+				</li>
+			</ul>
 		</div>
 		<div class="section heading">
 			Effects unit: Persistence
