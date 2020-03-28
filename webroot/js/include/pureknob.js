@@ -626,7 +626,7 @@ function PureKnob() {
 
 			const valMin = properties.valMin;
 			const valMax = properties.valMax;
-			const value = ((angle / angleDiff) * (valMax - valMin)) + valMin;
+			let value = ((angle / angleDiff) * (valMax - valMin)) + valMin;
 
 			/*
 			 * Clamp values into valid interval.
