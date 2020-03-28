@@ -118,16 +118,18 @@ function Helper() {
 		/*
 		 * If we should block the site, display blocker, otherwise hide it.
 		 */
-		if (blocked)
+		if (blocked) {
 			displayStyle = 'block';
-		else
+		} else {
 			displayStyle = 'none';
+		}
 
 		/*
 		 * Apply style if the site has a blocker.
 		 */
-		if (blocker !== null)
+		if (blocker !== null) {
 			blocker.style.display = displayStyle;
+		}
 
 	};
 
@@ -184,7 +186,7 @@ function Ajax() {
 	 * - data (string): Data to be passed along the request (e. g. form data).
 	 * - mimeType (string): Content type (MIME type) of the content sent to the server.
 	 * - callback (function): The function to be called when a response is
-	 *	returned from the server.
+	 *	                  returned from the server.
 	 * - block (boolean): Whether the site should be blocked.
 	 *
 	 * Returns: Nothing.
@@ -208,8 +210,9 @@ function Ajax() {
 				 * If we blocked the site on the request,
 				 * unblock it on the response.
 				 */
-				if (block)
+				if (block) {
 					helper.blockSite(false);
+				}
 
 				/*
 				 * Check if callback is registered.
@@ -228,8 +231,9 @@ function Ajax() {
 		/*
 		 * Set MIME type if requested.
 		 */
-		if (mimeType !== null)
+		if (mimeType !== null) {
 			xhr.setRequestHeader('Content-type', mimeType);
+		}
 
 		xhr.send(data);
 	};
@@ -298,8 +302,9 @@ function Request() {
 			/*
 			 * If this is not the first key-value pair, we need a separator.
 			 */
-			if (i > 0)
+			if (i > 0) {
 				s += '&';
+			}
 
 			s += keyEncoded + '=' + valueEncoded;
 		}
@@ -439,8 +444,9 @@ function UI() {
 		if (key in strings) {
 			var s = strings[key];
 			return s;
-		} else
+		} else {
 			return key;
+		}
 
 	};
 
@@ -574,12 +580,13 @@ function UI() {
 		elem.classList.add('button');
 
 		/*
-		 * Check whether the button should be active
+		 * Check whether the button should be active.
 		 */
-		if (active)
+		if (active) {
 			elem.classList.add('buttonactive');
-		else
+		} else {
 			elem.classList.add('buttonnormal');
+		}
 
 		var captionNode = document.createTextNode(caption);
 		elem.appendChild(captionNode);
@@ -604,7 +611,7 @@ function UI() {
 		var buttons = [];
 
 		/*
-		 * Iterate over the buttons;
+		 * Iterate over the buttons.
 		 */
 		for (var i = 0; i < numButtonsParam; i++) {
 			var buttonParam = buttonsParam[i];
@@ -695,10 +702,11 @@ function UI() {
 			/*
 			 * Check whether we should expand or collapse the unit.
 			 */
-			if (value)
+			if (value) {
 				displayValue = 'block';
-			else
+			} else {
 				displayValue = 'none';
+			}
 
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
@@ -742,9 +750,13 @@ function UI() {
 		switch (unitType) {
 			case 'power_amp':
 
-				if (paramName.startsWith('level_'))
+				/*
+				 * Only parameters of the form 'level_N' and 'filter_N',
+				 * where N is a number, require special handling.
+				 */
+				if (paramName.startsWith('level_')) {
 					return true;
-				else if (paramName.startsWith('filter_')) {
+				} else if (paramName.startsWith('filter_')) {
 					var suffix = paramName.substring(7);
 					var isNumeric = isFinite(suffix);
 					return isNumeric;
@@ -1292,10 +1304,11 @@ function UI() {
 			/*
 			 * Check whether we should expand or collapse the unit.
 			 */
-			if (value)
+			if (value) {
 				displayValue = 'block';
-			else
+			} else {
 				displayValue = 'none';
+			}
 
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
@@ -1366,8 +1379,9 @@ function UI() {
 			/*
 			 * If we have a match, store index.
 			 */
-			if (framesPerPeriod === currentValue)
+			if (framesPerPeriod === currentValue) {
 				valueIdx = i;
+			}
 
 		}
 
@@ -1414,10 +1428,11 @@ function UI() {
 			/*
 			 * Check whether we should expand or collapse the unit.
 			 */
-			if (value)
+			if (value) {
 				displayValue = 'block';
-			else
+			} else {
 				displayValue = 'none';
+			}
 
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
@@ -1593,9 +1608,9 @@ function UI() {
 			 * Handle special case of no channel and register timer
 			 * for updating readings for the UI.
 			 */
-			if (value === '- NONE -')
+			if (value === '- NONE -') {
 				value = '-1';
-			else {
+			} else {
 				var intervalNew = window.setInterval(callback, 250);
 				storage.put(this, 'interval', intervalNew);
 			}
@@ -1626,10 +1641,11 @@ function UI() {
 			/*
 			 * Check whether we should expand or collapse the unit.
 			 */
-			if (value)
+			if (value) {
 				displayValue = 'block';
-			else
+			} else {
 				displayValue = 'none';
+			}
 
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
@@ -1829,10 +1845,11 @@ function UI() {
 			/*
 			 * Check whether we should expand or collapse the unit.
 			 */
-			if (value)
+			if (value) {
 				displayValue = 'block';
-			else
+			} else {
 				displayValue = 'none';
+			}
 
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
@@ -2008,14 +2025,16 @@ function UI() {
 			/*
 			 * If we found the tick sound, store index.
 			 */
-			if (sound === tickSound)
+			if (sound === tickSound) {
 				tickIdx = i;
+			}
 
 			/*
 			 * If we found the tock sound, store index.
 			 */
-			if (sound === tockSound)
+			if (sound === tockSound) {
 				tockIdx = i;
+			}
 
 		}
 
@@ -2090,10 +2109,11 @@ function UI() {
 			/*
 			 * Check whether we should expand or collapse the unit.
 			 */
-			if (value)
+			if (value) {
 				displayValue = 'block';
-			else
+			} else {
 				displayValue = 'none';
+			}
 
 			controlsDiv.style.display = displayValue;
 			this.expanded = value;
@@ -2248,17 +2268,18 @@ function UI() {
 								 * If one of the channels does not match,
 								 * report mismatch.
 								 */
-								if (numNames <= i)
+								if (numNames <= i) {
 									mismatch = true;
-								else {
+								} else {
 									var channelNameControl = channelNames[i];
 
 									/*
 									 * Check if name of the response matches name
 									 * of the control.
 									 */
-									if (channelNameResponse !== channelNameControl)
+									if (channelNameResponse !== channelNameControl) {
 										mismatch = true;
+									}
 
 								}
 
@@ -2360,8 +2381,9 @@ function UI() {
 					/*
 					 * If a timer is registered, clear it.
 					 */
-					if (timer !== null)
+					if (timer !== null) {
 						window.clearInterval(timer);
+					}
 
 					unit.timer = null;
 				}
@@ -2390,10 +2412,11 @@ function UI() {
 				/*
 				 * Check whether we should expand or collapse the unit.
 				 */
-				if (value)
+				if (value) {
 					displayValue = 'block';
-				else
+				} else {
 					displayValue = 'none';
+				}
 
 				controlsDiv.style.display = displayValue;
 				this.expanded = value;
@@ -2484,8 +2507,9 @@ function UI() {
 				/*
 				 * Trigger batch processing if the control is active.
 				 */
-				if (active)
+				if (active) {
 					handler.process();
+				}
 
 			};
 
@@ -2523,10 +2547,11 @@ function UI() {
 				/*
 				 * Check whether we should expand or collapse the unit.
 				 */
-				if (value)
+				if (value) {
 					displayValue = 'block';
-				else
+				} else {
 					displayValue = 'none';
+				}
 
 				controlsDiv.style.display = displayValue;
 				this.expanded = value;
@@ -2593,8 +2618,9 @@ function Handler() {
 					var reason = webResponse.Reason;
 					var msg = 'Adding new unit failed: ' + reason;
 					console.log(msg);
-				} else
+				} else {
 					self.refresh();
+				}
 
 			}
 
@@ -2626,8 +2652,9 @@ function Handler() {
 			/*
 			 * Check if the response is valid JSON.
 			 */
-			if (levels !== null)
+			if (levels !== null) {
 				callback(levels);
+			}
 
 		};
 
@@ -2662,8 +2689,9 @@ function Handler() {
 					var reason = webResponse.Reason;
 					var msg = 'Moving unit down failed: ' + reason;
 					console.log(msg);
-				} else
+				} else {
 					self.refresh();
+				}
 
 			}
 
@@ -2704,8 +2732,9 @@ function Handler() {
 					var reason = webResponse.Reason;
 					var msg = 'Moving unit up failed: ' + reason;
 					console.log(msg);
-				} else
+				} else {
 					self.refresh();
+				}
 
 			}
 
@@ -2746,8 +2775,9 @@ function Handler() {
 					var reason = webResponse.Reason;
 					var msg = 'Removing unit failed: ' + reason;
 					console.log(msg);
-				} else
+				} else {
 					self.refresh();
+				}
 
 			}
 

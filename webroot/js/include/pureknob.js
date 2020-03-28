@@ -255,10 +255,11 @@ function PureKnob() {
 				/*
 				 * Clamp the actual value into the [valMin; valMax] range.
 				 */
-				if (value < valMin)
+				if (value < valMin) {
 					value = valMin;
-				else if (value > valMax)
+				} else if (value > valMax) {
 					value = valMax;
+				}
 
 				value = Math.round(value);
 				this.setProperty('val', value);
@@ -358,8 +359,9 @@ function PureKnob() {
 					/*
 					 * Call listener, if it exists.
 					 */
-					if (listener !== null)
+					if (listener !== null) {
 						listener(this, value);
+					}
 
 				}
 
@@ -506,10 +508,11 @@ function PureKnob() {
 				/*
 				 * Check if we're in needle mode.
 				 */
-				if (needle)
+				if (needle) {
 					ctx.arc(centerX, centerY, radius, angleVal - 0.1, angleVal + 0.1);
-				else
+				} else {
 					ctx.arc(centerX, centerY, radius, actualStart, angleVal);
+				}
 
 				ctx.lineCap = 'butt';
 				ctx.lineWidth = lineWidth;
@@ -582,10 +585,11 @@ function PureKnob() {
 				/*
 				 * Clamp the actual value into the [valMin; valMax] range.
 				 */
-				if (value < valMin)
+				if (value < valMin) {
 					value = valMin;
-				else if (value > valMax)
+				} else if (value > valMax) {
 					value = valMax;
+				}
 
 				value = Math.round(value);
 				this.setProperty('val', value);
@@ -617,10 +621,11 @@ function PureKnob() {
 			 */
 			if (angle < 0) {
 
-				if (angleDiff >= twoPi)
+				if (angleDiff >= twoPi) {
 					angle += twoPi;
-				else
+				} else {
 					angle = 0;
+				}
 
 			}
 
@@ -631,10 +636,11 @@ function PureKnob() {
 			/*
 			 * Clamp values into valid interval.
 			 */
-			if (value < valMin)
+			if (value < valMin) {
 				value = valMin;
-			else if (value > valMax)
+			} else if (value > valMax) {
 				value = valMax;
+			}
 
 			return value;
 		};
@@ -657,8 +663,9 @@ function PureKnob() {
 			/*
 			 * If there are touches, extract the first one.
 			 */
-			if (touches.length > 0)
+			if (touches.length > 0) {
 				touch = touches.item(0);
+			}
 
 			let x = 0.0;
 			let y = 0.0;
@@ -687,10 +694,11 @@ function PureKnob() {
 			 */
 			if (angle < 0) {
 
-				if (angleDiff >= twoPi)
+				if (angleDiff >= twoPi) {
 					angle += twoPi;
-				else
+				} else {
 					angle = 0;
+				}
 
 			}
 
@@ -701,10 +709,11 @@ function PureKnob() {
 			/*
 			 * Clamp values into valid interval.
 			 */
-			if (value < valMin)
+			if (value < valMin) {
 				value = valMin;
-			else if (value > valMax)
+			} else if (value > valMax) {
 				value = valMax;
+			}
 
 			return value;
 		};
@@ -1082,8 +1091,9 @@ function PureKnob() {
 					/*
 					 * Check if input is a valid number.
 					 */
-					if (valid)
+					if (valid) {
 						knob.setValue(val);
+					}
 
 				}
 
