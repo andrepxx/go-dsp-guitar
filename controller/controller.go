@@ -3311,7 +3311,7 @@ func (this *controllerStruct) Operate(numChannels uint32) {
 		if server == nil {
 			fmt.Printf("%s\n", "Web server did not enter message loop.")
 		} else {
-			channels := server.RegisterCgi("/cgi-bin/dsp")
+			requests := server.RegisterCgi("/cgi-bin/dsp")
 			server.Run()
 			in := os.Stdin
 			scanner := bufio.NewScanner(in)
@@ -3379,9 +3379,10 @@ func (this *controllerStruct) Operate(numChannels uint32) {
 				 * This is the actual message pump.
 				 */
 				for this.running {
-					request := <-channels.Requests
+					request := <-requests
 					response := this.dispatch(request)
-					channels.Responses <- response
+					respond := request.Respond
+					respond <- response
 				}
 
 				/*
