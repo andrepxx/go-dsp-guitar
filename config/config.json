@@ -23,7 +23,26 @@
 		},
 
 		"DefaultMime": "application/octet-stream",
-		"ErrorMime": "text/plain; charset=utf-8"
+		"ErrorMime": "text/plain; charset=utf-8",
+
+		"Timeouts": {
+
+			"HTTP": {
+				"Header": 5,
+				"Read": 10,
+				"Write": 5,
+				"Idle": 60
+			},
+
+			"TLS": {
+				"Header": 5,
+				"Read": 0,
+				"Write": 0,
+				"Idle": 60
+			}
+
+		}
+
 	},
 
 	"Connections": [

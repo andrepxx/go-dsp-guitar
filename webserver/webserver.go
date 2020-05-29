@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
@@ -36,6 +37,28 @@ type HttpResponse struct {
 }
 
 /*
+ * Data structure representing protocol timeouts.
+ *
+ * All numbers are provided in seconds.
+ *
+ * A value of zero represents no timeout.
+ */
+type ProtocolTimeouts struct {
+	Header uint32
+	Read   uint32
+	Write  uint32
+	Idle   uint32
+}
+
+/*
+ * Data structure representing timeouts for multiple protocols.
+ */
+type Timeouts struct {
+	HTTP ProtocolTimeouts
+	TLS  ProtocolTimeouts
+}
+
+/*
  * Data structure for web server configuration.
  */
 type Config struct {
@@ -49,6 +72,7 @@ type Config struct {
 	MimeTypes     map[string]string
 	DefaultMime   string
 	ErrorMime     string
+	Timeouts      Timeouts
 }
 
 /*
@@ -86,9 +110,19 @@ func (this *webServerStruct) setDefaultHeaders(writer http.ResponseWriter) {
 }
 
 /*
+ * Limits the size of an incoming request.
+ */
+func (this *webServerStruct) limitRequestSize(writer http.ResponseWriter, request *http.Request) {
+	requestBody := request.Body
+	limitedBody := http.MaxBytesReader(writer, requestBody, REQUEST_SIZE)
+	request.Body = limitedBody
+}
+
+/*
  * A handler for CGI requests.
  */
 func (this *webServerStruct) cgiHandler(writer http.ResponseWriter, request *http.Request) {
+	this.limitRequestSize(writer, request)
 	request.ParseMultipartForm(REQUEST_SIZE)
 	protocol := request.Proto
 	method := request.Method
@@ -334,19 +368,68 @@ func (this *webServerStruct) RemoveCgi(path string) {
  * listener.
  */
 func (this *webServerStruct) Run() {
+	redirectHandler := this.redirect
+	httpMux := http.NewServeMux()
+	httpMux.HandleFunc("/", redirectHandler)
+	cfg := this.config
+	httpPort := cfg.Port
+	httpAddr := fmt.Sprintf(":%s", httpPort)
+	timeouts := cfg.Timeouts
+	httpTimeouts := timeouts.HTTP
+	httpTimeoutHeaderSec := httpTimeouts.Header
+	httpTimeoutHeaderDur := time.Duration(httpTimeoutHeaderSec)
+	httpTimeoutHeader := httpTimeoutHeaderDur * time.Second
+	httpTimeoutReadSec := httpTimeouts.Read
+	httpTimeoutReadDur := time.Duration(httpTimeoutReadSec)
+	httpTimeoutRead := httpTimeoutReadDur * time.Second
+	httpTimeoutWriteSec := httpTimeouts.Write
+	httpTimeoutWriteDur := time.Duration(httpTimeoutWriteSec)
+	httpTimeoutWrite := httpTimeoutWriteDur * time.Second
+	httpTimeoutIdleSec := httpTimeouts.Idle
+	httpTimeoutIdleDur := time.Duration(httpTimeoutIdleSec)
+	httpTimeoutIdle := httpTimeoutIdleDur * time.Second
 
 	/*
-	 * Use only GCM (no CBC) and only SHA-2 (no SHA-1!).
+	 * The HTTP server.
+	 */
+	httpServer := http.Server{
+		Addr:              httpAddr,
+		Handler:           httpMux,
+		IdleTimeout:       httpTimeoutIdle,
+		ReadHeaderTimeout: httpTimeoutHeader,
+		ReadTimeout:       httpTimeoutRead,
+		WriteTimeout:      httpTimeoutWrite,
+	}
+
+	tlsMux := http.NewServeMux()
+	cgis := this.cgis
+	cgiHandler := this.cgiHandler
+
+	/*
+	 * Register all CGI paths to TLS server.
+	 */
+	for path, _ := range cgis {
+		tlsMux.HandleFunc(path, cgiHandler)
+	}
+
+	fileHandler := this.fileHandler
+	tlsMux.HandleFunc("/", fileHandler)
+	tlsPort := cfg.TLSPort
+	tlsAddr := fmt.Sprintf(":%s", tlsPort)
+
+	/*
+	 * TLS cipher suites to use.
 	 */
 	ciphersuites := []uint16{
+		tls.TLS_CHACHA20_POLY1305_SHA256,
+		tls.TLS_AES_256_GCM_SHA384,
+		tls.TLS_AES_128_GCM_SHA256,
 		tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
 		tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
 		tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 		tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
 		tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 		tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-		tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
-		tls.TLS_RSA_WITH_AES_128_GCM_SHA256,
 	}
 
 	/*
@@ -360,39 +443,43 @@ func (this *webServerStruct) Run() {
 	 * Use at least TLS 1.2 and Curve25519 (no NIST-Curves!).
 	 */
 	tlsConfig := tls.Config{
-		MinVersion:       tls.VersionTLS12,
-		CurvePreferences: curves,
-		CipherSuites:     ciphersuites,
+		CipherSuites:             ciphersuites,
+		CurvePreferences:         curves,
+		MinVersion:               tls.VersionTLS12,
+		PreferServerCipherSuites: true,
 	}
 
-	cfg := this.config
-	tlsPort := cfg.TLSPort
-	tlsAddr := fmt.Sprintf(":%s", tlsPort)
+	tlsTimeouts := timeouts.TLS
+	tlsTimeoutHeaderSec := tlsTimeouts.Header
+	tlsTimeoutHeaderDur := time.Duration(tlsTimeoutHeaderSec)
+	tlsTimeoutHeader := tlsTimeoutHeaderDur * time.Second
+	tlsTimeoutReadSec := tlsTimeouts.Read
+	tlsTimeoutReadDur := time.Duration(tlsTimeoutReadSec)
+	tlsTimeoutRead := tlsTimeoutReadDur * time.Second
+	tlsTimeoutWriteSec := tlsTimeouts.Write
+	tlsTimeoutWriteDur := time.Duration(tlsTimeoutWriteSec)
+	tlsTimeoutWrite := tlsTimeoutWriteDur * time.Second
+	tlsTimeoutIdleSec := tlsTimeouts.Idle
+	tlsTimeoutIdleDur := time.Duration(tlsTimeoutIdleSec)
+	tlsTimeoutIdle := tlsTimeoutIdleDur * time.Second
 
 	/*
 	 * The TLS server.
 	 */
 	tlsServer := http.Server{
-		Addr:      tlsAddr,
-		TLSConfig: &tlsConfig,
+		Addr:              tlsAddr,
+		Handler:           tlsMux,
+		IdleTimeout:       tlsTimeoutIdle,
+		ReadHeaderTimeout: tlsTimeoutHeader,
+		ReadTimeout:       tlsTimeoutRead,
+		TLSConfig:         &tlsConfig,
+		WriteTimeout:      tlsTimeoutWrite,
 	}
 
-	cgis := this.cgis
-
-	/*
-	 * Register all CGI paths to HTTP handler.
-	 */
-	for path, _ := range cgis {
-		http.HandleFunc(path, this.cgiHandler)
-	}
-
-	http.HandleFunc("/", this.fileHandler)
 	publicKey := cfg.TLSPublicKey
 	privateKey := cfg.TLSPrivateKey
-	httpPort := cfg.Port
 	go tlsServer.ListenAndServeTLS(publicKey, privateKey)
-	httpAddr := fmt.Sprintf(":%s", httpPort)
-	go http.ListenAndServe(httpAddr, http.HandlerFunc(this.redirect))
+	go httpServer.ListenAndServe()
 }
 
 /*
