@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -371,6 +373,8 @@ func (this *webServerStruct) Run() {
 	redirectHandler := this.redirect
 	httpMux := http.NewServeMux()
 	httpMux.HandleFunc("/", redirectHandler)
+	discard := ioutil.Discard
+	logger := log.New(discard, "", log.LstdFlags)
 	cfg := this.config
 	httpPort := cfg.Port
 	httpAddr := fmt.Sprintf(":%s", httpPort)
@@ -394,6 +398,7 @@ func (this *webServerStruct) Run() {
 	 */
 	httpServer := http.Server{
 		Addr:              httpAddr,
+		ErrorLog:          logger,
 		Handler:           httpMux,
 		IdleTimeout:       httpTimeoutIdle,
 		ReadHeaderTimeout: httpTimeoutHeader,
@@ -468,6 +473,7 @@ func (this *webServerStruct) Run() {
 	 */
 	tlsServer := http.Server{
 		Addr:              tlsAddr,
+		ErrorLog:          logger,
 		Handler:           tlsMux,
 		IdleTimeout:       tlsTimeoutIdle,
 		ReadHeaderTimeout: tlsTimeoutHeader,
