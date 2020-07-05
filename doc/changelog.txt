@@ -1,6 +1,15 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.6.1
+
+Maintenance / bugfixes / corrections:
+
+- Update to latest version of "pure-knob".
+- Technical improvements.
+- Increment patch version number: v1.6.0 --> v1.6.1
+
+
 v1.6.0
 
 New features / enhancements:
