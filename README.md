@@ -42,9 +42,9 @@ The software itself runs in headless mode and is entirely controlled via a moder
 
 ## Screenshots
 
-![Screenshot 01](/doc/img/screenshot-01-thumb.png)
+![Screenshot 01](/doc/img/screenshot-02-thumb.png)
 
-[View full resolution image](/doc/img/screenshot-01.png)
+[View full resolution image](/doc/img/screenshot-02.png)
 
 ## Running the software (from a binary package)
 

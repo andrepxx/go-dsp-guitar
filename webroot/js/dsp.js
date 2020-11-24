@@ -6,25 +6,25 @@
 function Globals() {
 	this.cgi = '/cgi-bin/dsp';
 	this.mimeDefault = 'application/x-www-form-urlencoded';
-	this.unitTypes = new Array();
+	this.unitTypes = [];
 }
 
 /*
  * The global state object.
  */
-var globals = new Globals();
+const globals = new Globals();
 
 /*
  * A class implementing data storage.
  */
 function Storage() {
-	var g_map = new WeakMap();
+	const g_map = new WeakMap();
 
 	/*
 	 * Store a value under a key inside an element.
 	 */
 	this.put = function(elem, key, value) {
-		var map = g_map.get(elem);
+		let map = g_map.get(elem);
 
 		/*
 		 * Check if element is still unknown.
@@ -41,7 +41,7 @@ function Storage() {
 	 * Fetch a value from a key inside an element.
 	 */
 	this.get = function(elem, key, value) {
-		var map = g_map.get(elem);
+		const map = g_map.get(elem);
 
 		/*
 		 * Check if element is unknown.
@@ -49,7 +49,7 @@ function Storage() {
 		if (map == null) {
 			return null;
 		} else {
-			var value = map.get(key);
+			const value = map.get(key);
 			return value;
 		}
 
@@ -59,7 +59,7 @@ function Storage() {
 	 * Check if a certain key exists inside an element.
 	 */
 	this.has = function(elem, key) {
-		var map = g_map.get(elem);
+		const map = g_map.get(elem);
 
 		/*
 		 * Check if element is unknown.
@@ -67,7 +67,7 @@ function Storage() {
 		if (map == null) {
 			return false;
 		} else {
-			var value = map.has(key);
+			const value = map.has(key);
 			return value;
 		}
 
@@ -77,7 +77,7 @@ function Storage() {
 	 * Remove a certain key from an element.
 	 */
 	this.remove = function(elem, key) {
-		var map = g_map.get(elem);
+		const map = g_map.get(elem);
 
 		/*
 		 * Check if element is known.
@@ -101,7 +101,7 @@ function Storage() {
 /*
  * The global storage object.
  */
-var storage = new Storage();
+const storage = new Storage();
 
 /*
  * A class supposed to make life a little easier.
@@ -112,8 +112,8 @@ function Helper() {
 	 * Blocks or unblocks the site for user interactions.
 	 */
 	this.blockSite = function(blocked) {
-		var blocker = document.getElementById('blocker');
-		var displayStyle = '';
+		const blocker = document.getElementById('blocker');
+		let displayStyle = '';
 
 		/*
 		 * If we should block the site, display blocker, otherwise hide it.
@@ -142,7 +142,7 @@ function Helper() {
 		 * As long as the element has child nodes, remove one.
 		 */
 		while (elem.hasChildNodes()) {
-			var child = elem.firstChild;
+			const child = elem.firstChild;
 			elem.removeChild(child);
 		}
 
@@ -157,7 +157,7 @@ function Helper() {
 		 * Try to parse JSON structure.
 		 */
 		try {
-			var obj = JSON.parse(jsonString);
+			const obj = JSON.parse(jsonString);
 			return obj;
 		} catch (ex) {
 			return null;
@@ -170,7 +170,7 @@ function Helper() {
 /*
  * The (global) helper object.
  */
-var helper = new Helper();
+const helper = new Helper();
 
 /*
  * A class implementing an Ajax engine.
@@ -192,7 +192,7 @@ function Ajax() {
 	 * Returns: Nothing.
 	 */
 	this.request = function(method, url, data, mimeType, callback, block) {
-		var xhr = new XMLHttpRequest();
+		const xhr = new XMLHttpRequest();
 
 		/*
 		 * Event handler for ReadyStateChange event.
@@ -218,7 +218,7 @@ function Ajax() {
 				 * Check if callback is registered.
 				 */
 				if (callback !== null) {
-					var content = xhr.responseText;
+					const content = xhr.responseText;
 					callback(content);
 				}
 
@@ -243,14 +243,14 @@ function Ajax() {
 /*
  * The (global) Ajax engine.
  */
-var ajax = new Ajax();
+const ajax = new Ajax();
 
 /*
  * A class implementing a key-value-pair.
  */
 function KeyValuePair(key, value) {
-	var g_key = key;
-	var g_value = value;
+	const g_key = key;
+	const g_value = value;
 
 	/*
 	 * Returns the key stored in this key-value pair.
@@ -272,13 +272,13 @@ function KeyValuePair(key, value) {
  * A class implementing a JSON request.
  */
 function Request() {
-	var g_keyValues = Array();
+	const g_keyValues = [];
 
 	/*
 	 * Append a key-value-pair to a request.
 	 */
 	this.append = function(key, value) {
-		var kv = new KeyValuePair(key, value);
+		const kv = new KeyValuePair(key, value);
 		g_keyValues.push(kv);
 	};
 
@@ -286,18 +286,18 @@ function Request() {
 	 * Returns the URL encoded data for this request.
 	 */
 	this.getData = function() {
-		var numPairs = g_keyValues.length;
-		var s = '';
+		const numPairs = g_keyValues.length;
+		let s = '';
 
 		/*
 		 * Iterate over the key-value pairs.
 		 */
-		for (var i = 0; i < numPairs; i++) {
-			var keyValue = g_keyValues[i];
-			var key = keyValue.getKey();
-			var keyEncoded = encodeURIComponent(key);
-			var value = keyValue.getValue();
-			var valueEncoded = encodeURIComponent(value);
+		for (let i = 0; i < numPairs; i++) {
+			const keyValue = g_keyValues[i];
+			const key = keyValue.getKey();
+			const keyEncoded = encodeURIComponent(key);
+			const value = keyValue.getValue();
+			const valueEncoded = encodeURIComponent(value);
 
 			/*
 			 * If this is not the first key-value pair, we need a separator.
@@ -322,7 +322,7 @@ function UI() {
 	/*
 	 * Strings for the user interface.
 	 */
-	var strings = {
+	const strings = {
 		'add': 'Add',
 		'add_unit': 'Add unit',
 		'auto_wah': 'Auto wah',
@@ -442,7 +442,7 @@ function UI() {
 		 * Check whether key is defined in strings.
 		 */
 		if (key in strings) {
-			var s = strings[key];
+			const s = strings[key];
 			return s;
 		} else {
 			return key;
@@ -454,32 +454,32 @@ function UI() {
 	 * Creates a turnable knob.
 	 */
 	this.createKnob = function(params) {
-		var label = params.label;
-		var physicalUnit = params.physicalUnit;
-		var valueMin = params.valueMin;
-		var valueMax = params.valueMax;
-		var valueDefault = params.valueDefault;
-		var valueWidth = params.valueWidth;
-		var valueHeight = params.valueHeight;
-		var valueAngle = params.angle;
-		var valueAngleArc = (valueAngle / 180.0) * Math.PI;
-		var valueCursor = params.cursor;
-		var valueReadonly = params.readonly;
-		var colorScheme = params.colorScheme;
-		var angleArc = (valueAngle / 180.0) * Math.PI;
-		var halfAngleArc = 0.5 * valueAngleArc;
-		var paramDiv = document.createElement('div');
+		const label = params.label;
+		const physicalUnit = params.physicalUnit;
+		const valueMin = params.valueMin;
+		const valueMax = params.valueMax;
+		const valueDefault = params.valueDefault;
+		const valueWidth = params.valueWidth;
+		const valueHeight = params.valueHeight;
+		const valueAngle = params.angle;
+		const valueAngleArc = (valueAngle / 180.0) * Math.PI;
+		const valueCursor = params.cursor;
+		const valueReadonly = params.readonly;
+		const colorScheme = params.colorScheme;
+		const angleArc = (valueAngle / 180.0) * Math.PI;
+		const halfAngleArc = 0.5 * valueAngleArc;
+		const paramDiv = document.createElement('div');
 		paramDiv.classList.add('paramdiv');
-		var labelDiv = document.createElement('div');
+		const labelDiv = document.createElement('div');
 		labelDiv.classList.add('knoblabel');
-		var labelNode = document.createTextNode(label);
+		const labelNode = document.createTextNode(label);
 		labelDiv.appendChild(labelNode);
 		paramDiv.appendChild(labelDiv);
-		var knobDiv = document.createElement('div');
+		const knobDiv = document.createElement('div');
 		knobDiv.classList.add('knobdiv');
-		var fgColor = '#ff8800';
-		var bgColor = '#181818';
-		var labelColor = '#666666';
+		let fgColor = '#ff8800';
+		let bgColor = '#181818';
+		let labelColor = '#666666';
 
 		/*
 		 * Check if we want a blue or green color scheme.
@@ -494,7 +494,7 @@ function UI() {
 			labelColor = '#ffffff';
 		}
 
-		var knobElem = pureknob.createKnob(valueHeight, valueWidth);
+		const knobElem = pureknob.createKnob(valueHeight, valueWidth);
 		knobElem.setProperty('angleStart', -halfAngleArc);
 		knobElem.setProperty('angleEnd', halfAngleArc);
 		knobElem.setProperty('colorBG', bgColor);
@@ -506,14 +506,14 @@ function UI() {
 		knobElem.setProperty('valMin', valueMin);
 		knobElem.setProperty('valMax', valueMax);
 		knobElem.setValue(valueDefault);
-		var knobNode = knobElem.node();
+		const knobNode = knobElem.node();
 		knobDiv.appendChild(knobNode);
 		paramDiv.appendChild(knobDiv);
 
 		/*
 		 * Create knob.
 		 */
-		var knob = {
+		const knob = {
 			'div': paramDiv,
 			'node': knobNode,
 			'obj': knobElem
@@ -526,32 +526,32 @@ function UI() {
 	 * Creates a drop down menu.
 	 */
 	this.createDropDown = function(params) {
-		var label = params.label;
-		var options = params.options;
-		var numOptions = options.length;
-		var selectedIndex = params.selectedIndex;
-		var paramDiv = document.createElement('div');
+		const label = params.label;
+		const options = params.options;
+		const numOptions = options.length;
+		const selectedIndex = params.selectedIndex;
+		const paramDiv = document.createElement('div');
 		paramDiv.classList.add('paramdiv');
 
 		/*
 		 * Check if we should apply a label.
 		 */
 		if (label !== null) {
-			var labelDiv = document.createElement('div');
+			const labelDiv = document.createElement('div');
 			labelDiv.classList.add('dropdownlabel');
-			var labelNode = document.createTextNode(label);
+			const labelNode = document.createTextNode(label);
 			labelDiv.appendChild(labelNode);
 			paramDiv.appendChild(labelDiv);
 		}
 
-		var selectElem = document.createElement('select');
+		const selectElem = document.createElement('select');
 		selectElem.classList.add('dropdown');
 
 		/*
 		 * Add all options.
 		 */
-		for (var i = 0; i < numOptions; i++) {
-			var optionElem = document.createElement('option');
+		for (let i = 0; i < numOptions; i++) {
+			const optionElem = document.createElement('option');
 			optionElem.text = options[i];
 			selectElem.add(optionElem);
 		}
@@ -562,7 +562,7 @@ function UI() {
 		/*
 		 * Create dropdown.
 		 */
-		var dropdown = {
+		const dropdown = {
 			'div': paramDiv,
 			'input': selectElem
 		};
@@ -574,9 +574,9 @@ function UI() {
 	 * Creates a button.
 	 */
 	this.createButton = function(params) {
-		var caption = params.caption;
-		var active = params.active;
-		var elem = document.createElement('button');
+		const caption = params.caption;
+		const active = params.active;
+		const elem = document.createElement('button');
 		elem.classList.add('button');
 
 		/*
@@ -588,13 +588,13 @@ function UI() {
 			elem.classList.add('buttonnormal');
 		}
 
-		var captionNode = document.createTextNode(caption);
+		const captionNode = document.createTextNode(caption);
 		elem.appendChild(captionNode);
 
 		/*
 		 * Create button.
 		 */
-		var button = {
+		const button = {
 			'input': elem
 		};
 
@@ -605,60 +605,60 @@ function UI() {
 	 * Creates a unit.
 	 */
 	this.createUnit = function(params) {
-		var typeString = params.type;
-		var buttonsParam = params.buttons;
-		var numButtonsParam = buttonsParam.length;
-		var buttons = [];
+		const typeString = params.type;
+		const buttonsParam = params.buttons;
+		const numButtonsParam = buttonsParam.length;
+		const buttons = [];
 
 		/*
 		 * Iterate over the buttons.
 		 */
-		for (var i = 0; i < numButtonsParam; i++) {
-			var buttonParam = buttonsParam[i];
-			var label = buttonParam.label;
-			var active = buttonParam.active;
+		for (let i = 0; i < numButtonsParam; i++) {
+			const buttonParam = buttonsParam[i];
+			const label = buttonParam.label;
+			const active = buttonParam.active;
 
 			/*
 			 * Parameters for the button.
 			 */
-			var params = {
+			const params = {
 				'caption': label,
 				'active': active
 			};
 
-			var button = this.createButton(params);
+			const button = this.createButton(params);
 			buttons.push(button);
 		}
 
-		var unitDiv = document.createElement('div');
+		const unitDiv = document.createElement('div');
 		unitDiv.classList.add('contentdiv');
-		var headerDiv = document.createElement('div');
+		const headerDiv = document.createElement('div');
 		headerDiv.classList.add('headerdiv');
-		var numButtons = buttons.length;
+		const numButtons = buttons.length;
 
 		/*
 		 * Add buttons to header.
 		 */
-		for (var i = 0; i < numButtons; i++) {
-			var button = buttons[i];
+		for (let i = 0; i < numButtons; i++) {
+			const button = buttons[i];
 			headerDiv.appendChild(button.input);
 		}
 
-		var labelDiv = document.createElement('div');
+		const labelDiv = document.createElement('div');
 		labelDiv.classList.add('labeldiv');
 		labelDiv.classList.add('active');
-		var typeNode = document.createTextNode(typeString);
+		const typeNode = document.createTextNode(typeString);
 		labelDiv.appendChild(typeNode);
 		headerDiv.appendChild(labelDiv);
 		unitDiv.appendChild(headerDiv);
-		var controlsDiv = document.createElement('div');
+		const controlsDiv = document.createElement('div');
 		controlsDiv.classList.add('controlsdiv');
 		unitDiv.appendChild(controlsDiv);
 
 		/*
 		 * Create unit.
 		 */
-		var unit = {
+		const unit = {
 			'div': unitDiv,
 			'controls': controlsDiv,
 			'buttons': buttons,
@@ -669,7 +669,7 @@ function UI() {
 		 * Adds a control to a unit.
 		 */
 		unit.addControl = function(control) {
-			var controlDiv = control.div;
+			const controlDiv = control.div;
 			this.controls.appendChild(controlDiv);
 		};
 
@@ -677,15 +677,15 @@ function UI() {
 		 * Adds a row with controls to a unit.
 		 */
 		unit.addControlRow = function(controls) {
-			var rowDiv = document.createElement('div');
-			var numControls = controls.length;
+			const rowDiv = document.createElement('div');
+			const numControls = controls.length;
 
 			/*
 			 * Insert controls into the row.
 			 */
-			for (var i = 0; i < numControls; i++) {
-				var control = controls[i];
-				var controlDiv = control.div;
+			for (let i = 0; i < numControls; i++) {
+				const control = controls[i];
+				const controlDiv = control.div;
 				rowDiv.appendChild(controlDiv);
 			}
 
@@ -696,8 +696,8 @@ function UI() {
 		 * Expands or collapses a unit.
 		 */
 		unit.setExpanded = function(value) {
-			var controlsDiv = this.controls;
-			var displayValue = '';
+			const controlsDiv = this.controls;
+			let displayValue = '';
 
 			/*
 			 * Check whether we should expand or collapse the unit.
@@ -723,7 +723,7 @@ function UI() {
 		 * Toggles a unit between expanded and collapsed state.
 		 */
 		unit.toggleExpanded = function() {
-			var state = this.getExpanded();
+			const state = this.getExpanded();
 			this.setExpanded(!state);
 		};
 
@@ -731,7 +731,7 @@ function UI() {
 		 * This is called when a user clicks on the label div.
 		 */
 		labelDiv.onclick = function(e) {
-			var unit = storage.get(this, 'unit');
+			const unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		};
 
@@ -757,8 +757,8 @@ function UI() {
 				if (paramName.startsWith('level_')) {
 					return true;
 				} else if (paramName.startsWith('filter_')) {
-					var suffix = paramName.substring(7);
-					var isNumeric = isFinite(suffix);
+					const suffix = paramName.substring(7);
+					const isNumeric = isFinite(suffix);
 					return isNumeric;
 				}
 
@@ -772,20 +772,20 @@ function UI() {
 	 * Renders a unit given chain and unit ID, as well as a description returned from the server.
 	 */
 	this.renderUnit = function(chainId, unitId, description) {
-		var bypassButtonLabel = ui.getString('bypass');
-		var moveUpButtonLabel = ui.getString('move_up');
-		var moveDownButtonLabel = ui.getString('move_down');
-		var removeButtonLabel = ui.getString('remove');
-		var unitTypes = globals.unitTypes;
-		var unitTypeId = description.Type;
-		var unitType = unitTypes[unitTypeId];
-		var unitTypeString = ui.getString(unitType);
-		var bypassActive = description.Bypass;
+		const bypassButtonLabel = ui.getString('bypass');
+		const moveUpButtonLabel = ui.getString('move_up');
+		const moveDownButtonLabel = ui.getString('move_down');
+		const removeButtonLabel = ui.getString('remove');
+		const unitTypes = globals.unitTypes;
+		const unitTypeId = description.Type;
+		const unitType = unitTypes[unitTypeId];
+		const unitTypeString = ui.getString(unitType);
+		const bypassActive = description.Bypass;
 
 		/*
 		 * Buttons for this unit.
 		 */
-		var buttons = [
+		const buttons = [
 			{
 				'label': bypassButtonLabel,
 				'active': bypassActive
@@ -807,13 +807,13 @@ function UI() {
 		/*
 		 * Parameters for the unit UI element.
 		 */
-		var paramsUnit = {
+		const paramsUnit = {
 			'type': unitTypeString,
 			'buttons': buttons
 		};
 
-		var unit = ui.createUnit(paramsUnit);
-		var btnBypass = unit.buttons[0].input;
+		const unit = ui.createUnit(paramsUnit);
+		const btnBypass = unit.buttons[0].input;
 		storage.put(btnBypass, 'chain', chainId);
 		storage.put(btnBypass, 'unit', unitId);
 		storage.put(btnBypass, 'active', bypassActive);
@@ -822,9 +822,9 @@ function UI() {
 		 * This is invoked when someone clicks on the 'bypass' button.
 		 */
 		btnBypass.onclick = function(e) {
-			var chainId = storage.get(this, 'chain');
-			var unitId = storage.get(this, 'unit');
-			var active = !storage.get(this, 'active');
+			const chainId = storage.get(this, 'chain');
+			const unitId = storage.get(this, 'unit');
+			const active = !storage.get(this, 'active');
 
 			/*
 			 * Check whether the control should be active.
@@ -841,7 +841,7 @@ function UI() {
 			handler.setBypass(chainId, unitId, active);
 		};
 
-		var btnMoveUp = unit.buttons[1].input;
+		const btnMoveUp = unit.buttons[1].input;
 		storage.put(btnMoveUp, 'chain', chainId);
 		storage.put(btnMoveUp, 'unit', unitId);
 
@@ -849,12 +849,12 @@ function UI() {
 		 * This is invoked when someone clicks on the 'move up' button.
 		 */
 		btnMoveUp.onclick = function(e) {
-			var chainId = storage.get(this, 'chain');
-			var unitId = storage.get(this, 'unit');
+			const chainId = storage.get(this, 'chain');
+			const unitId = storage.get(this, 'unit');
 			handler.moveUp(chainId, unitId);
 		};
 
-		var btnMoveDown = unit.buttons[2].input;
+		const btnMoveDown = unit.buttons[2].input;
 		storage.put(btnMoveDown, 'chain', chainId);
 		storage.put(btnMoveDown, 'unit', unitId);
 
@@ -862,12 +862,12 @@ function UI() {
 		 * This is invoked when someone clicks on the 'move down' button.
 		 */
 		btnMoveDown.onclick = function(e) {
-			var chainId = storage.get(this, 'chain');
-			var unitId = storage.get(this, 'unit');
+			const chainId = storage.get(this, 'chain');
+			const unitId = storage.get(this, 'unit');
 			handler.moveDown(chainId, unitId);
 		};
 
-		var btnRemove = unit.buttons[3].input;
+		const btnRemove = unit.buttons[3].input;
 		btnRemove.classList.add('buttonremove');
 		storage.put(btnRemove, 'chain', chainId);
 		storage.put(btnRemove, 'unit', unitId);
@@ -876,35 +876,35 @@ function UI() {
 		 * This is invoked when someone clicks on the 'remove' button.
 		 */
 		btnRemove.onclick = function(e) {
-			var chainId = storage.get(this, 'chain');
-			var unitId = storage.get(this, 'unit');
+			const chainId = storage.get(this, 'chain');
+			const unitId = storage.get(this, 'unit');
 			handler.removeUnit(chainId, unitId);
 		};
 
-		var unitParams = description.Parameters;
-		var numParams = unitParams.length;
+		const unitParams = description.Parameters;
+		const numParams = unitParams.length;
 
 		/*
 		 * Iterate over the parameters and add all 'ordinary' (non-special) ones to the unit.
 		 */
-		for (var i = 0; i < numParams; i++) {
-			var param = unitParams[i];
-			var paramType = param.Type;
-			var paramName = param.Name;
-			var paramPhysicalUnit = param.PhysicalUnit;
-			var paramMinimum = param.Minimum;
-			var paramMaximum = param.Maximum;
-			var paramNumericValue = param.NumericValue;
-			var paramDiscreteValues = param.DiscreteValues;
-			var paramDiscreteValueIndex = param.DiscreteValueIndex;
-			var isSpecial = this.isSpecialParameter(unitType, paramName);
+		for (let i = 0; i < numParams; i++) {
+			const param = unitParams[i];
+			const paramType = param.Type;
+			const paramName = param.Name;
+			const paramPhysicalUnit = param.PhysicalUnit;
+			const paramMinimum = param.Minimum;
+			const paramMaximum = param.Maximum;
+			const paramNumericValue = param.NumericValue;
+			const paramDiscreteValues = param.DiscreteValues;
+			const paramDiscreteValueIndex = param.DiscreteValueIndex;
+			const isSpecial = this.isSpecialParameter(unitType, paramName);
 
 			/*
 			 * Only handle 'ordinary' (non-special) parameters on the first pass.
 			 */
 			if (!isSpecial) {
-				var isFloating = (i !== 0);
-				var label = ui.getString(paramName);
+				const isFloating = (i !== 0);
+				const label = ui.getString(paramName);
 
 				/*
 				 * Handle numeric parameter.
@@ -914,7 +914,7 @@ function UI() {
 					/*
 					 * Parameters for the knob.
 					 */
-					var params = {
+					const params = {
 						'label': label,
 						'physicalUnit': paramPhysicalUnit,
 						'valueMin': paramMinimum,
@@ -928,9 +928,9 @@ function UI() {
 						'readonly': false
 					};
 
-					var knob = ui.createKnob(params);
+					const knob = ui.createKnob(params);
 					unit.addControl(knob);
-					var knobNode = knob.node;
+					const knobNode = knob.node;
 					storage.put(knobNode, 'chain', chainId);
 					storage.put(knobNode, 'unit', unitId);
 					storage.put(knobNode, 'param', paramName);
@@ -938,15 +938,15 @@ function UI() {
 					/*
 					 * This is called when a numeric value changes.
 					 */
-					var knobHandler = function(knob, value) {
-						var knobNode = knob.node();
-						var chain = storage.get(knobNode, 'chain');
-						var unit = storage.get(knobNode, 'unit');
-						var param = storage.get(knobNode, 'param');
+					const knobHandler = function(knob, value) {
+						const knobNode = knob.node();
+						const chain = storage.get(knobNode, 'chain');
+						const unit = storage.get(knobNode, 'unit');
+						const param = storage.get(knobNode, 'param');
 						handler.setNumericValue(chain, unit, param, value);
 					};
 
-					var knobObj = knob.obj;
+					const knobObj = knob.obj;
 					knobObj.addListener(knobHandler);
 				}
 
@@ -958,14 +958,14 @@ function UI() {
 					/*
 					 * Parameters for the drop down menu.
 					 */
-					var params = {
+					const params = {
 						'label': label,
 						'options': paramDiscreteValues,
 						'selectedIndex': paramDiscreteValueIndex
 					};
 
-					var dropDown = ui.createDropDown(params);
-					var dropDownInput = dropDown.input;
+					const dropDown = ui.createDropDown(params);
+					const dropDownInput = dropDown.input;
 					storage.put(dropDownInput, 'chain', chainId);
 					storage.put(dropDownInput, 'unit', unitId);
 					storage.put(dropDownInput, 'param', paramName);
@@ -974,12 +974,12 @@ function UI() {
 					 * This is called when a discrete value changes.
 					 */
 					dropDownInput.onchange = function(e) {
-						var chain = storage.get(this, 'chain');
-						var unit = storage.get(this, 'unit');
-						var param = storage.get(this, 'param');
-						var idx = this.selectedIndex;
-						var option = this.options[idx];
-						var value = option.text;
+						const chain = storage.get(this, 'chain');
+						const unit = storage.get(this, 'unit');
+						const param = storage.get(this, 'param');
+						const idx = this.selectedIndex;
+						const option = this.options[idx];
+						const value = option.text;
 						handler.setDiscreteValue(chain, unit, param, value);
 					};
 
@@ -993,31 +993,31 @@ function UI() {
 		/*
 		 * Iterate over the parameters and add all special discrete ones to the unit.
 		 */
-		for (var i = 0; i < numParams; i++) {
-			var param = unitParams[i];
-			var paramType = param.Type;
-			var paramName = param.Name;
-			var paramDiscreteValues = param.DiscreteValues;
-			var paramDiscreteValueIndex = param.DiscreteValueIndex;
-			var isSpecial = this.isSpecialParameter(unitType, paramName);
+		for (let i = 0; i < numParams; i++) {
+			const param = unitParams[i];
+			const paramType = param.Type;
+			const paramName = param.Name;
+			const paramDiscreteValues = param.DiscreteValues;
+			const paramDiscreteValueIndex = param.DiscreteValueIndex;
+			const isSpecial = this.isSpecialParameter(unitType, paramName);
 
 			/*
 			 * Only handle special discrete parameters on the second pass.
 			 */
 			if (isSpecial & (paramType === 'discrete')) {
-				var label = ui.getString(paramName);
+				const label = ui.getString(paramName);
 
 				/*
 				 * Parameters for the drop down menu.
 				 */
-				var params = {
+				const params = {
 					'label': label,
 					'options': paramDiscreteValues,
 					'selectedIndex': paramDiscreteValueIndex
 				};
 
-				var dropDown = ui.createDropDown(params);
-				var dropDownInput = dropDown.input;
+				const dropDown = ui.createDropDown(params);
+				const dropDownInput = dropDown.input;
 				storage.put(dropDownInput, 'chain', chainId);
 				storage.put(dropDownInput, 'unit', unitId);
 				storage.put(dropDownInput, 'param', paramName);
@@ -1026,16 +1026,16 @@ function UI() {
 				 * This is called when a discrete value changes.
 				 */
 				dropDownInput.onchange = function(e) {
-					var chain = storage.get(this, 'chain');
-					var unit = storage.get(this, 'unit');
-					var param = storage.get(this, 'param');
-					var idx = this.selectedIndex;
-					var option = this.options[idx];
-					var value = option.text;
+					const chain = storage.get(this, 'chain');
+					const unit = storage.get(this, 'unit');
+					const param = storage.get(this, 'param');
+					const idx = this.selectedIndex;
+					const option = this.options[idx];
+					const value = option.text;
 					handler.setDiscreteValue(chain, unit, param, value);
 				};
 
-				var controlRow = Array();
+				const controlRow = [];
 				controlRow.push(dropDown);
 				unit.addControlRow(controlRow);
 			}
@@ -1045,26 +1045,26 @@ function UI() {
 		/*
 		 * Iterate over the parameters and add all special numeric ones to the unit.
 		 */
-		for (var i = 0; i < numParams; i++) {
-			var param = unitParams[i];
-			var paramType = param.Type;
-			var paramName = param.Name;
-			var paramPhysicalUnit = param.PhysicalUnit;
-			var paramMinimum = param.Minimum;
-			var paramMaximum = param.Maximum;
-			var paramNumericValue = param.NumericValue;
-			var isSpecial = this.isSpecialParameter(unitType, paramName);
+		for (let i = 0; i < numParams; i++) {
+			const param = unitParams[i];
+			const paramType = param.Type;
+			const paramName = param.Name;
+			const paramPhysicalUnit = param.PhysicalUnit;
+			const paramMinimum = param.Minimum;
+			const paramMaximum = param.Maximum;
+			const paramNumericValue = param.NumericValue;
+			const isSpecial = this.isSpecialParameter(unitType, paramName);
 
 			/*
 			 * Only handle special numeric parameters on the third pass.
 			 */
 			if (isSpecial & (paramType === 'numeric')) {
-				var label = ui.getString(paramName);
+				const label = ui.getString(paramName);
 
 				/*
 				 * Parameters for the knob.
 				 */
-				var params = {
+				const params = {
 					'label': label,
 					'physicalUnit': paramPhysicalUnit,
 					'valueMin': paramMinimum,
@@ -1078,9 +1078,9 @@ function UI() {
 					'readonly': false
 				};
 
-				var knob = ui.createKnob(params);
+				const knob = ui.createKnob(params);
 				unit.addControl(knob);
-				var knobNode = knob.node;
+				const knobNode = knob.node;
 				storage.put(knobNode, 'chain', chainId);
 				storage.put(knobNode, 'unit', unitId);
 				storage.put(knobNode, 'param', paramName);
@@ -1088,15 +1088,15 @@ function UI() {
 				/*
 				 * This is called when a numeric value changes.
 				 */
-				var knobHandler = function(knob, value) {
-					var knobNode = knob.node();
-					var chain = storage.get(knobNode, 'chain');
-					var unit = storage.get(knobNode, 'unit');
-					var param = storage.get(knobNode, 'param');
+				const knobHandler = function(knob, value) {
+					const knobNode = knob.node();
+					const chain = storage.get(knobNode, 'chain');
+					const unit = storage.get(knobNode, 'unit');
+					const param = storage.get(knobNode, 'param');
 					handler.setNumericValue(chain, unit, param, value);
 				};
 
-				var knobObj = knob.obj;
+				const knobObj = knob.obj;
 				knobObj.addListener(knobHandler);
 			}
 
@@ -1109,47 +1109,47 @@ function UI() {
 	 * Renders a signal chain, given its ID and a chain description returned from the server.
 	 */
 	this.renderSignalChain = function(id, description) {
-		var idString = id.toString();
-		var chainDiv = document.createElement('div');
-		var beginDiv = document.createElement('div');
+		const idString = id.toString();
+		const chainDiv = document.createElement('div');
+		const beginDiv = document.createElement('div');
 		beginDiv.classList.add('contentdiv');
 		beginDiv.classList.add('iodiv');
-		var beginHeaderDiv = document.createElement('div');
+		const beginHeaderDiv = document.createElement('div');
 		beginHeaderDiv.classList.add('headerdiv');
-		var beginLabelDiv = document.createElement('div');
+		const beginLabelDiv = document.createElement('div');
 		beginLabelDiv.classList.add('labeldiv');
-		var labelFromInput = ui.getString('from_input');
-		var beginLabelText = labelFromInput + ' ' + idString;
-		var beginLabelNode = document.createTextNode(beginLabelText);
+		const labelFromInput = ui.getString('from_input');
+		const beginLabelText = labelFromInput + ' ' + idString;
+		const beginLabelNode = document.createTextNode(beginLabelText);
 		beginLabelDiv.appendChild(beginLabelNode);
 		beginHeaderDiv.appendChild(beginLabelDiv);
 		beginDiv.appendChild(beginHeaderDiv);
 		chainDiv.appendChild(beginDiv);
-		var units = description.Units;
-		var numUnits = units.length;
+		const units = description.Units;
+		const numUnits = units.length;
 
 		/*
 		 * Iterate over the units in this chain.
 		 */
-		for (var i = 0; i < numUnits; i++) {
-			var unit = units[i];
-			var result = this.renderUnit(id, i, unit);
-			var unitDiv = result.div;
+		for (let i = 0; i < numUnits; i++) {
+			const unit = units[i];
+			const result = this.renderUnit(id, i, unit);
+			const unitDiv = result.div;
 			chainDiv.appendChild(unitDiv);
 		}
 
-		var labelDropdown = ui.getString('add_unit');
-		var labelButton = ui.getString('add');
-		var unitTypes = globals.unitTypes;
-		var numUnitTypes = unitTypes.length;
-		var unitTypeNames = new Array();
+		const labelDropdown = ui.getString('add_unit');
+		const labelButton = ui.getString('add');
+		const unitTypes = globals.unitTypes;
+		const numUnitTypes = unitTypes.length;
+		const unitTypeNames = [];
 
 		/*
 		 * Look up the name of the unit types.
 		 */
-		for (var i = 0; i < numUnitTypes; i++) {
-			var unitType = unitTypes[i];
-			var unitTypeName = ui.getString(unitType);
+		for (let i = 0; i < numUnitTypes; i++) {
+			const unitType = unitTypes[i];
+			const unitTypeName = ui.getString(unitType);
 			unitTypeNames.push(unitTypeName);
 		}
 
@@ -1179,30 +1179,30 @@ function UI() {
 		 * What happens when we click on the 'add' button.
 		 */
 		buttonElem.onclick = function(e) {
-			var chainId = storage.get(this, 'chain');
-			var dropdown = storage.get(this, 'dropdown');
-			var unitType = dropdown.selectedIndex;
+			const chainId = storage.get(this, 'chain');
+			const dropdown = storage.get(this, 'dropdown');
+			const unitType = dropdown.selectedIndex;
 			handler.addUnit(unitType, chainId);
 		};
 
 		storage.put(buttonElem, 'chain', id);
 		storage.put(buttonElem, 'dropdown', dropDown.input);
-		var dropDownDiv = document.createElement('div');
+		const dropDownDiv = document.createElement('div');
 		dropDownDiv.classList.add('contentdiv');
 		dropDownDiv.classList.add('addunitdiv');
 		dropDownDiv.appendChild(dropDown.div);
 		dropDownDiv.appendChild(buttonElem);
 		chainDiv.appendChild(dropDownDiv);
-		var endDiv = document.createElement('div');
+		const endDiv = document.createElement('div');
 		endDiv.classList.add('contentdiv');
 		endDiv.classList.add('iodiv');
-		var endHeaderDiv = document.createElement('div');
+		const endHeaderDiv = document.createElement('div');
 		endHeaderDiv.classList.add('headerdiv');
-		var endLabelDiv = document.createElement('div');
+		const endLabelDiv = document.createElement('div');
 		endLabelDiv.classList.add('labeldiv');
-		var labelToOutput = ui.getString('to_output');
-		var endLabelText = labelToOutput + ' ' + idString;
-		var endLabelNode = document.createTextNode(endLabelText);
+		const labelToOutput = ui.getString('to_output');
+		const endLabelText = labelToOutput + ' ' + idString;
+		const endLabelNode = document.createTextNode(endLabelText);
 		endLabelDiv.appendChild(endLabelNode);
 		endHeaderDiv.appendChild(endLabelDiv);
 		endDiv.appendChild(endHeaderDiv);
@@ -1211,7 +1211,7 @@ function UI() {
 		/*
 		 * This object represents the signal chain.
 		 */
-		var chain = {
+		const chain = {
 			'div': chainDiv
 		};
 
@@ -1222,20 +1222,20 @@ function UI() {
 	 * Renders the signal chains given a configuration returned from the server.
 	 */
 	this.renderSignalChains = function(configuration) {
-		var elem = document.getElementById('signal_chains');
+		const elem = document.getElementById('signal_chains');
 		helper.clearElement(elem);
-		var chains = configuration.Chains;
-		var numChains = chains.length;
+		const chains = configuration.Chains;
+		const numChains = chains.length;
 
 		/*
 		 * Iterate over the signal chains.
 		 */
-		for (var i = 0; i < numChains; i++) {
-			var chain = chains[i];
-			var result = this.renderSignalChain(i, chain);
-			var chainDiv = result.div;
+		for (let i = 0; i < numChains; i++) {
+			const chain = chains[i];
+			const result = this.renderSignalChain(i, chain);
+			const chainDiv = result.div;
 			elem.append(chainDiv);
-			var spacerDiv = document.createElement('div');
+			const spacerDiv = document.createElement('div');
 			spacerDiv.classList.add('spacerdiv');
 			elem.appendChild(spacerDiv);
 		}
@@ -1246,42 +1246,42 @@ function UI() {
 	 * Renders the persistence area given a configuration returned from the server.
 	 */
 	this.renderPersistence = function(configuration) {
-		var elem = document.getElementById('persistence');
+		const elem = document.getElementById('persistence');
 		helper.clearElement(elem);
-		var unitDiv = document.createElement('div');
+		const unitDiv = document.createElement('div');
 		unitDiv.classList.add('contentdiv');
 		unitDiv.classList.add('masterunitdiv');
-		var headerDiv = document.createElement('div');
-		var labelDiv = document.createElement('div');
+		const headerDiv = document.createElement('div');
+		const labelDiv = document.createElement('div');
 		labelDiv.classList.add('labeldiv');
 		labelDiv.classList.add('active');
 		labelDiv.classList.add('io');
-		var label = ui.getString('persistence');
-		var labelNode = document.createTextNode(label);
+		const label = ui.getString('persistence');
+		const labelNode = document.createTextNode(label);
 		labelDiv.appendChild(labelNode);
 		headerDiv.appendChild(labelDiv);
 		headerDiv.classList.add('headerdiv');
 		unitDiv.appendChild(headerDiv);
-		var controlsDiv = document.createElement('div');
+		const controlsDiv = document.createElement('div');
 		controlsDiv.classList.add('controlsdiv');
 		unitDiv.appendChild(controlsDiv);
 		elem.appendChild(unitDiv);
-		var uploadAreaDiv = document.createElement('div');
+		const uploadAreaDiv = document.createElement('div');
 		uploadAreaDiv.classList.add('uploadarea');
 		uploadAreaDiv.addEventListener('dragend', handler.dragLeave);
 		uploadAreaDiv.addEventListener('dragenter', handler.dragEnter);
 		uploadAreaDiv.addEventListener('dragleave', handler.dragLeave);
 		uploadAreaDiv.addEventListener('dragover', handler.absorbEvent);
 		uploadAreaDiv.addEventListener('drop', handler.uploadFile);
-		var downloadAnchor = document.createElement('a');
-		var cgi = globals.cgi;
-		var downloadTarget = cgi + '?cgi=persistence-save';
+		const downloadAnchor = document.createElement('a');
+		const cgi = globals.cgi;
+		const downloadTarget = cgi + '?cgi=persistence-save';
 		downloadAnchor.setAttribute('href', downloadTarget);
 		downloadAnchor.setAttribute('target', '_blank');
 		downloadAnchor.classList.add('link');
 		downloadAnchor.classList.add('auto');
-		var instructionsString = ui.getString('file_transfer_instructions');
-		var instructionsNode = document.createTextNode(instructionsString);
+		const instructionsString = ui.getString('file_transfer_instructions');
+		const instructionsNode = document.createTextNode(instructionsString);
 		downloadAnchor.appendChild(instructionsNode);
 		uploadAreaDiv.appendChild(downloadAnchor);
 		controlsDiv.appendChild(uploadAreaDiv);
@@ -1289,7 +1289,7 @@ function UI() {
 		/*
 		 * Create unit object.
 		 */
-		var unit = {
+		const unit = {
 			'controls': controlsDiv,
 			'expanded': false
 		};
@@ -1298,8 +1298,8 @@ function UI() {
 		 * Expands or collapses a unit.
 		 */
 		unit.setExpanded = function(value) {
-			var controlsDiv = this.controls;
-			var displayValue = '';
+			const controlsDiv = this.controls;
+			let displayValue = '';
 
 			/*
 			 * Check whether we should expand or collapse the unit.
@@ -1325,7 +1325,7 @@ function UI() {
 		 * Toggles a unit between expanded and collapsed state.
 		 */
 		unit.toggleExpanded = function() {
-			var state = this.getExpanded();
+			const state = this.getExpanded();
 			this.setExpanded(!state);
 		};
 
@@ -1333,7 +1333,7 @@ function UI() {
 		 * This is called when a user clicks on the label div.
 		 */
 		labelDiv.onclick = function(e) {
-			var unit = storage.get(this, 'unit');
+			const unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		};
 
@@ -1344,141 +1344,149 @@ function UI() {
 	 * Renders the latency configuration given a configuration returned from the server.
 	 */
 	this.renderLatency = function(configuration) {
-		var elem = document.getElementById('latency');
+		const batchProcessing = configuration.BatchProcessing;
+		const elem = document.getElementById('latency');
 		helper.clearElement(elem);
-		var unitDiv = document.createElement('div');
-		unitDiv.classList.add('contentdiv');
-		unitDiv.classList.add('masterunitdiv');
-		var headerDiv = document.createElement('div');
-		var labelDiv = document.createElement('div');
-		labelDiv.classList.add('labeldiv');
-		labelDiv.classList.add('active');
-		labelDiv.classList.add('io');
-		var label = ui.getString('latency');
-		var labelNode = document.createTextNode(label);
-		labelDiv.appendChild(labelNode);
-		headerDiv.appendChild(labelDiv);
-		headerDiv.classList.add('headerdiv');
-		unitDiv.appendChild(headerDiv);
-		var controlsDiv = document.createElement('div');
-		controlsDiv.classList.add('controlsdiv');
-		unitDiv.appendChild(controlsDiv);
-		elem.appendChild(unitDiv);
-		var labelFramesPerPeriod = ui.getString('frames_per_period');
-		var framesPerPeriod = configuration.FramesPerPeriod;
-		var dropdownRow = document.createElement('div');
-		var values = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192];
-		var valueIdx = 0;
 
 		/*
-		 * Iterate over all possible values.
+		 * Only display latency controls if batch processing is disabled on the server.
 		 */
-		for (var i = 0; i < values.length; i++) {
-			var currentValue = values[i];
+		if (batchProcessing === false) {
+			const unitDiv = document.createElement('div');
+			unitDiv.classList.add('contentdiv');
+			unitDiv.classList.add('masterunitdiv');
+			const headerDiv = document.createElement('div');
+			const labelDiv = document.createElement('div');
+			labelDiv.classList.add('labeldiv');
+			labelDiv.classList.add('active');
+			labelDiv.classList.add('io');
+			const label = ui.getString('latency');
+			const labelNode = document.createTextNode(label);
+			labelDiv.appendChild(labelNode);
+			headerDiv.appendChild(labelDiv);
+			headerDiv.classList.add('headerdiv');
+			unitDiv.appendChild(headerDiv);
+			const controlsDiv = document.createElement('div');
+			controlsDiv.classList.add('controlsdiv');
+			unitDiv.appendChild(controlsDiv);
+			elem.appendChild(unitDiv);
+			const labelFramesPerPeriod = ui.getString('frames_per_period');
+			const framesPerPeriod = configuration.FramesPerPeriod;
+			const dropdownRow = document.createElement('div');
+			const values = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192];
+			let valueIdx = 0;
 
 			/*
-			 * If we have a match, store index.
+			 * Iterate over all possible values.
 			 */
-			if (framesPerPeriod === currentValue) {
-				valueIdx = i;
+			for (let i = 0; i < values.length; i++) {
+				const currentValue = values[i];
+
+				/*
+				 * If we have a match, store index.
+				 */
+				if (framesPerPeriod === currentValue) {
+					valueIdx = i;
+				}
+
 			}
 
+			/*
+			 * Parameters for the frames per period drop down menu.
+			 */
+			const paramsFramesPerPeriod = {
+				'label': labelFramesPerPeriod,
+				'options': values,
+				'selectedIndex': valueIdx
+			};
+
+			const dropDownFramesPerPeriod = ui.createDropDown(paramsFramesPerPeriod);
+			const dropDownFramesPerPeriodElem = dropDownFramesPerPeriod.input;
+
+			/*
+			 * This is called when the period size changes.
+			 */
+			dropDownFramesPerPeriodElem.onchange = function(e) {
+				const idx = this.selectedIndex;
+				const option = this.options[idx];
+				const value = option.text;
+				handler.setFramesPerPeriod(value);
+			};
+
+			dropdownRow.appendChild(dropDownFramesPerPeriod.div);
+			controlsDiv.appendChild(dropdownRow);
+
+			/*
+			 * Create unit object.
+			 */
+			const unit = {
+				'controls': controlsDiv,
+				'expanded': false
+			};
+
+			/*
+			 * Expands or collapses a unit.
+			 */
+			unit.setExpanded = function(value) {
+				const controlsDiv = this.controls;
+				let displayValue = '';
+
+				/*
+				 * Check whether we should expand or collapse the unit.
+				 */
+				if (value) {
+					displayValue = 'block';
+				} else {
+					displayValue = 'none';
+				}
+
+				controlsDiv.style.display = displayValue;
+				this.expanded = value;
+			};
+
+			/*
+			 * Returns whether a unit is expanded.
+			 */
+			unit.getExpanded = function() {
+				return this.expanded;
+			};
+
+			/*
+			 * Toggles a unit between expanded and collapsed state.
+			 */
+			unit.toggleExpanded = function() {
+				const state = this.getExpanded();
+				this.setExpanded(!state);
+			};
+
+			/*
+			 * This is called when a user clicks on the label div.
+			 */
+			labelDiv.onclick = function(e) {
+				const unit = storage.get(this, 'unit');
+				unit.toggleExpanded();
+			};
+
+			storage.put(labelDiv, 'unit', unit);
 		}
 
-		/*
-		 * Parameters for the frames per period drop down menu.
-		 */
-		var paramsFramesPerPeriod = {
-			'label': labelFramesPerPeriod,
-			'options': values,
-			'selectedIndex': valueIdx
-		};
-
-		var dropDownFramesPerPeriod = ui.createDropDown(paramsFramesPerPeriod);
-		var dropDownFramesPerPeriodElem = dropDownFramesPerPeriod.input;
-
-		/*
-		 * This is called when the period size changes.
-		 */
-		dropDownFramesPerPeriodElem.onchange = function(e) {
-			var idx = this.selectedIndex;
-			var option = this.options[idx];
-			var value = option.text;
-			handler.setFramesPerPeriod(value);
-		};
-
-		dropdownRow.appendChild(dropDownFramesPerPeriod.div);
-		controlsDiv.appendChild(dropdownRow);
-
-		/*
-		 * Create unit object.
-		 */
-		var unit = {
-			'controls': controlsDiv,
-			'expanded': false
-		};
-
-		/*
-		 * Expands or collapses a unit.
-		 */
-		unit.setExpanded = function(value) {
-			var controlsDiv = this.controls;
-			var displayValue = '';
-
-			/*
-			 * Check whether we should expand or collapse the unit.
-			 */
-			if (value) {
-				displayValue = 'block';
-			} else {
-				displayValue = 'none';
-			}
-
-			controlsDiv.style.display = displayValue;
-			this.expanded = value;
-		};
-
-		/*
-		 * Returns whether a unit is expanded.
-		 */
-		unit.getExpanded = function() {
-			return this.expanded;
-		};
-
-		/*
-		 * Toggles a unit between expanded and collapsed state.
-		 */
-		unit.toggleExpanded = function() {
-			var state = this.getExpanded();
-			this.setExpanded(!state);
-		};
-
-		/*
-		 * This is called when a user clicks on the label div.
-		 */
-		labelDiv.onclick = function(e) {
-			var unit = storage.get(this, 'unit');
-			unit.toggleExpanded();
-		};
-
-		storage.put(labelDiv, 'unit', unit);
 	};
 
 	/*
 	 * Updates the tuner display based on information returned from the server.
 	 */
 	this.updateTuner = function(result) {
-		var cents = result.Cents;
-		var frequency = result.Frequency;
-		var note = result.Note;
-		var centsDiv = document.querySelector('.tunercentsknob');
-		var centsKnob = storage.get(centsDiv, 'knob');
+		const cents = result.Cents;
+		const frequency = result.Frequency;
+		const note = result.Note;
+		const centsDiv = document.querySelector('.tunercentsknob');
+		const centsKnob = storage.get(centsDiv, 'knob');
 		centsKnob.setValue(cents);
-		var frequencyDiv = document.querySelector('.tunerfrequencydiv');
-		var frequencyString = frequency.toFixed(4);
+		const frequencyDiv = document.querySelector('.tunerfrequencydiv');
+		const frequencyString = frequency.toFixed(4);
 		frequencyDiv.innerHTML = frequencyString;
-		var noteDiv = document.querySelector('.tunernotediv');
-		var noteString = note.toString();
+		const noteDiv = document.querySelector('.tunernotediv');
+		const noteString = note.toString();
 		noteDiv.innerHTML = noteString;
 	};
 
@@ -1486,221 +1494,229 @@ function UI() {
 	 * Renders the tuner given a configuration returned from the server.
 	 */
 	this.renderTuner = function(configuration) {
-		var chainsConfiguration = configuration.Chains;
-		var numChannels = chainsConfiguration.length;
-		var tunerConfiguration = configuration.Tuner;
-		var elem = document.getElementById('tuner');
+		const batchProcessing = configuration.BatchProcessing;
+		const elem = document.getElementById('tuner');
 		helper.clearElement(elem);
-		var unitDiv = document.createElement('div');
-		unitDiv.classList.add('contentdiv');
-		unitDiv.classList.add('masterunitdiv');
-		var headerDiv = document.createElement('div');
-		var labelDiv = document.createElement('div');
-		labelDiv.classList.add('labeldiv');
-		labelDiv.classList.add('active');
-		labelDiv.classList.add('io');
-		var label = ui.getString('tuner');
-		var labelNode = document.createTextNode(label);
-		labelDiv.appendChild(labelNode);
-		headerDiv.appendChild(labelDiv);
-		headerDiv.classList.add('headerdiv');
-		unitDiv.appendChild(headerDiv);
-		var controlsDiv = document.createElement('div');
-		controlsDiv.classList.add('controlsdiv');
-		unitDiv.appendChild(controlsDiv);
-		elem.appendChild(unitDiv);
-		var centsString = ui.getString('cents');
-		var frequencyString = ui.getString('frequency');
-		var noteString = ui.getString('note');
-		var centsValue = tunerConfiguration.BeatsPerPeriod;
 
 		/*
-		 * Parameters for the cents knob.
+		 * Only display tuner if batch processing is disabled on the server.
 		 */
-		var centsParams = {
-			'label': centsString,
-			'physicalUnit': null,
-			'valueMin': -50,
-			'valueMax': 50,
-			'valueDefault': 0,
-			'valueWidth': 150,
-			'valueHeight': 150,
-			'angle': 270,
-			'cursor': true,
-			'colorScheme': 'green',
-			'readonly': true
-		};
-
-		var centsKnob = ui.createKnob(centsParams);
-		var centsKnobNode = centsKnob.node;
-		centsKnobNode.classList.add('tunercentsknob');
-		var centsKnobObj = centsKnob.obj;
-		storage.put(centsKnobNode, 'knob', centsKnobObj);
-		var centsKnobDiv = centsKnob.div;
-		controlsDiv.appendChild(centsKnobDiv);
-		var frequencyRow = document.createElement('div');
-		var labelFrequency = ui.getString('frequency');
-		var frequencyLabelDiv = document.createElement('div');
-		frequencyLabelDiv.classList.add('labeldiv');
-		var frequencyLabelNode = document.createTextNode(labelFrequency);
-		frequencyLabelDiv.appendChild(frequencyLabelNode);
-		frequencyRow.appendChild(frequencyLabelDiv);
-		var frequencyValueDiv = document.createElement('div');
-		frequencyValueDiv.classList.add('tunerfrequencydiv');
-		frequencyRow.appendChild(frequencyValueDiv);
-		controlsDiv.appendChild(frequencyRow);
-		var noteRow = document.createElement('div');
-		var labelNote = ui.getString('note');
-		var noteLabelDiv = document.createElement('div');
-		noteLabelDiv.classList.add('labeldiv');
-		var noteLabelNode = document.createTextNode(labelNote);
-		noteLabelDiv.appendChild(noteLabelNode);
-		noteRow.appendChild(noteLabelDiv);
-		var noteNameDiv = document.createElement('div');
-		noteNameDiv.classList.add('tunernotediv');
-		noteRow.appendChild(noteNameDiv);
-		controlsDiv.appendChild(noteRow);
-		var channelRow = document.createElement('div');
-		var labelChannel = ui.getString('channel');
-		var channels = ['- NONE -'];
-
-		/*
-		 * Append indices for all channels.
-		 */
-		for (var i = 0; i < numChannels; i++) {
-			var idxString = i.toString();
-			channels.push(idxString);
-		}
-
-		var channelIdx = tunerConfiguration.Channel;
-		var channelIdxInc = channelIdx + 1;
-
-		/*
-		 * Parameters for the channel drop down menu.
-		 */
-		var paramsChannel = {
-			'label': labelChannel,
-			'options': channels,
-			'selectedIndex': channelIdxInc
-		};
-
-		var dropDownChannel = ui.createDropDown(paramsChannel);
-		var dropDownChannelElem = dropDownChannel.input;
-
-		/*
-		 * This is called when the channel number changes.
-		 */
-		dropDownChannelElem.onchange = function(e) {
-			var idx = this.selectedIndex;
-			var option = this.options[idx];
-			var value = option.text;
-			var interval = storage.get(this, 'interval');
-			window.clearInterval(interval);
+		if (batchProcessing === false) {
+			const chainsConfiguration = configuration.Chains;
+			const numChannels = chainsConfiguration.length;
+			const tunerConfiguration = configuration.Tuner;
+			const unitDiv = document.createElement('div');
+			unitDiv.classList.add('contentdiv');
+			unitDiv.classList.add('masterunitdiv');
+			const headerDiv = document.createElement('div');
+			const labelDiv = document.createElement('div');
+			labelDiv.classList.add('labeldiv');
+			labelDiv.classList.add('active');
+			labelDiv.classList.add('io');
+			const label = ui.getString('tuner');
+			const labelNode = document.createTextNode(label);
+			labelDiv.appendChild(labelNode);
+			headerDiv.appendChild(labelDiv);
+			headerDiv.classList.add('headerdiv');
+			unitDiv.appendChild(headerDiv);
+			const controlsDiv = document.createElement('div');
+			controlsDiv.classList.add('controlsdiv');
+			unitDiv.appendChild(controlsDiv);
+			elem.appendChild(unitDiv);
+			const centsString = ui.getString('cents');
+			const frequencyString = ui.getString('frequency');
+			const noteString = ui.getString('note');
+			const centsValue = tunerConfiguration.BeatsPerPeriod;
 
 			/*
-			 * This gets executed whenever the timer ticks.
+			 * Parameters for the cents knob.
 			 */
-			var callback = function() {
-				handler.refreshTuner();
+			const centsParams = {
+				'label': centsString,
+				'physicalUnit': null,
+				'valueMin': -50,
+				'valueMax': 50,
+				'valueDefault': 0,
+				'valueWidth': 150,
+				'valueHeight': 150,
+				'angle': 270,
+				'cursor': true,
+				'colorScheme': 'green',
+				'readonly': true
+			};
+
+			const centsKnob = ui.createKnob(centsParams);
+			const centsKnobNode = centsKnob.node;
+			centsKnobNode.classList.add('tunercentsknob');
+			const centsKnobObj = centsKnob.obj;
+			storage.put(centsKnobNode, 'knob', centsKnobObj);
+			const centsKnobDiv = centsKnob.div;
+			controlsDiv.appendChild(centsKnobDiv);
+			const frequencyRow = document.createElement('div');
+			const labelFrequency = ui.getString('frequency');
+			const frequencyLabelDiv = document.createElement('div');
+			frequencyLabelDiv.classList.add('labeldiv');
+			const frequencyLabelNode = document.createTextNode(labelFrequency);
+			frequencyLabelDiv.appendChild(frequencyLabelNode);
+			frequencyRow.appendChild(frequencyLabelDiv);
+			const frequencyValueDiv = document.createElement('div');
+			frequencyValueDiv.classList.add('tunerfrequencydiv');
+			frequencyRow.appendChild(frequencyValueDiv);
+			controlsDiv.appendChild(frequencyRow);
+			const noteRow = document.createElement('div');
+			const labelNote = ui.getString('note');
+			const noteLabelDiv = document.createElement('div');
+			noteLabelDiv.classList.add('labeldiv');
+			const noteLabelNode = document.createTextNode(labelNote);
+			noteLabelDiv.appendChild(noteLabelNode);
+			noteRow.appendChild(noteLabelDiv);
+			const noteNameDiv = document.createElement('div');
+			noteNameDiv.classList.add('tunernotediv');
+			noteRow.appendChild(noteNameDiv);
+			controlsDiv.appendChild(noteRow);
+			const channelRow = document.createElement('div');
+			const labelChannel = ui.getString('channel');
+			const channels = ['- NONE -'];
+
+			/*
+			 * Append indices for all channels.
+			 */
+			for (let i = 0; i < numChannels; i++) {
+				const idxString = i.toString();
+				channels.push(idxString);
+			}
+
+			const channelIdx = tunerConfiguration.Channel;
+			const channelIdxInc = channelIdx + 1;
+
+			/*
+			 * Parameters for the channel drop down menu.
+			 */
+			const paramsChannel = {
+				'label': labelChannel,
+				'options': channels,
+				'selectedIndex': channelIdxInc
+			};
+
+			const dropDownChannel = ui.createDropDown(paramsChannel);
+			const dropDownChannelElem = dropDownChannel.input;
+
+			/*
+			 * This is called when the channel number changes.
+			 */
+			dropDownChannelElem.onchange = function(e) {
+				const idx = this.selectedIndex;
+				const option = this.options[idx];
+				let value = option.text;
+				const interval = storage.get(this, 'interval');
+				window.clearInterval(interval);
+
+				/*
+				 * This gets executed whenever the timer ticks.
+				 */
+				const callback = function() {
+					handler.refreshTuner();
+				};
+
+				/*
+				 * Handle special case of no channel and register timer
+				 * for updating readings for the UI.
+				 */
+				if (value === '- NONE -') {
+					value = '-1';
+				} else {
+					const intervalNew = window.setInterval(callback, 250);
+					storage.put(this, 'interval', intervalNew);
+				}
+
+				handler.setTunerValue('channel', value);
+			};
+
+			dropDownChannelElem.onchange(null);
+			const dropDownChannelDiv = dropDownChannel.div;
+			channelRow.appendChild(dropDownChannelDiv);
+			controlsDiv.appendChild(channelRow);
+
+			/*
+			 * Create unit object.
+			 */
+			const unit = {
+				'controls': controlsDiv,
+				'expanded': false
 			};
 
 			/*
-			 * Handle special case of no channel and register timer
-			 * for updating readings for the UI.
+			 * Expands or collapses a unit.
 			 */
-			if (value === '- NONE -') {
-				value = '-1';
-			} else {
-				var intervalNew = window.setInterval(callback, 250);
-				storage.put(this, 'interval', intervalNew);
-			}
+			unit.setExpanded = function(value) {
+				const controlsDiv = this.controls;
+				let displayValue = '';
 
-			handler.setTunerValue('channel', value);
-		};
+				/*
+				 * Check whether we should expand or collapse the unit.
+				 */
+				if (value) {
+					displayValue = 'block';
+				} else {
+					displayValue = 'none';
+				}
 
-		dropDownChannelElem.onchange(null);
-		var dropDownChannelDiv = dropDownChannel.div;
-		channelRow.appendChild(dropDownChannelDiv);
-		controlsDiv.appendChild(channelRow);
-
-		/*
-		 * Create unit object.
-		 */
-		var unit = {
-			'controls': controlsDiv,
-			'expanded': false
-		};
-
-		/*
-		 * Expands or collapses a unit.
-		 */
-		unit.setExpanded = function(value) {
-			var controlsDiv = this.controls;
-			var displayValue = '';
+				controlsDiv.style.display = displayValue;
+				this.expanded = value;
+			};
 
 			/*
-			 * Check whether we should expand or collapse the unit.
+			 * Returns whether a unit is expanded.
 			 */
-			if (value) {
-				displayValue = 'block';
-			} else {
-				displayValue = 'none';
+			unit.getExpanded = function() {
+				return this.expanded;
+			};
+
+			/*
+			 * Toggles a unit between expanded and collapsed state.
+			 */
+			unit.toggleExpanded = function() {
+				const state = this.getExpanded();
+				this.setExpanded(!state);
+			};
+
+			/*
+			 * This is called when a user clicks on the label div.
+			 */
+			labelDiv.onclick = function(e) {
+				const unit = storage.get(this, 'unit');
+				unit.toggleExpanded();
 			}
 
-			controlsDiv.style.display = displayValue;
-			this.expanded = value;
-		};
-
-		/*
-		 * Returns whether a unit is expanded.
-		 */
-		unit.getExpanded = function() {
-			return this.expanded;
-		};
-
-		/*
-		 * Toggles a unit between expanded and collapsed state.
-		 */
-		unit.toggleExpanded = function() {
-			var state = this.getExpanded();
-			this.setExpanded(!state);
-		};
-
-		/*
-		 * This is called when a user clicks on the label div.
-		 */
-		labelDiv.onclick = function(e) {
-			var unit = storage.get(this, 'unit');
-			unit.toggleExpanded();
+			storage.put(labelDiv, 'unit', unit);
 		}
 
-		storage.put(labelDiv, 'unit', unit);
 	}
 
 	/*
 	 * Renders the spatializer given a configuration returned from the server.
 	 */
 	this.renderSpatializer = function(configuration) {
-		var spatializer = configuration.Spatializer;
-		var channels = spatializer.Channels;
-		var numChannels = channels.length;
-		var elem = document.getElementById('spatializer');
+		const spatializer = configuration.Spatializer;
+		const channels = spatializer.Channels;
+		const numChannels = channels.length;
+		const elem = document.getElementById('spatializer');
 		helper.clearElement(elem);
-		var unitDiv = document.createElement('div');
+		const unitDiv = document.createElement('div');
 		unitDiv.classList.add('contentdiv');
 		unitDiv.classList.add('masterunitdiv');
-		var headerDiv = document.createElement('div');
-		var labelDiv = document.createElement('div');
+		const headerDiv = document.createElement('div');
+		const labelDiv = document.createElement('div');
 		labelDiv.classList.add('labeldiv');
 		labelDiv.classList.add('active');
 		labelDiv.classList.add('io');
-		var label = ui.getString('spatializer');
-		var labelNode = document.createTextNode(label);
+		const label = ui.getString('spatializer');
+		const labelNode = document.createTextNode(label);
 		labelDiv.appendChild(labelNode);
 		headerDiv.appendChild(labelDiv);
 		headerDiv.classList.add('headerdiv');
 		unitDiv.appendChild(headerDiv);
-		var controlsDiv = document.createElement('div');
+		const controlsDiv = document.createElement('div');
 		controlsDiv.classList.add('controlsdiv');
 		unitDiv.appendChild(controlsDiv);
 		elem.appendChild(unitDiv);
@@ -1708,19 +1724,19 @@ function UI() {
 		/*
 		 * Iterate over the channels.
 		 */
-		for (var i = 0; i < numChannels; i++) {
-			var iString = i.toString();
-			var channel = channels[i];
-			var azimuth = channel.Azimuth;
-			var distance = 10 * channel.Distance;
-			var level = 100 * channel.Level;
-			var azimuthString = ui.getString('azimuth');
-			var azimuthLabel = azimuthString + ' ' + iString;
+		for (let i = 0; i < numChannels; i++) {
+			const iString = i.toString();
+			const channel = channels[i];
+			const azimuth = channel.Azimuth;
+			const distance = 10 * channel.Distance;
+			const level = 100 * channel.Level;
+			const azimuthString = ui.getString('azimuth');
+			const azimuthLabel = azimuthString + ' ' + iString;
 
 			/*
 			 * Parameters for the azimuth knob.
 			 */
-			var azimuthParams = {
+			const azimuthParams = {
 				'label': azimuthLabel,
 				'physicalUnit': '°',
 				'valueMin': -90,
@@ -1734,16 +1750,16 @@ function UI() {
 				'readonly': false
 			};
 
-			var azimuthKnob = ui.createKnob(azimuthParams);
-			var azimuthKnobDiv = azimuthKnob.div;
+			const azimuthKnob = ui.createKnob(azimuthParams);
+			const azimuthKnobDiv = azimuthKnob.div;
 			controlsDiv.appendChild(azimuthKnobDiv);
-			var distanceString = ui.getString('distance');
-			var distanceLabel = distanceString + ' ' + iString;
+			const distanceString = ui.getString('distance');
+			const distanceLabel = distanceString + ' ' + iString;
 
 			/*
 			 * Parameters for the distance knob.
 			 */
-			var distanceParams = {
+			const distanceParams = {
 				'label': distanceLabel,
 				'physicalUnit': 'dm',
 				'valueMin': 0,
@@ -1757,16 +1773,16 @@ function UI() {
 				'readonly': false
 			};
 
-			var distanceKnob = ui.createKnob(distanceParams);
-			var distanceKnobDiv = distanceKnob.div;
+			const distanceKnob = ui.createKnob(distanceParams);
+			const distanceKnobDiv = distanceKnob.div;
 			controlsDiv.append(distanceKnobDiv);
-			var levelString = ui.getString('level');
-			var levelLabel = levelString + ' ' + iString;
+			const levelString = ui.getString('level');
+			const levelLabel = levelString + ' ' + iString;
 
 			/*
 			 * Parameters for the level knob.
 			 */
-			var levelParams = {
+			const levelParams = {
 				'label': levelLabel,
 				'physicalUnit': '%',
 				'valueMin': 0,
@@ -1780,12 +1796,12 @@ function UI() {
 				'readonly': false
 			};
 
-			var levelKnob = ui.createKnob(levelParams);
-			var levelKnobDiv = levelKnob.div;
+			const levelKnob = ui.createKnob(levelParams);
+			const levelKnobDiv = levelKnob.div;
 			controlsDiv.append(levelKnobDiv);
-			var azimuthKnobNode = azimuthKnob.node;
-			var distanceKnobNode = distanceKnob.node;
-			var levelKnobNode = levelKnob.node;
+			const azimuthKnobNode = azimuthKnob.node;
+			const distanceKnobNode = distanceKnob.node;
+			const levelKnobNode = levelKnob.node;
 			storage.put(azimuthKnobNode, 'channel', i);
 			storage.put(distanceKnobNode, 'channel', i);
 			storage.put(levelKnobNode, 'channel', i);
@@ -1793,44 +1809,44 @@ function UI() {
 			/*
 			 * This gets executed when the azimuth value changes.
 			 */
-			var azimuthHandler = function(knob, value) {
-				var node = knob.node();
-				var channel = storage.get(node, 'channel');
+			const azimuthHandler = function(knob, value) {
+				const node = knob.node();
+				const channel = storage.get(node, 'channel');
 				handler.setAzimuth(channel, value);
 			};
 
 			/*
 			 * This gets executed when the distance value changes.
 			 */
-			var distanceHandler = function(knob, value) {
-				var node = knob.node();
-				var channel = storage.get(node, 'channel');
-				var distanceValue = (0.1 * value).toFixed(1);
+			const distanceHandler = function(knob, value) {
+				const node = knob.node();
+				const channel = storage.get(node, 'channel');
+				const distanceValue = (0.1 * value).toFixed(1);
 				handler.setDistance(channel, distanceValue);
 			};
 
 			/*
 			 * This gets executed when the level value changes.
 			 */
-			var levelHandler = function(knob, value) {
-				var node = knob.node();
-				var channel = storage.get(node, 'channel');
-				var levelValue = (0.01 * value).toFixed(2);
+			const levelHandler = function(knob, value) {
+				const node = knob.node();
+				const channel = storage.get(node, 'channel');
+				const levelValue = (0.01 * value).toFixed(2);
 				handler.setLevel(channel, levelValue);
 			};
 
-			var azimuthKnobObj = azimuthKnob.obj;
+			const azimuthKnobObj = azimuthKnob.obj;
 			azimuthKnobObj.addListener(azimuthHandler);
-			var distanceKnobObj = distanceKnob.obj;
+			const distanceKnobObj = distanceKnob.obj;
 			distanceKnobObj.addListener(distanceHandler);
-			var levelKnobObj = levelKnob.obj;
+			const levelKnobObj = levelKnob.obj;
 			levelKnobObj.addListener(levelHandler);
 		}
 
 		/*
 		 * Create unit object.
 		 */
-		var unit = {
+		const unit = {
 			'controls': controlsDiv,
 			'expanded': false
 		};
@@ -1839,8 +1855,8 @@ function UI() {
 		 * Expands or collapses a unit.
 		 */
 		unit.setExpanded = function(value) {
-			var controlsDiv = this.controls;
-			var displayValue = '';
+			const controlsDiv = this.controls;
+			let displayValue = '';
 
 			/*
 			 * Check whether we should expand or collapse the unit.
@@ -1866,7 +1882,7 @@ function UI() {
 		 * Toggles a unit between expanded and collapsed state.
 		 */
 		unit.toggleExpanded = function() {
-			var state = this.getExpanded();
+			const state = this.getExpanded();
 			this.setExpanded(!state);
 		};
 
@@ -1874,7 +1890,7 @@ function UI() {
 		 * This is called when a user clicks on the label div.
 		 */
 		labelDiv.onclick = function(e) {
-			var unit = storage.get(this, 'unit');
+			const unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		};
 
@@ -1885,33 +1901,33 @@ function UI() {
 	 * Renders the metronome given a configuration returned from the server.
 	 */
 	this.renderMetronome = function(configuration) {
-		var metronomeConfiguration = configuration.Metronome;
-		var masterOutput = metronomeConfiguration.MasterOutput;
-		var elem = document.getElementById('metronome');
+		const metronomeConfiguration = configuration.Metronome;
+		const masterOutput = metronomeConfiguration.MasterOutput;
+		const elem = document.getElementById('metronome');
 		helper.clearElement(elem);
-		var unitDiv = document.createElement('div');
+		const unitDiv = document.createElement('div');
 		unitDiv.classList.add('contentdiv');
 		unitDiv.classList.add('masterunitdiv');
-		var headerDiv = document.createElement('div');
-		var masterString = ui.getString('master');
+		const headerDiv = document.createElement('div');
+		const masterString = ui.getString('master');
 
 		/*
 		 * Parameters for metronome button.
 		 */
-		var paramsButton = {
+		const paramsButton = {
 			caption: masterString,
 			active: masterOutput
 		};
 
-		var button = ui.createButton(paramsButton);
-		var buttonElem = button.input;
+		const button = ui.createButton(paramsButton);
+		const buttonElem = button.input;
 		storage.put(buttonElem, 'active', masterOutput);
 
 		/*
 		 * This is called when the user clicks on the 'master' button of the metronome.
 		 */
 		buttonElem.onclick = function(e) {
-			var active = !storage.get(this, 'active');
+			const active = !storage.get(this, 'active');
 
 			/*
 			 * Check whether the control should be active.
@@ -1929,22 +1945,22 @@ function UI() {
 		};
 
 		headerDiv.appendChild(buttonElem);
-		var labelDiv = document.createElement('div');
+		const labelDiv = document.createElement('div');
 		labelDiv.classList.add('labeldiv');
 		labelDiv.classList.add('active');
 		labelDiv.classList.add('io');
-		var label = ui.getString('metronome');
-		var labelNode = document.createTextNode(label);
+		const label = ui.getString('metronome');
+		const labelNode = document.createTextNode(label);
 		labelDiv.appendChild(labelNode);
 		headerDiv.appendChild(labelDiv);
 		headerDiv.classList.add('headerdiv');
 		unitDiv.appendChild(headerDiv);
-		var controlsDiv = document.createElement('div');
+		const controlsDiv = document.createElement('div');
 		controlsDiv.classList.add('controlsdiv');
 		unitDiv.appendChild(controlsDiv);
 		elem.appendChild(unitDiv);
-		var beatsString = ui.getString('beats_per_period');
-		var beatsValue = metronomeConfiguration.BeatsPerPeriod;
+		const beatsString = ui.getString('beats_per_period');
+		const beatsValue = metronomeConfiguration.BeatsPerPeriod;
 
 		/*
 		 * Parameters for the beats per period knob.
@@ -1963,12 +1979,12 @@ function UI() {
 			'readonly': false
 		};
 
-		var beatsKnob = ui.createKnob(beatsParams);
-		var beatsKnobDiv = beatsKnob.div;
+		const beatsKnob = ui.createKnob(beatsParams);
+		const beatsKnobDiv = beatsKnob.div;
 		controlsDiv.appendChild(beatsKnobDiv);
-		var speedString = ui.getString('speed');
-		var bpmString = ui.getString('bpm');
-		var speedValue = metronomeConfiguration.Speed;
+		const speedString = ui.getString('speed');
+		const bpmString = ui.getString('bpm');
+		const speedValue = metronomeConfiguration.Speed;
 
 		/*
 		 * Parameters for the speed knob.
@@ -1987,40 +2003,40 @@ function UI() {
 			'readonly': false
 		};
 
-		var speedKnob = ui.createKnob(speedParams);
-		var speedKnobDiv = speedKnob.div;
+		const speedKnob = ui.createKnob(speedParams);
+		const speedKnobDiv = speedKnob.div;
 		controlsDiv.appendChild(speedKnobDiv);
 
 		/*
 		 * This gets executed when the beats per period value changes.
 		 */
-		var beatsHandler = function(knob, value) {
+		const beatsHandler = function(knob, value) {
 			handler.setMetronomeValue('beats-per-period', value);
 		};
 
 		/*
 		 * This gets executed when the beats per period value changes.
 		 */
-		var speedHandler = function(knob, value) {
+		const speedHandler = function(knob, value) {
 			handler.setMetronomeValue('speed', value);
 		};
 
-		var beatsKnobObj = beatsKnob.obj;
+		const beatsKnobObj = beatsKnob.obj;
 		beatsKnobObj.addListener(beatsHandler);
-		var speedKnobObj = speedKnob.obj;
+		const speedKnobObj = speedKnob.obj;
 		speedKnobObj.addListener(speedHandler);
-		var sounds = metronomeConfiguration.Sounds;
-		var numSounds = sounds.length;
-		var tickSound = metronomeConfiguration.TickSound;
-		var tockSound = metronomeConfiguration.TockSound;
-		var tickIdx = 0;
-		var tockIdx = 0;
+		const sounds = metronomeConfiguration.Sounds;
+		const numSounds = sounds.length;
+		const tickSound = metronomeConfiguration.TickSound;
+		const tockSound = metronomeConfiguration.TockSound;
+		let tickIdx = 0;
+		let tockIdx = 0;
 
 		/*
 		 * Iterate over all sounds and find the tick and tock sound.
 		 */
-		for (var i = 0; i < numSounds; i++) {
-			var sound = sounds[i];
+		for (let i = 0; i < numSounds; i++) {
+			const sound = sounds[i];
 
 			/*
 			 * If we found the tick sound, store index.
@@ -2038,13 +2054,13 @@ function UI() {
 
 		}
 
-		var labelTick = ui.getString('tick_sound');
-		var labelTock = ui.getString('tock_sound');
+		const labelTick = ui.getString('tick_sound');
+		const labelTock = ui.getString('tock_sound');
 
 		/*
 		 * Parameters for the tick sound drop down menu.
 		 */
-		var paramsTick = {
+		const paramsTick = {
 			'label': labelTick,
 			'options': sounds,
 			'selectedIndex': tickIdx
@@ -2053,24 +2069,24 @@ function UI() {
 		/*
 		 * Parameters for the tock sound drop down menu.
 		 */
-		var paramsTock = {
+		const paramsTock = {
 			'label': labelTock,
 			'options': sounds,
 			'selectedIndex': tockIdx
 		};
 
-		var dropDownTick = ui.createDropDown(paramsTick);
-		var dropDownTock = ui.createDropDown(paramsTock);
-		var dropDownTickElem = dropDownTick.input;
-		var dropDownTockElem = dropDownTock.input;
+		const dropDownTick = ui.createDropDown(paramsTick);
+		const dropDownTock = ui.createDropDown(paramsTock);
+		const dropDownTickElem = dropDownTick.input;
+		const dropDownTockElem = dropDownTock.input;
 
 		/*
 		 * This is called when the tick sound changes.
 		 */
 		dropDownTickElem.onchange = function(e) {
-			var idx = this.selectedIndex;
-			var option = this.options[idx];
-			var value = option.text;
+			const idx = this.selectedIndex;
+			const option = this.options[idx];
+			const value = option.text;
 			handler.setMetronomeValue('tick-sound', value);
 		};
 
@@ -2078,23 +2094,23 @@ function UI() {
 		 * This is called when the tock sound changes.
 		 */
 		dropDownTockElem.onchange = function(e) {
-			var idx = this.selectedIndex;
-			var option = this.options[idx];
-			var value = option.text;
+			const idx = this.selectedIndex;
+			const option = this.options[idx];
+			const value = option.text;
 			handler.setMetronomeValue('tock-sound', value);
 		};
 
-		var controlRowTick = document.createElement('div');
+		const controlRowTick = document.createElement('div');
 		controlRowTick.appendChild(dropDownTick.div);
 		controlsDiv.appendChild(controlRowTick);
-		var controlRowTock = document.createElement('div');
+		const controlRowTock = document.createElement('div');
 		controlRowTock.appendChild(dropDownTock.div);
 		controlsDiv.appendChild(controlRowTock);
 
 		/*
 		 * Create unit object.
 		 */
-		var unit = {
+		const unit = {
 			'controls': controlsDiv,
 			'expanded': false
 		};
@@ -2103,8 +2119,8 @@ function UI() {
 		 * Expands or collapses a unit.
 		 */
 		unit.setExpanded = function(value) {
-			var controlsDiv = this.controls;
-			var displayValue = '';
+			const controlsDiv = this.controls;
+			let displayValue = '';
 
 			/*
 			 * Check whether we should expand or collapse the unit.
@@ -2130,7 +2146,7 @@ function UI() {
 		 * Toggles a unit between expanded and collapsed state.
 		 */
 		unit.toggleExpanded = function() {
-			var state = this.getExpanded();
+			const state = this.getExpanded();
 			this.setExpanded(!state);
 		};
 
@@ -2138,7 +2154,7 @@ function UI() {
 		 * This is called when a user clicks on the label div.
 		 */
 		labelDiv.onclick = function(e) {
-			var unit = storage.get(this, 'unit');
+			const unit = storage.get(this, 'unit');
 			unit.toggleExpanded();
 		};
 
@@ -2149,21 +2165,21 @@ function UI() {
 	 * Renders the signal level analysis section given a configuration returned from the server.
 	 */
 	this.renderSignalLevels = function(configuration) {
-		var batchProcessing = configuration.BatchProcessing;
-		var levelMeter = configuration.LevelMeter;
-		var enabled = levelMeter.Enabled;
-		var elem = document.getElementById('levels');
+		const batchProcessing = configuration.BatchProcessing;
+		const elem = document.getElementById('levels');
 		helper.clearElement(elem);
 
 		/*
 		 * Only display levels if batch processing is disabled on the server.
 		 */
-		if (!batchProcessing) {
-			var unitDiv = document.createElement('div');
+		if (batchProcessing === false) {
+			const unitDiv = document.createElement('div');
 			unitDiv.classList.add('contentdiv');
 			unitDiv.classList.add('masterunitdiv');
-			var headerDiv = document.createElement('div');
-			var enabledString = ui.getString('enabled');
+			const headerDiv = document.createElement('div');
+			const enabledString = ui.getString('enabled');
+			const levelMeter = configuration.LevelMeter;
+			const enabled = levelMeter.Enabled;
 
 			/*
 			 * Parameters for metronome button.
@@ -2173,15 +2189,15 @@ function UI() {
 				active: enabled
 			};
 
-			var button = ui.createButton(paramsButton);
-			var buttonElem = button.input;
+			const button = ui.createButton(paramsButton);
+			const buttonElem = button.input;
 			storage.put(buttonElem, 'active', enabled);
 
 			/*
 			 * This is called when the user clicks on the 'enabled' button of the level meter.
 			 */
 			buttonElem.onclick = function(e) {
-				var active = !storage.get(this, 'active');
+				const active = !storage.get(this, 'active');
 
 				/*
 				 * Check whether the control should be active.
@@ -2199,17 +2215,17 @@ function UI() {
 			};
 
 			headerDiv.appendChild(buttonElem);
-			var labelDiv = document.createElement('div');
+			const labelDiv = document.createElement('div');
 			labelDiv.classList.add('labeldiv');
 			labelDiv.classList.add('active');
 			labelDiv.classList.add('io');
-			var label = ui.getString('signal_levels');
-			var labelNode = document.createTextNode(label);
+			const label = ui.getString('signal_levels');
+			const labelNode = document.createTextNode(label);
 			labelDiv.appendChild(labelNode);
 			headerDiv.appendChild(labelDiv);
 			headerDiv.classList.add('headerdiv');
 			unitDiv.appendChild(headerDiv);
-			var controlsDiv = document.createElement('div');
+			const controlsDiv = document.createElement('div');
 			controlsDiv.classList.add('controlsdiv');
 			unitDiv.appendChild(controlsDiv);
 			elem.appendChild(unitDiv);
@@ -2243,26 +2259,26 @@ function UI() {
 					 * Update controls to represent new level and peak values obtained
 					 * from the response.
 					 */
-					var callback = function() {
+					const callback = function() {
 
 						/*
 						 * This is called when the server returns a response.
 						 */
-						var responseListener = function(response) {
-							var dspLoadControl = unit.dspLoadControl;
-							var channelNames = unit.channelNames;
-							var numNames = channelNames.length;
-							var channelControls = unit.channelControls;
-							var mismatch = (dspLoadControl === null);
-							var channels = response.Channels;
-							var numChannels = channels.length;
+						const responseListener = function(response) {
+							let dspLoadControl = unit.dspLoadControl;
+							let channelNames = unit.channelNames;
+							const numNames = channelNames.length;
+							let channelControls = unit.channelControls;
+							let mismatch = (dspLoadControl === null);
+							const channels = response.Channels;
+							const numChannels = channels.length;
 
 							/*
 							 * Iterate over all channels in the response.
 							 */
-							for (var i = 0; i < numChannels; i++) {
-								var channel = channels[i];
-								var channelNameResponse = channel.ChannelName;
+							for (let i = 0; i < numChannels; i++) {
+								const channel = channels[i];
+								const channelNameResponse = channel.ChannelName;
 
 								/*
 								 * If one of the channels does not match,
@@ -2271,7 +2287,7 @@ function UI() {
 								if (numNames <= i) {
 									mismatch = true;
 								} else {
-									var channelNameControl = channelNames[i];
+									const channelNameControl = channelNames[i];
 
 									/*
 									 * Check if name of the response matches name
@@ -2289,11 +2305,11 @@ function UI() {
 							 * If the channel mapping has changed, create new controls.
 							 */
 							if (mismatch) {
-								var controlsDiv = unit.controls;
+								const controlsDiv = unit.controls;
 								helper.clearElement(controlsDiv);
-								var dspLoadString = ui.getString('dsp_load');
-								var dspLoadLabelDiv = document.createElement('div');
-								var dspLoadLabelNode = document.createTextNode(dspLoadString);
+								const dspLoadString = ui.getString('dsp_load');
+								const dspLoadLabelDiv = document.createElement('div');
+								const dspLoadLabelNode = document.createTextNode(dspLoadString);
 								dspLoadLabelDiv.appendChild(dspLoadLabelNode);
 								dspLoadControl = pureknob.createBarGraph(400, 40);
 								dspLoadControl.setProperty('colorFG', '#ff4444');
@@ -2304,10 +2320,10 @@ function UI() {
 								dspLoadControl.setProperty('valMin', 0);
 								dspLoadControl.setProperty('valMax', 100);
 								dspLoadControl.setValue(0);
-								var node = dspLoadControl.node();
-								var nodeWrapper = document.createElement('div');
+								const node = dspLoadControl.node();
+								const nodeWrapper = document.createElement('div');
 								nodeWrapper.appendChild(node);
-								var container = document.createElement('div');
+								const container = document.createElement('div');
 								container.appendChild(dspLoadLabelDiv);
 								container.appendChild(nodeWrapper);
 								controlsDiv.appendChild(container);
@@ -2317,10 +2333,10 @@ function UI() {
 								/*
 								 * Iterate over all channels in the response.
 								 */
-								for (var i = 0; i < numChannels; i++) {
-									var channel = channels[i];
-									var channelName = channel.ChannelName;
-									var channelControl = pureknob.createBarGraph(400, 40);
+								for (let i = 0; i < numChannels; i++) {
+									const channel = channels[i];
+									const channelName = channel.ChannelName;
+									const channelControl = pureknob.createBarGraph(400, 40);
 									channelControl.setProperty('colorFG', '#44ff44');
 									channelControl.setProperty('colorMarkers', '#ffffff');
 									channelControl.setProperty('markerStart', -60);
@@ -2331,13 +2347,13 @@ function UI() {
 									channelControl.setValue(-145);
 									channelNames.push(channelName);
 									channelControls.push(channelControl);
-									var channelNameDiv = document.createElement('div');
-									var channelNameNode = document.createTextNode(channelName);
+									const channelNameDiv = document.createElement('div');
+									const channelNameNode = document.createTextNode(channelName);
 									channelNameDiv.appendChild(channelNameNode);
-									var node = channelControl.node();
-									var nodeWrapper = document.createElement('div');
+									const node = channelControl.node();
+									const nodeWrapper = document.createElement('div');
 									nodeWrapper.appendChild(node);
-									var container = document.createElement('div');
+									const container = document.createElement('div');
 									container.appendChild(channelNameDiv);
 									container.appendChild(nodeWrapper);
 									controlsDiv.appendChild(container);
@@ -2349,18 +2365,18 @@ function UI() {
 							 * Display DSP load.
 							 */
 							if (dspLoadControl !== null) {
-								var dspLoad = response.DSPLoad;
+								const dspLoad = response.DSPLoad;
 								dspLoadControl.setValue(dspLoad);
 							}
 
 							/*
 							 * Iterate over all channels in the response.
 							 */
-							for (var i = 0; i < numChannels; i++) {
-								var channel = channels[i];
-								var channelLevel = channel.Level;
-								var channelPeak = channel.Peak;
-								var channelControl = channelControls[i];
+							for (let i = 0; i < numChannels; i++) {
+								const channel = channels[i];
+								const channelLevel = channel.Level;
+								const channelPeak = channel.Peak;
+								const channelControl = channelControls[i];
 								channelControl.setValue(channelLevel);
 								channelControl.setPeaks([channelPeak]);
 							}
@@ -2373,10 +2389,10 @@ function UI() {
 						handler.getLevelAnalysis(responseListener);
 					};
 
-					var timer = window.setInterval(callback, 200);
+					const timer = window.setInterval(callback, 200);
 					unit.timer = timer;
 				} else {
-					var timer = unit.timer;
+					const timer = unit.timer;
 
 					/*
 					 * If a timer is registered, clear it.
@@ -2393,7 +2409,7 @@ function UI() {
 			/*
 			 * Create unit object.
 			 */
-			var unit = {
+			const unit = {
 				'channelNames': [],
 				'channelControls': [],
 				'controls': controlsDiv,
@@ -2406,8 +2422,8 @@ function UI() {
 			 * Expands or collapses a unit.
 			 */
 			unit.setExpanded = function(value) {
-				var controlsDiv = this.controls;
-				var displayValue = '';
+				const controlsDiv = this.controls;
+				let displayValue = '';
 
 				/*
 				 * Check whether we should expand or collapse the unit.
@@ -2420,7 +2436,7 @@ function UI() {
 
 				controlsDiv.style.display = displayValue;
 				this.expanded = value;
-				var listeners = this.listeners;
+				const listeners = this.listeners;
 
 				/*
 				 * Check if there are listeners resistered.
@@ -2431,8 +2447,8 @@ function UI() {
 					/*
 					 * Invoke each listener.
 					 */
-					for (var i = 0; i < numListeners; i++) {
-						var listener = listeners[i];
+					for (let i = 0; i < numListeners; i++) {
+						const listener = listeners[i];
 						listener(this, value);
 					}
 
@@ -2451,7 +2467,7 @@ function UI() {
 			 * Toggles a unit between expanded and collapsed state.
 			 */
 			unit.toggleExpanded = function() {
-				var state = this.getExpanded();
+				const state = this.getExpanded();
 				this.setExpanded(!state);
 			};
 
@@ -2459,7 +2475,7 @@ function UI() {
 			 * This is called when a user clicks on the label div.
 			 */
 			labelDiv.onclick = function(e) {
-				var unit = storage.get(this, 'unit');
+				const unit = storage.get(this, 'unit');
 				unit.toggleExpanded();
 			};
 
@@ -2472,19 +2488,19 @@ function UI() {
 	 * Renders the 'processing' button given a configuration returned from the server.
 	 */
 	this.renderProcessing = function(configuration) {
-		var batchProcessing = configuration.BatchProcessing;
-		var elem = document.getElementById('processing');
+		const batchProcessing = configuration.BatchProcessing;
+		const elem = document.getElementById('processing');
 		helper.clearElement(elem);
 
 		/*
-		 * Only display this if batch processing is enabled on the server.
+		 * Only display processing button if batch processing is enabled on the server.
 		 */
-		if (batchProcessing) {
-			var unitDiv = document.createElement('div');
+		if (batchProcessing === true) {
+			const unitDiv = document.createElement('div');
 			unitDiv.classList.add('contentdiv');
 			unitDiv.classList.add('masterunitdiv');
-			var headerDiv = document.createElement('div');
-			var processString = ui.getString('process_now');
+			const headerDiv = document.createElement('div');
+			const processString = ui.getString('process_now');
 
 			/*
 			 * Parameters for process button.
@@ -2494,15 +2510,15 @@ function UI() {
 				active: false
 			};
 
-			var button = ui.createButton(paramsButton);
-			var buttonElem = button.input;
+			const button = ui.createButton(paramsButton);
+			const buttonElem = button.input;
 			storage.put(buttonElem, 'active', batchProcessing);
 
 			/*
 			 * This is called when the user clicks on the 'process' button.
 			 */
 			buttonElem.onclick = function(e) {
-				var active = storage.get(this, 'active');
+				const active = storage.get(this, 'active');
 
 				/*
 				 * Trigger batch processing if the control is active.
@@ -2514,17 +2530,17 @@ function UI() {
 			};
 
 			headerDiv.appendChild(buttonElem);
-			var labelDiv = document.createElement('div');
+			const labelDiv = document.createElement('div');
 			labelDiv.classList.add('labeldiv');
 			labelDiv.classList.add('active');
 			labelDiv.classList.add('io');
-			var label = ui.getString('batch_processing');
-			var labelNode = document.createTextNode(label);
+			const label = ui.getString('batch_processing');
+			const labelNode = document.createTextNode(label);
 			labelDiv.appendChild(labelNode);
 			headerDiv.appendChild(labelDiv);
 			headerDiv.classList.add('headerdiv');
 			unitDiv.appendChild(headerDiv);
-			var controlsDiv = document.createElement('div');
+			const controlsDiv = document.createElement('div');
 			controlsDiv.classList.add('controlsdiv');
 			unitDiv.appendChild(controlsDiv);
 			elem.appendChild(unitDiv);
@@ -2532,7 +2548,7 @@ function UI() {
 			/*
 			 * Create unit object.
 			 */
-			var unit = {
+			const unit = {
 				'controls': controlsDiv,
 				'expanded': false
 			};
@@ -2541,8 +2557,8 @@ function UI() {
 			 * Expands or collapses a unit.
 			 */
 			unit.setExpanded = function(value) {
-				var controlsDiv = this.controls;
-				var displayValue = '';
+				const controlsDiv = this.controls;
+				let displayValue = '';
 
 				/*
 				 * Check whether we should expand or collapse the unit.
@@ -2568,7 +2584,7 @@ function UI() {
 			 * Toggles a unit between expanded and collapsed state.
 			 */
 			unit.toggleExpanded = function() {
-				var state = this.getExpanded();
+				const state = this.getExpanded();
 				this.setExpanded(!state);
 			};
 
@@ -2576,7 +2592,7 @@ function UI() {
 			 * This is called when a user clicks on the label div.
 			 */
 			labelDiv.onclick = function(e) {
-				var unit = storage.get(this, 'unit');
+				const unit = storage.get(this, 'unit');
 				unit.toggleExpanded();
 			};
 
@@ -2587,13 +2603,13 @@ function UI() {
 
 }
 
-var ui = new UI();
+const ui = new UI();
 
 /*
  * This class implements all handler functions for user interaction.
  */
 function Handler() {
-	var self = this;
+	const self = this;
 
 	/*
 	 * This is called when a new effects unit should be added.
@@ -2603,8 +2619,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -2615,8 +2631,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt, otherwise refresh rack.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Adding new unit failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Adding new unit failed: ' + reason;
 					console.log(msg);
 				} else {
 					self.refresh();
@@ -2626,15 +2642,15 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var unitTypeString = unitType.toString();
-		var chainString = chain.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const unitTypeString = unitType.toString();
+		const chainString = chain.toString();
+		const request = new Request();
 		request.append('cgi', 'add-unit');
 		request.append('type', unitTypeString);
 		request.append('chain', chainString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -2646,8 +2662,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var levels = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const levels = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -2658,11 +2674,11 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const request = new Request();
 		request.append('cgi', 'get-level-analysis');
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, false);
 	};
 
@@ -2675,7 +2691,7 @@ function Handler() {
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -2686,8 +2702,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Moving unit down failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Moving unit down failed: ' + reason;
 					console.log(msg);
 				} else {
 					self.refresh();
@@ -2697,15 +2713,15 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var chainString = chain.toString();
-		var unitString = unit.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const chainString = chain.toString();
+		const unitString = unit.toString();
+		const request = new Request();
 		request.append('cgi', 'move-down');
 		request.append('chain', chainString);
 		request.append('unit', unitString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -2717,8 +2733,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -2729,8 +2745,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Moving unit up failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Moving unit up failed: ' + reason;
 					console.log(msg);
 				} else {
 					self.refresh();
@@ -2740,15 +2756,15 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var chainString = chain.toString();
-		var unitString = unit.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const chainString = chain.toString();
+		const unitString = unit.toString();
+		const request = new Request();
 		request.append('cgi', 'move-up');
 		request.append('chain', chainString);
 		request.append('unit', unitString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -2760,8 +2776,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -2772,8 +2788,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Removing unit failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Removing unit failed: ' + reason;
 					console.log(msg);
 				} else {
 					self.refresh();
@@ -2783,15 +2799,15 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var chainString = chain.toString();
-		var unitString = unit.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const chainString = chain.toString();
+		const unitString = unit.toString();
+		const request = new Request();
 		request.append('cgi', 'remove-unit');
 		request.append('chain', chainString);
 		request.append('unit', unitString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -2803,8 +2819,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -2815,8 +2831,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Setting azimuth value failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Setting azimuth value failed: ' + reason;
 					console.log(msg);
 				}
 
@@ -2824,15 +2840,15 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var chainString = chain.toString();
-		var valueString = value.toString()
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const chainString = chain.toString();
+		const valueString = value.toString()
+		const request = new Request();
 		request.append('cgi', 'set-azimuth');
 		request.append('chain', chainString);
 		request.append('value', valueString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -2844,8 +2860,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -2856,8 +2872,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Setting bypass value failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Setting bypass value failed: ' + reason;
 					console.log(msg);
 				}
 
@@ -2865,17 +2881,17 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var chainString = chain.toString();
-		var unitString = unit.toString();
-		var valueString = value.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const chainString = chain.toString();
+		const unitString = unit.toString();
+		const valueString = value.toString();
+		const request = new Request();
 		request.append('cgi', 'set-bypass');
 		request.append('chain', chainString);
 		request.append('unit', unitString);
 		request.append('value', valueString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -2887,8 +2903,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -2899,8 +2915,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Setting distance value failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Setting distance value failed: ' + reason;
 					console.log(msg);
 				}
 
@@ -2908,15 +2924,15 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var chainString = chain.toString();
-		var valueString = value.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const chainString = chain.toString();
+		const valueString = value.toString();
+		const request = new Request();
 		request.append('cgi', 'set-distance');
 		request.append('chain', chainString);
 		request.append('value', valueString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -2928,8 +2944,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -2940,8 +2956,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Setting discrete value failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Setting discrete value failed: ' + reason;
 					console.log(msg);
 				}
 
@@ -2949,19 +2965,19 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var chainString = chain.toString();
-		var unitString = unit.toString();
-		var paramString = param.toString();
-		var valueString = value.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const chainString = chain.toString();
+		const unitString = unit.toString();
+		const paramString = param.toString();
+		const valueString = value.toString();
+		const request = new Request();
 		request.append('cgi', 'set-discrete-value');
 		request.append('chain', chainString);
 		request.append('unit', unitString);
 		request.append('param', paramString);
 		request.append('value', valueString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -2973,8 +2989,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -2985,8 +3001,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Setting frames per period failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Setting frames per period failed: ' + reason;
 					console.log(msg);
 				}
 
@@ -2994,13 +3010,13 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var valueString = value.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const valueString = value.toString();
+		const request = new Request();
 		request.append('cgi', 'set-frames-per-period');
 		request.append('value', valueString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -3012,8 +3028,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -3024,8 +3040,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Setting level value failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Setting level value failed: ' + reason;
 					console.log(msg);
 				}
 
@@ -3033,15 +3049,15 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var chainString = chain.toString();
-		var valueString = value.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const chainString = chain.toString();
+		const valueString = value.toString();
+		const request = new Request();
 		request.append('cgi', 'set-level');
 		request.append('chain', chainString);
 		request.append('value', valueString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -3054,7 +3070,7 @@ function Handler() {
 		 * This gets called when the server returns a response.
 		 */
 		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -3065,8 +3081,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var action = 'Enabling';
+					const reason = webResponse.Reason;
+					const action = 'Enabling';
 
 					/*
 					 * Check if we should disable the level meter.
@@ -3075,7 +3091,7 @@ function Handler() {
 						action = 'Disabling';
 					}
 
-					var msg = action + ' level meter failed: ' + reason;
+					const msg = action + ' level meter failed: ' + reason;
 					console.log(msg);
 				}
 
@@ -3083,13 +3099,13 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var valueString = value.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const valueString = value.toString();
+		const request = new Request();
 		request.append('cgi', 'set-level-meter-enabled');
 		request.append('value', valueString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -3101,8 +3117,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -3113,8 +3129,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Setting metronome value failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Setting metronome value failed: ' + reason;
 					console.log(msg);
 				}
 
@@ -3122,15 +3138,15 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var paramString = param.toString();
-		var valueString = value.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const paramString = param.toString();
+		const valueString = value.toString();
+		const request = new Request();
 		request.append('cgi', 'set-metronome-value');
 		request.append('param', paramString);
 		request.append('value', valueString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -3142,8 +3158,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -3154,8 +3170,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Setting tuner value failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Setting tuner value failed: ' + reason;
 					console.log(msg);
 				}
 
@@ -3163,15 +3179,15 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var paramString = param.toString();
-		var valueString = value.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const paramString = param.toString();
+		const valueString = value.toString();
+		const request = new Request();
 		request.append('cgi', 'set-tuner-value');
 		request.append('param', paramString);
 		request.append('value', valueString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -3183,8 +3199,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var webResponse = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const webResponse = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -3195,8 +3211,8 @@ function Handler() {
 				 * If we were not successful, log failed attempt.
 				 */
 				if (webResponse.Success !== true) {
-					var reason = webResponse.Reason;
-					var msg = 'Setting numeric value failed: ' + reason;
+					const reason = webResponse.Reason;
+					const msg = 'Setting numeric value failed: ' + reason;
 					console.log(msg);
 				}
 
@@ -3204,19 +3220,19 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var chainString = chain.toString();
-		var unitString = unit.toString();
-		var paramString = param.toString();
-		var valueString = value.toString();
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const chainString = chain.toString();
+		const unitString = unit.toString();
+		const paramString = param.toString();
+		const valueString = value.toString();
+		const request = new Request();
 		request.append('cgi', 'set-numeric-value');
 		request.append('chain', chainString);
 		request.append('unit', unitString);
 		request.append('param', paramString);
 		request.append('value', valueString);
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -3228,8 +3244,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var configuration = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const configuration = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -3247,11 +3263,11 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const request = new Request();
 		request.append('cgi', 'get-configuration');
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -3263,8 +3279,8 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var analysis = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const analysis = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
@@ -3275,11 +3291,11 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const request = new Request();
 		request.append('cgi', 'get-tuner-analysis');
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, false);
 	};
 
@@ -3291,15 +3307,15 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
+		const responseHandler = function(response) {
 			helper.blockSite(true);
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const request = new Request();
 		request.append('cgi', 'process');
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, false);
 	};
 
@@ -3318,7 +3334,7 @@ function Handler() {
 	this.dragEnter = function(e) {
 		e.stopPropagation();
 		e.preventDefault();
-		var elem = e.target;
+		const elem = e.target;
 		elem.classList.add('dragover');
 		return false;
 	};
@@ -3329,7 +3345,7 @@ function Handler() {
 	this.dragLeave = function(e) {
 		e.stopPropagation();
 		e.preventDefault();
-		var elem = e.target;
+		const elem = e.target;
 		elem.classList.remove('dragover');
 		return false;
 	};
@@ -3340,15 +3356,15 @@ function Handler() {
 	this.uploadFile = function(e) {
 		e.stopPropagation();
 		e.preventDefault();
-		var transfer = e.dataTransfer;
-		var files = transfer.files;
-		var numFiles = files.length;
+		const transfer = e.dataTransfer;
+		const files = transfer.files;
+		const numFiles = files.length;
 
 		/*
 		 * Check if there is a file.
 		 */
 		if (numFiles > 0) {
-			var file = files[0];
+			const file = files[0];
 
 			/*
 			 * This gets called when the server returns a response.
@@ -3357,8 +3373,8 @@ function Handler() {
 				handler.refresh();
 			};
 
-			var url = globals.cgi;
-			var data = new FormData();
+			const url = globals.cgi;
+			const data = new FormData();
 			data.append('cgi', 'persistence-restore');
 			data.append('patchfile', file);
 			ajax.request('POST', url, data, null, responseHandler, true);
@@ -3375,20 +3391,20 @@ function Handler() {
 		/*
 		 * This gets called when the server returns a response.
 		 */
-		var responseHandler = function(response) {
-			var unitTypes = helper.parseJSON(response);
+		const responseHandler = function(response) {
+			const unitTypes = helper.parseJSON(response);
 
 			/*
 			 * Check if the response is valid JSON.
 			 */
 			if (unitTypes !== null) {
-				var numUnitTypes = unitTypes.length;
+				const numUnitTypes = unitTypes.length;
 
 				/*
 				 * Iterate over the unit types and add them to the global list.
 				 */
-				for (var i = 0; i < numUnitTypes; i++) {
-					var t = unitTypes[i];
+				for (let i = 0; i < numUnitTypes; i++) {
+					const t = unitTypes[i];
 					globals.unitTypes.push(t);
 				}
 
@@ -3397,11 +3413,11 @@ function Handler() {
 
 		};
 
-		var url = globals.cgi;
-		var mimeType = globals.mimeDefault;
-		var request = new Request();
+		const url = globals.cgi;
+		const mimeType = globals.mimeDefault;
+		const request = new Request();
 		request.append('cgi', 'get-unit-types');
-		var requestBody = request.getData();
+		const requestBody = request.getData();
 		ajax.request('POST', url, requestBody, mimeType, responseHandler, true);
 	};
 
@@ -3410,6 +3426,6 @@ function Handler() {
 /*
  * The (global) event handlers.
  */
-var handler = new Handler();
+const handler = new Handler();
 document.addEventListener('DOMContentLoaded', handler.initialize);
 
