@@ -1,6 +1,15 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.6.2
+
+Maintenance / bugfixes / corrections:
+
+- Make UI code compatible to ECMAScript 6.
+- Update screenshots to include physical units introduced in v1.4.0.
+- Increment patch version number: v1.6.1 --> v1.6.2
+
+
 v1.6.1
 
 Maintenance / bugfixes / corrections:
