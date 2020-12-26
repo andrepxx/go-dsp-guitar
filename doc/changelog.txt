@@ -1,6 +1,14 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.6.3
+
+Maintenance / bugfixes / corrections:
+
+- Update the sysroot for our Windows builds with libraries extracted from latest Windows 10 install.
+- Increment patch version number: v1.6.2 --> v1.6.3
+
+
 v1.6.2
 
 Maintenance / bugfixes / corrections:
