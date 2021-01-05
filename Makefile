@@ -86,6 +86,7 @@ test:
 	GOPATH=$(GOPATH) go test -cover github.com/andrepxx/go-dsp-guitar/fft
 	GOPATH=$(GOPATH) go test -cover github.com/andrepxx/go-dsp-guitar/level
 	GOPATH=$(GOPATH) go test -cover github.com/andrepxx/go-dsp-guitar/oversampling
+	GOPATH=$(GOPATH) go test -cover github.com/andrepxx/go-dsp-guitar/path
 	GOPATH=$(GOPATH) go test -cover github.com/andrepxx/go-dsp-guitar/random
 	GOPATH=$(GOPATH) go test -cover github.com/andrepxx/go-dsp-guitar/resample
 	GOPATH=$(GOPATH) go test -cover github.com/andrepxx/go-dsp-guitar/tuner

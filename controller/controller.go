@@ -10,6 +10,7 @@ import (
 	"github.com/andrepxx/go-dsp-guitar/hwio"
 	"github.com/andrepxx/go-dsp-guitar/level"
 	"github.com/andrepxx/go-dsp-guitar/metronome"
+	"github.com/andrepxx/go-dsp-guitar/path"
 	"github.com/andrepxx/go-dsp-guitar/persistence"
 	"github.com/andrepxx/go-dsp-guitar/resample"
 	"github.com/andrepxx/go-dsp-guitar/signal"
@@ -2723,7 +2724,8 @@ func (this *controllerStruct) getInput(scanner *bufio.Scanner, prompt string) st
  * Process files for batch processing.
  */
 func (this *controllerStruct) processFiles(scanner *bufio.Scanner, targetRate uint32) {
-	numChannels := len(this.effects)
+	effects := this.effects
+	numChannels := len(effects)
 	fmt.Printf("Web interface initiated batch processing for %d channels.\n", numChannels)
 	inputs := make([][]float64, numChannels)
 	sampleRates := make([]uint32, numChannels)
@@ -2800,6 +2802,7 @@ func (this *controllerStruct) processFiles(scanner *bufio.Scanner, targetRate ui
 		fmt.Printf("%s\n", "Enter name/path of the wave file for input.")
 		prompt := fmt.Sprintf("File for input %d: ", fileId)
 		fileName := this.getInput(scanner, prompt)
+		fileName = path.Sanitize(fileName)
 
 		/*
 		 * Abort if file name is empty.
@@ -3082,34 +3085,44 @@ func (this *controllerStruct) processFiles(scanner *bufio.Scanner, targetRate ui
 					}
 
 					prompt := fmt.Sprintf("Output file for channel '%s': ", channelName)
-					path := this.getInput(scanner, prompt)
-					fd, err := os.Create(path)
+					fileName := this.getInput(scanner, prompt)
+					fileName = path.Sanitize(fileName)
 
 					/*
-					 * Check if file was successfully created.
+					 * Check if file name is empty.
 					 */
-					if err != nil {
-						fmt.Printf("%s\n", "Failed to create output file.")
+					if fileName == "" {
+						fmt.Printf("%s\n", "Skipping output due to empty file name.")
 					} else {
-						_, err = fd.Write(buf)
+						fd, err := os.Create(fileName)
 
 						/*
-						 * Check if buffer was written successfully.
+						 * Check if file was successfully created.
 						 */
 						if err != nil {
-							fmt.Printf("%s\n", "Failed to write to output file.")
-						}
+							fmt.Printf("%s\n", "Failed to create output file.")
+						} else {
+							_, err = fd.Write(buf)
 
-						err = fd.Close()
-						buf = nil
-						runtime.GC()
+							/*
+							 * Check if buffer was written successfully.
+							 */
+							if err != nil {
+								fmt.Printf("%s\n", "Failed to write to output file.")
+							}
 
-						/*
-						 * Check if file was closed successfully.
-						 */
-						if err != nil {
-							msg := err.Error()
-							fmt.Printf("%s\n", "Failed to close output file.", msg)
+							err = fd.Close()
+							buf = nil
+							runtime.GC()
+
+							/*
+							 * Check if file was closed successfully.
+							 */
+							if err != nil {
+								msg := err.Error()
+								fmt.Printf("%s\n", "Failed to close output file.", msg)
+							}
+
 						}
 
 					}
@@ -3142,7 +3155,7 @@ func (this *controllerStruct) initialize(nInputs uint32, useHardware bool) error
 	 * Check if file could be read.
 	 */
 	if err != nil {
-		return fmt.Errorf("Could not open config file: '%s'", CONFIG_PATH)
+		return fmt.Errorf("Failed to open config file: '%s'", CONFIG_PATH)
 	} else {
 		config := configStruct{}
 		err = json.Unmarshal(content, &config)
@@ -3152,7 +3165,7 @@ func (this *controllerStruct) initialize(nInputs uint32, useHardware bool) error
 		 * Check if file failed to unmarshal.
 		 */
 		if err != nil {
-			return fmt.Errorf("Could not decode config file: '%s'", CONFIG_PATH)
+			return fmt.Errorf("Failed to decode config file: '%s'", CONFIG_PATH)
 		} else {
 			ir, err := filter.Import(config.ImpulseResponses)
 
@@ -3427,7 +3440,7 @@ func Version() (string, error) {
 	 * Check if file could be read.
 	 */
 	if err != nil {
-		return "", fmt.Errorf("Could not open config file: '%s'", CONFIG_PATH)
+		return "", fmt.Errorf("Failed to open config file: '%s'", CONFIG_PATH)
 	} else {
 		config := configStruct{}
 		err = json.Unmarshal(content, &config)
@@ -3436,7 +3449,7 @@ func Version() (string, error) {
 		 * Check if file failed to unmarshal.
 		 */
 		if err != nil {
-			return "", fmt.Errorf("Could not decode config file: '%s'", CONFIG_PATH)
+			return "", fmt.Errorf("Failed to decode config file: '%s'", CONFIG_PATH)
 		} else {
 			svr := config.WebServer
 			version := svr.Name
