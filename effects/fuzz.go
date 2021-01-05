@@ -155,6 +155,9 @@ func (this *fuzz) Process(in []float64, out []float64, sampleRate uint32) {
 
 		oversampler := this.oversamplerTwo
 
+		/*
+		 * Check oversampling factor.
+		 */
 		if factor == 4 {
 			oversampler = this.oversamplerFour
 		}
