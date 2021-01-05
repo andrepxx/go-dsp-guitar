@@ -108,7 +108,7 @@ func TestPaths(t *testing.T) {
 		 * Check if we got the expected result.
 		 */
 		if result != expected {
-			t.Errorf("Sanitization of string number %d failed: Input '%s', expected '%s', got '%s'.", i, val, result, expected)
+			t.Errorf("Sanitization of string number %d failed: Input '%s', expected '%s', got '%s'.", i, val, expected, result)
 		}
 
 	}

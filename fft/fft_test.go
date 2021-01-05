@@ -829,9 +829,9 @@ func TestShift(t *testing.T) {
 	oddCorrect = areSlicesEqual(shiftOdd, inOdd)
 
 	/*
-	 * Check if array with even element-count was inverse-permuted correctly.
+	 * Check if array with odd element-count was inverse-permuted correctly.
 	 */
-	if !evenCorrect {
+	if !oddCorrect {
 		t.Errorf("Odd-valued array was not inverse-permuted correctly. Expected %v, got %v.", inOdd, shiftOdd)
 	}
 
