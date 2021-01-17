@@ -976,20 +976,14 @@ func (this *controllerStruct) persistenceRestoreHandler(request webserver.HttpRe
 						 * more channels than we have.
 						 */
 						if numChannels > numChains {
-							numChannelsString := string(numChannels)
-							numChainsString := string(numChains)
-							warningMessage := "WARNING: Restored file contains "
-							warningMessage += numChannelsString
-							warningMessage += " channels, but we currently have only "
-							warningMessage += numChainsString
-							warningMessage += ". Restore may be incomplete."
+							msg := fmt.Sprintf("WARNING: Restored file contains %d channels, but we currently have only %d. Restore may be incomplete.", numChannels, numChains)
 
 							/*
 							 * Indicate failure.
 							 */
 							webResponse = webResponseStruct{
 								Success: false,
-								Reason:  warningMessage,
+								Reason:  msg,
 							}
 
 						}
@@ -3336,14 +3330,14 @@ func (this *controllerStruct) Operate(numChannels uint32) {
 			server.Run()
 			in := os.Stdin
 			scanner := bufio.NewScanner(in)
-			sampleRate := uint32(DEFAULT_SAMPLE_RATE)
-			sampleRates := filter.SampleRates()
 
 			/*
 			 * If we are in batch mode, prepare file processing.
 			 */
 			if batch {
-				sampleRate64 := uint64(0)
+				sampleRate64 := uint64(DEFAULT_SAMPLE_RATE)
+				sampleRate := uint32(sampleRate64)
+				sampleRates := filter.SampleRates()
 				correctRate := false
 
 				/*
@@ -3384,9 +3378,10 @@ func (this *controllerStruct) Operate(numChannels uint32) {
 
 				}
 
+				this.sampleRate = sampleRate
+				this.sampleRateListener(sampleRate)
 			}
 
-			this.sampleRate = sampleRate
 			tlsPort := serverCfg.TLSPort
 			fmt.Printf("Web interface ready: https://localhost:%s/\n", tlsPort)
 
@@ -3410,6 +3405,7 @@ func (this *controllerStruct) Operate(numChannels uint32) {
 				 * If we are in batch mode, process files.
 				 */
 				if batch {
+					sampleRate := this.sampleRate
 					this.processFiles(scanner, sampleRate)
 				}
 
