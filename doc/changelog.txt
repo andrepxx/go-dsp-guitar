@@ -1,6 +1,18 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.6.4
+
+Maintenance / bugfixes / corrections:
+
+- Improve handling of file paths and error messages.
+- Fix issues with messages and sample rate handling.
+- Fix bugs in some tests.
+- Improve documentation.
+- Update to latest version of "pure-knob".
+- Increment patch version number: v1.6.3 --> v1.6.4
+
+
 v1.6.3
 
 Maintenance / bugfixes / corrections:
