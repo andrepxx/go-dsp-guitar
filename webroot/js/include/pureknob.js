@@ -4,7 +4,7 @@
  * Canvas-based JavaScript UI element implementing touch,
  * keyboard, mouse and scroll wheel support.
  *
- * Copyright 2018 - 2020 Andre Plötze
+ * Copyright 2018 - 2021 Andre Plötze
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1085,13 +1085,13 @@
 			/*
 			 * This is called when the user presses a key on the keyboard.
 			 */
-			const keyPressListener = function(e) {
-				const kc = e.keyCode;
+			const keyDownListener = function(e) {
+				const k = e.key;
 
 				/*
 				 * Hide input element when user presses enter or escape.
 				 */
-				if ((kc === 13) || (kc === 27)) {
+				if ((k === 'Enter') || (k === 'Escape')) {
 					const inputDiv = knob._inputDiv;
 					inputDiv.style.display = 'none';
 					const input = e.target;
@@ -1099,7 +1099,7 @@
 					/*
 					 * Only evaluate value when user pressed enter.
 					 */
-					if (kc === 13) {
+					if (k === 'Enter') {
 						const properties = knob._properties;
 						const value = input.value;
 						const stringToValue = properties.fnStringToValue;
@@ -1131,7 +1131,7 @@
 			canvas.addEventListener('touchend', touchEndListener);
 			canvas.addEventListener('touchcancel', touchCancelListener);
 			canvas.addEventListener('wheel', scrollListener);
-			input.addEventListener('keypress', keyPressListener);
+			input.addEventListener('keydown', keyDownListener);
 			return knob;
 		};
 
