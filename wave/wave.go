@@ -36,6 +36,7 @@ const (
 	AUDIO_IEEE_FLOAT      = 0x0003     // uint16
 	DEFAULT_BIT_DEPTH     = 0x0010     // uint16
 	FORMAT_WAVE           = 0x45564157 // uint32
+	ID_BW64               = 0x34365742 // uint32
 	ID_DATA               = 0x61746164 // uint32
 	ID_DATASIZE           = 0x34367364 // uint32
 	ID_FORMAT             = 0x20746d66 // uint32
@@ -959,7 +960,8 @@ func (this *fileStruct) Channel(id uint16) (Channel, error) {
 	if id >= channelCount {
 		return nil, fmt.Errorf("No channel with id = %d in this wave file with channel count %d.", id, channelCount)
 	} else {
-		return this.channels[id], nil
+		c := this.channels[id]
+		return c, nil
 	}
 
 }
@@ -1108,16 +1110,19 @@ func readHeaderRIFF(reader *bytes.Reader, totalSize uint64) (*riffHeader, error)
 	} else {
 		expectedRiffChunkSize64 := totalSize - 8
 		expectedRiffChunkSize32 := uint32(expectedRiffChunkSize64)
+		chunkId := hdrRiff.ChunkID
+		chunkSize := hdrRiff.ChunkSize
+		format := hdrRiff.Format
 
 		/*
 		 * Check RIFF header for validity.
 		 */
-		if hdrRiff.ChunkID != ID_RIFF {
-			return nil, fmt.Errorf("RIFF header contains invalid chunk id. Expected %#08x or %#08x, found %#08x.", ID_RIFF, ID_RIFF64, hdrRiff.ChunkID)
-		} else if (expectedRiffChunkSize64 < math.MaxUint32 && hdrRiff.ChunkSize != expectedRiffChunkSize32) || (hdrRiff.ChunkID == ID_RIFF64 && hdrRiff.ChunkSize != math.MaxUint32) {
-			return nil, fmt.Errorf("RIFF header contains invalid chunk size. Expected %#08x (or %#08x for 'RF64'), found %#08x.", expectedRiffChunkSize32, uint32(math.MaxUint32), hdrRiff.ChunkSize)
-		} else if hdrRiff.Format != FORMAT_WAVE {
-			return nil, fmt.Errorf("RIFF header contains invalid format. Expected %#08x, found %#08x.", FORMAT_WAVE, hdrRiff.Format)
+		if chunkId != ID_RIFF && chunkId != ID_RIFF64 && chunkId != ID_BW64 {
+			return nil, fmt.Errorf("RIFF header contains invalid chunk id. Expected %#08x or %#08x or %08x, found %#08x.", ID_RIFF, ID_RIFF64, ID_BW64, chunkId)
+		} else if (expectedRiffChunkSize64 < math.MaxUint32 && chunkSize != expectedRiffChunkSize32) || ((chunkId == ID_RIFF64 || chunkId == ID_BW64) && chunkSize != math.MaxUint32) {
+			return nil, fmt.Errorf("RIFF header contains invalid chunk size. Expected %#08x (or %#08x for 'RF64'), found %#08x.", expectedRiffChunkSize32, uint32(math.MaxUint32), chunkSize)
+		} else if format != FORMAT_WAVE {
+			return nil, fmt.Errorf("RIFF header contains invalid format. Expected %#08x, found %#08x.", FORMAT_WAVE, format)
 		} else {
 			return &hdrRiff, nil
 		}
@@ -1140,17 +1145,20 @@ func readHeaderDataSize(reader *bytes.Reader, totalSize uint64) (*dataSizeHeader
 		msg := err.Error()
 		return nil, fmt.Errorf("Failed to read data size header: %s", msg)
 	} else {
+		chunkId := hdrDataSize.ChunkID
+		chunkSize := hdrDataSize.ChunkSize
+		sizeRiff := hdrDataSize.SizeRIFF
 		expectedRiffChunkSize := totalSize - 8
 
 		/*
 		 * Check data size header for validity.
 		 */
-		if hdrDataSize.ChunkID != ID_DATASIZE {
-			return nil, fmt.Errorf("Data size header contains invalid chunk id. Expected %#08x, found %#08x.", ID_DATASIZE, hdrDataSize.ChunkID)
-		} else if hdrDataSize.ChunkSize < MIN_DATASIZE_CHUNK_SIZE {
-			return nil, fmt.Errorf("Data size header has too small size. Expected at least %#08x, found %#08x.", MIN_DATASIZE_CHUNK_SIZE, hdrDataSize.ChunkSize)
-		} else if hdrDataSize.SizeRIFF != expectedRiffChunkSize {
-			return nil, fmt.Errorf("Unexpected RIFF chunk size in data size header. Expected %#08x, found %0#8x.", expectedRiffChunkSize, hdrDataSize.SizeRIFF)
+		if chunkId != ID_DATASIZE {
+			return nil, fmt.Errorf("Data size header contains invalid chunk id. Expected %#08x, found %#08x.", ID_DATASIZE, chunkId)
+		} else if chunkSize < MIN_DATASIZE_CHUNK_SIZE {
+			return nil, fmt.Errorf("Data size header has too small size. Expected at least %#08x, found %#08x.", MIN_DATASIZE_CHUNK_SIZE, chunkSize)
+		} else if sizeRiff != expectedRiffChunkSize {
+			return nil, fmt.Errorf("Unexpected RIFF chunk size in data size header. Expected %#08x, found %0#8x.", expectedRiffChunkSize, sizeRiff)
 		} else {
 			return &hdrDataSize, nil
 		}
@@ -1173,6 +1181,7 @@ func readHeaderFormat(reader *bytes.Reader) (*formatHeader, error) {
 		msg := err.Error()
 		return nil, fmt.Errorf("Failed to read format header: %s", msg)
 	} else {
+		chunkId := hdrFormat.ChunkID
 		channelCount := hdrFormat.ChannelCount
 		bitDepth := hdrFormat.BitDepth
 		sampleRate := hdrFormat.SampleRate
@@ -1180,8 +1189,12 @@ func readHeaderFormat(reader *bytes.Reader) (*formatHeader, error) {
 		expectedBlockAlign32 := uint32(frameSize / BITS_PER_BYTE)
 		expectedBlockAlign16 := uint16(expectedBlockAlign32)
 		expectedByteRate := expectedBlockAlign32 * sampleRate
-		chunkSize := int64(hdrFormat.ChunkSize)
-		numBytesSkip := chunkSize - MIN_CHUNK_SIZE_FORMAT
+		chunkSize := hdrFormat.ChunkSize
+		chunkSize64 := int64(chunkSize)
+		numBytesSkip := chunkSize64 - MIN_CHUNK_SIZE_FORMAT
+		audioFormat := hdrFormat.AudioFormat
+		byteRate := hdrFormat.ByteRate
+		blockAlign := hdrFormat.BlockAlign
 
 		/*
 		 * Skip optional fields in the format header.
@@ -1202,20 +1215,20 @@ func readHeaderFormat(reader *bytes.Reader) (*formatHeader, error) {
 		/*
 		 * Check format header for validity.
 		 */
-		if hdrFormat.ChunkID != ID_FORMAT {
-			return nil, fmt.Errorf("Format header contains invalid chunk id. Expected %#08x, found %#08x.", ID_FORMAT, hdrFormat.ChunkID)
-		} else if hdrFormat.ChunkSize < MIN_CHUNK_SIZE_FORMAT {
-			return nil, fmt.Errorf("Format header contains invalid chunk size. Expected at least %#08x, found %#08x.", MIN_CHUNK_SIZE_FORMAT, hdrFormat.ChunkSize)
-		} else if hdrFormat.AudioFormat != AUDIO_PCM && hdrFormat.AudioFormat != AUDIO_IEEE_FLOAT {
-			return nil, fmt.Errorf("Format header contains invalid audio format. Expected %#04x or %#04x, found %#04x.", AUDIO_PCM, AUDIO_IEEE_FLOAT, hdrFormat.AudioFormat)
-		} else if hdrFormat.ByteRate != expectedByteRate {
-			return nil, fmt.Errorf("Format header contains invalid byte rate. Expected %#08x, found %#08x.", expectedByteRate, hdrFormat.ByteRate)
-		} else if hdrFormat.BlockAlign != expectedBlockAlign16 {
-			return nil, fmt.Errorf("Format header contains invalid block align. Expected %#04x, found %#04x.", expectedBlockAlign16, hdrFormat.BlockAlign)
-		} else if hdrFormat.AudioFormat == AUDIO_PCM && hdrFormat.BitDepth != 8 && hdrFormat.BitDepth != 16 && hdrFormat.BitDepth != 24 && hdrFormat.BitDepth != 32 {
-			return nil, fmt.Errorf("Format header contains invalid bit depth for PCM format. Expected %#04x or %#04x or %#04x or %#04x, found %#04x.", 8, 16, 24, 32, hdrFormat.BitDepth)
-		} else if hdrFormat.AudioFormat == AUDIO_IEEE_FLOAT && hdrFormat.BitDepth != 32 && hdrFormat.BitDepth != 64 {
-			return nil, fmt.Errorf("Format header contains invalid bit depth for IEEE floating-point format. Expected %#04x or %#04x, found %#04x.", 32, 64, hdrFormat.BitDepth)
+		if chunkId != ID_FORMAT {
+			return nil, fmt.Errorf("Format header contains invalid chunk id. Expected %#08x, found %#08x.", ID_FORMAT, chunkId)
+		} else if chunkSize < MIN_CHUNK_SIZE_FORMAT {
+			return nil, fmt.Errorf("Format header contains invalid chunk size. Expected at least %#08x, found %#08x.", MIN_CHUNK_SIZE_FORMAT, chunkSize)
+		} else if audioFormat != AUDIO_PCM && audioFormat != AUDIO_IEEE_FLOAT {
+			return nil, fmt.Errorf("Format header contains invalid audio format. Expected %#04x or %#04x, found %#04x.", AUDIO_PCM, AUDIO_IEEE_FLOAT, audioFormat)
+		} else if byteRate != expectedByteRate {
+			return nil, fmt.Errorf("Format header contains invalid byte rate. Expected %#08x, found %#08x.", expectedByteRate, byteRate)
+		} else if blockAlign != expectedBlockAlign16 {
+			return nil, fmt.Errorf("Format header contains invalid block align. Expected %#04x, found %#04x.", expectedBlockAlign16, blockAlign)
+		} else if audioFormat == AUDIO_PCM && bitDepth != 8 && bitDepth != 16 && bitDepth != 24 && bitDepth != 32 {
+			return nil, fmt.Errorf("Format header contains invalid bit depth for PCM format. Expected %#04x or %#04x or %#04x or %#04x, found %#04x.", 8, 16, 24, 32, bitDepth)
+		} else if audioFormat == AUDIO_IEEE_FLOAT && bitDepth != 32 && bitDepth != 64 {
+			return nil, fmt.Errorf("Format header contains invalid bit depth for IEEE floating-point format. Expected %#04x or %#04x, found %#04x.", 32, 64, bitDepth)
 		} else {
 			return &hdrFormat, nil
 		}
@@ -1312,6 +1325,7 @@ func FromBuffer(buffer []byte) (File, error) {
 	totalSize64 := uint64(totalSize)
 	reader := bytes.NewReader(buffer)
 	hdrRiff, err := readHeaderRIFF(reader, totalSize64)
+	riffChunkId := hdrRiff.ChunkID
 
 	/*
 	 * Check if RIFF header was successfully read.
@@ -1322,9 +1336,9 @@ func FromBuffer(buffer []byte) (File, error) {
 		hdrDataSize := &dataSizeHeader{}
 
 		/*
-		 * If this is an 'RF64' file, read data size header.
+		 * If this is an 'RF64' or 'BW64' file, read data size header.
 		 */
-		if hdrRiff.ChunkID == ID_RIFF64 {
+		if riffChunkId == ID_RIFF64 || riffChunkId == ID_BW64 {
 			hdrDataSize, err = readHeaderDataSize(reader, totalSize64)
 
 			/*
@@ -1375,9 +1389,9 @@ func FromBuffer(buffer []byte) (File, error) {
 				chunkSize64 := uint64(chunkSize32)
 
 				/*
-				 * If this is an 'RF64' file, take chunk size from data size header.
+				 * If this is an 'RF64' or 'BW64' file, take chunk size from data size header.
 				 */
-				if hdrRiff.ChunkID == ID_RIFF64 {
+				if riffChunkId == ID_RIFF64 || riffChunkId == ID_BW64 {
 					chunkSize64 = hdrDataSize.SizeData
 				}
 
