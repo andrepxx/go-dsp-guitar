@@ -1,8 +1,9 @@
 "RF64" = 52 46 36 34 = 0x34364652
+"BW64" = 42 57 36 34 = 0x34365742
 "ds64" = 64 73 36 34 = 0x34367364
 
 struct ChunkRF64 {
-	chunkId uint32, // 0x34364652 = "RF64"
+	chunkId uint32, // 0x34364652 = "RF64", 0x34365742 = "BW64"
 	size uint32, // 0xffffffff (= MAX_UINT32) means "don't use"
 	type uint32, // "WAVE"
 }
