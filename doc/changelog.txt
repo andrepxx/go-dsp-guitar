@@ -1,6 +1,15 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.6.5
+
+Maintenance / bugfixes / corrections:
+
+- Fix handling of RF64 files.
+- Implement handling of BW64 files.
+- Increment patch version number: v1.6.4 --> v1.6.5
+
+
 v1.6.4
 
 Maintenance / bugfixes / corrections:
