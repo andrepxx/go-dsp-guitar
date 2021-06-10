@@ -1365,75 +1365,86 @@ func FromBuffer(buffer []byte) (File, error) {
 
 		}
 
-		hdrFormat, err := readHeaderFormat(reader)
+		err := skipToChunk(reader, ID_FORMAT)
 
 		/*
-		 * Check if format header was successfully read.
+		 * Check if we successfully arrived at the format chunk.
 		 */
 		if err != nil {
-			return nil, err
+			msg := err.Error()
+			return nil, fmt.Errorf("Failed to locate format chunk: %s", msg)
 		} else {
-			bitDepth := hdrFormat.BitDepth
-			sampleFormat := hdrFormat.AudioFormat
-			err = skipToChunk(reader, ID_DATA)
+			hdrFormat, err := readHeaderFormat(reader)
 
 			/*
-			 * Check if we successfully arrived at the data chunk.
+			 * Check if format header was successfully read.
 			 */
 			if err != nil {
-				msg := err.Error()
-				return nil, fmt.Errorf("Failed to locate data chunk: %s", msg)
+				return nil, err
 			} else {
-				hdrData, err := readHeaderData(reader, totalSize64)
-				chunkSize32 := hdrData.ChunkSize
-				chunkSize64 := uint64(chunkSize32)
+				bitDepth := hdrFormat.BitDepth
+				sampleFormat := hdrFormat.AudioFormat
+				err := skipToChunk(reader, ID_DATA)
 
 				/*
-				 * If this is an 'RF64' or 'BW64' file, take chunk size from data size header.
-				 */
-				if riffChunkId == ID_RIFF64 || riffChunkId == ID_BW64 {
-					chunkSize64 = hdrDataSize.SizeData
-				}
-
-				/*
-				 * Check if data header was successfully read.
+				 * Check if we successfully arrived at the data chunk.
 				 */
 				if err != nil {
-					return nil, err
+					msg := err.Error()
+					return nil, fmt.Errorf("Failed to locate data chunk: %s", msg)
 				} else {
-					sampleData := make([]byte, chunkSize64)
-					_, err = reader.Read(sampleData)
+					hdrData, err := readHeaderData(reader, totalSize64)
+					chunkSize32 := hdrData.ChunkSize
+					chunkSize64 := uint64(chunkSize32)
 
 					/*
-					 * Check if sample data was read.
+					 * If this is an 'RF64' or 'BW64' file, take chunk size from data size header.
+					 */
+					if riffChunkId == ID_RIFF64 || riffChunkId == ID_BW64 {
+						chunkSize64 = hdrDataSize.SizeData
+					}
+
+					/*
+					 * Check if data header was successfully read.
 					 */
 					if err != nil {
-						msg := err.Error()
-						return nil, fmt.Errorf("Failed to read sample data: %s", msg)
+						return nil, err
 					} else {
-						samples, err := bytesToSamples(sampleData, sampleFormat, bitDepth)
+						sampleData := make([]byte, chunkSize64)
+						_, err = reader.Read(sampleData)
 
 						/*
-						 * Check if sample data was decoded.
+						 * Check if sample data was read.
 						 */
 						if err != nil {
 							msg := err.Error()
-							return nil, fmt.Errorf("Failed to decode sample data: %s", msg)
+							return nil, fmt.Errorf("Failed to read sample data: %s", msg)
 						} else {
-							channelCount := hdrFormat.ChannelCount
-							channels := samplesToChannels(samples, channelCount)
+							samples, err := bytesToSamples(sampleData, sampleFormat, bitDepth)
 
 							/*
-							 * Create a new data structure representing the contents of the wave file.
+							 * Check if sample data was decoded.
 							 */
-							file := fileStruct{
-								bitDepth:     bitDepth,
-								sampleFormat: sampleFormat,
-								sampleRate:   hdrFormat.SampleRate,
-								channels:     channels,
+							if err != nil {
+								msg := err.Error()
+								return nil, fmt.Errorf("Failed to decode sample data: %s", msg)
+							} else {
+								channelCount := hdrFormat.ChannelCount
+								channels := samplesToChannels(samples, channelCount)
+
+								/*
+								 * Create a new data structure representing the contents of the wave file.
+								 */
+								file := fileStruct{
+									bitDepth:     bitDepth,
+									sampleFormat: sampleFormat,
+									sampleRate:   hdrFormat.SampleRate,
+									channels:     channels,
+								}
+
+								return &file, nil
 							}
 
-							return &file, nil
 						}
 
 					}
