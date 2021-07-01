@@ -14,7 +14,7 @@ import (
 const (
 	BITS_PER_BYTE                 = 8
 	MIN_CHUNK_HEADER_SIZE         = 8
-	MIN_DATASIZE_CHUNK_SIZE       = 36
+	MIN_DATASIZE_CHUNK_SIZE       = 28
 	LENGTH_DATASIZE_TABLE_ENTRIES = 12
 )
 
