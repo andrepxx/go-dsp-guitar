@@ -693,9 +693,9 @@
 				 * the element position.
 				 */
 				if (touch !== null) {
-					const touchX = touch.pageX;
+					const touchX = touch.clientX;
 					x = touchX - offsetX;
-					const touchY = touch.pageY;
+					const touchY = touch.clientY;
 					y = touchY - offsetY;
 				}
 
