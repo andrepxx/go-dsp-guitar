@@ -707,7 +707,7 @@
 			Effects unit: Fuzz
 		</div>
 		<div class="section">
-			<span class="emphasis">Fuzz</span> is a non-linear distortion effect with asymmetric clipping, which produces both even- and odd-order harmonics. Traditional fuzz-boxes are based upon simple Silicon- or Germanium-based transistor circuits and typically employ hard clipping, while tube circuits typically employ softer clipping. The effects unit in <span class="emphasis">go-fx-guitar</span> allows you to tune the fuzz unit for the &quot;hardness&quot; or &quot;softness&quot; of the clipping. It enables a guitarist to achieve anything from smooth and &quot;blusey&quot; to rough-sounding distortion tones typically associated with old-school rock music or blues.
+			<span class="emphasis">Fuzz</span> is a non-linear distortion effect with asymmetric clipping, which produces both even- and odd-order harmonics. Traditional fuzz-boxes are based upon simple Silicon- or Germanium-based transistor circuits and typically employ hard clipping, while tube circuits typically employ softer clipping. The effects unit in <span class="emphasis">go-dsp-guitar</span> allows you to tune the fuzz unit for the &quot;hardness&quot; or &quot;softness&quot; of the clipping. It enables a guitarist to achieve anything from smooth and &quot;blusey&quot; to rough-sounding distortion tones typically associated with old-school rock music or blues.
 		</div>
 		<div class="section">
 			Parameters:
@@ -715,7 +715,7 @@
 		<div class="section">
 			<ul>
 				<li class="item">
-					<span class="highlight">Follow:</span> Asymmetric clipping is achieved by adding a <span class="emphasis">bias</span> signal with a strong DC component to the input signal before it reaches the pre-amplifier stages. To prevent the output of the pre-amplifier to get stuck at either positive or negative supply rail voltage (which would effectively prevent it from passing on any real information about the input signal to the output), this bias voltage has to follow the level of the input signal. An input signal with a larger amplitude allows for a larger bias voltage, while the bias voltage has to be reduced as the amplitude of the input signal decays towards zero. This value determines, whether the bias voltage should follow the signal <span class="highlight">envelope</span> or the average signal <span class="highlight">level</span>. The <span class="highlight">envelope</span> option makes the bias voltage follow changes in the input amplitude more closely and rapidly, while the <span class="highlight">level</span> option makes the bias voltage more steady and reduces the impact of large short-term signal spikes.
+					<span class="highlight">Follow:</span> Asymmetric clipping is achieved by adding a <span class="emphasis">bias</span> signal with a strong DC component to the input signal before it reaches the pre-amplifier stages. To prevent the output of the pre-amplifier from getting stuck at either positive or negative supply rail voltage (which would effectively prevent it from passing on any real information about the input signal to the output), this bias voltage has to follow the level of the input signal. An input signal with a larger amplitude allows for a larger bias voltage, while the bias voltage has to be reduced as the amplitude of the input signal decays towards zero. This value determines, whether the bias voltage should follow the signal <span class="highlight">envelope</span> or the average signal <span class="highlight">level</span>. The <span class="highlight">envelope</span> option makes the bias voltage follow changes in the input amplitude more closely and rapidly, while the <span class="highlight">level</span> option makes the bias voltage more steady and reduces the impact of large short-term signal spikes.
 				</li>
 				<li class="item">
 					<span class="highlight">Bias:</span> The polarity and amount of bias voltage applied to the pre-amplifier stage, relative to either the peak amplitude or average level of the input signal. The further away the bias value is from the zero point, the more asymmetric the clipping is and the higher the level of even-order harmonics is, in relation to odd-order harmonics. With a bias-value of zero, the effects unit mainly produces odd-order harmonics.
@@ -1064,7 +1064,7 @@
 		<div class="section">
 			<ul>
 				<li class="item">
-					<span class="highlight">Type:</span> Allows the type of speaker cabinet to be selected. Currently, there of only a single setting called <span class="highlight">- DEFAULT -</span>.
+					<span class="highlight">Type:</span> Allows the type of speaker cabinet to be selected. Currently, there is only a single setting called <span class="highlight">- DEFAULT -</span>.
 				</li>
 			</ul>
 		</div>
