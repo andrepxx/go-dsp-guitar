@@ -23,12 +23,14 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"time"
 )
 
 /*
  * Constants for the controller.
  */
 const (
+	ARCHIVE_TIME_STAMP       = "20060102-150405"
 	CONFIG_PATH              = "config/config.json"
 	DEFAULT_SAMPLE_RATE      = 96000
 	BLOCK_SIZE               = 8192
@@ -238,9 +240,9 @@ func (this *controllerStruct) createJSON(obj interface{}) (string, []byte) {
  */
 func (this *controllerStruct) addUnitHandler(request webserver.HttpRequest) webserver.HttpResponse {
 	unitTypeString := request.Params["type"]
-	unitType64, errUnitType := strconv.ParseUint(unitTypeString, 10, 64)
+	unitType64, errUnitType := strconv.ParseUint(unitTypeString, 10, 32)
 	chainIdString := request.Params["chain"]
-	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 64)
+	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 32)
 	webResponse := webResponseStruct{}
 
 	/*
@@ -599,8 +601,8 @@ func (this *controllerStruct) getTunerAnalysisHandler(request webserver.HttpRequ
 	 * Check if analysis was successful.
 	 */
 	if err != nil {
-		message := err.Error()
-		reason := "Failed to perform analysis: " + message
+		msg := err.Error()
+		reason := fmt.Sprintf("Failed to perform analysis: %s", msg)
 
 		/*
 		 * Indicate failure.
@@ -654,9 +656,9 @@ func (this *controllerStruct) getTunerAnalysisHandler(request webserver.HttpRequ
  */
 func (this *controllerStruct) moveDownHandler(request webserver.HttpRequest) webserver.HttpResponse {
 	chainIdString := request.Params["chain"]
-	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 64)
+	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 32)
 	unitIdString := request.Params["unit"]
-	unitId64, errUnitId := strconv.ParseUint(unitIdString, 10, 64)
+	unitId64, errUnitId := strconv.ParseUint(unitIdString, 10, 32)
 	webResponse := webResponseStruct{}
 
 	/*
@@ -752,9 +754,9 @@ func (this *controllerStruct) moveDownHandler(request webserver.HttpRequest) web
  */
 func (this *controllerStruct) moveUpHandler(request webserver.HttpRequest) webserver.HttpResponse {
 	chainIdString := request.Params["chain"]
-	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 64)
+	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 32)
 	unitIdString := request.Params["unit"]
-	unitId64, errUnitId := strconv.ParseUint(unitIdString, 10, 64)
+	unitId64, errUnitId := strconv.ParseUint(unitIdString, 10, 32)
 	webResponse := webResponseStruct{}
 
 	/*
@@ -917,13 +919,14 @@ func (this *controllerStruct) persistenceRestoreHandler(request webserver.HttpRe
 				 */
 				if err != nil {
 					msg := err.Error()
+					reason := fmt.Sprintf("Error during unmarshalling: %s", msg)
 
 					/*
 					 * Indicate failure.
 					 */
 					webResponse = webResponseStruct{
 						Success: false,
-						Reason:  "Error during unmarshalling: " + msg,
+						Reason:  reason,
 					}
 
 				} else {
@@ -1329,13 +1332,20 @@ func (this *controllerStruct) persistenceSaveHandler(request webserver.HttpReque
 	}
 
 	mimeType, buffer := this.createJSON(configuration)
+	creationTime := time.Now()
+	timeStamp := creationTime.Format(ARCHIVE_TIME_STAMP)
+	fileName := fmt.Sprintf("patch-%s.json", timeStamp)
+	disposition := fmt.Sprintf("attachment; filename=\"%s\"", fileName)
 
 	/*
 	 * Create HTTP response.
 	 */
 	response := webserver.HttpResponse{
-		Header: map[string]string{"Content-type": mimeType},
-		Body:   buffer,
+		Header: map[string]string{
+			"Content-type":        mimeType,
+			"Content-disposition": disposition,
+		},
+		Body: buffer,
 	}
 
 	return response
@@ -1373,9 +1383,9 @@ func (this *controllerStruct) processHandler(request webserver.HttpRequest) webs
  */
 func (this *controllerStruct) removeUnitHandler(request webserver.HttpRequest) webserver.HttpResponse {
 	chainIdString := request.Params["chain"]
-	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 64)
+	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 32)
 	unitIdString := request.Params["unit"]
-	unitId64, errUnitId := strconv.ParseUint(unitIdString, 10, 64)
+	unitId64, errUnitId := strconv.ParseUint(unitIdString, 10, 32)
 	webResponse := webResponseStruct{}
 
 	/*
@@ -1471,7 +1481,7 @@ func (this *controllerStruct) removeUnitHandler(request webserver.HttpRequest) w
  */
 func (this *controllerStruct) setAzimuthHandler(request webserver.HttpRequest) webserver.HttpResponse {
 	chainIdString := request.Params["chain"]
-	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 64)
+	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 32)
 	valueString := request.Params["value"]
 	valueInt, errValue := strconv.ParseInt(valueString, 10, 64)
 	webResponse := webResponseStruct{}
@@ -1551,9 +1561,9 @@ func (this *controllerStruct) setAzimuthHandler(request webserver.HttpRequest) w
  */
 func (this *controllerStruct) setBypassHandler(request webserver.HttpRequest) webserver.HttpResponse {
 	chainIdString := request.Params["chain"]
-	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 64)
+	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 32)
 	unitIdString := request.Params["unit"]
-	unitId64, errUnitId := strconv.ParseUint(unitIdString, 10, 64)
+	unitId64, errUnitId := strconv.ParseUint(unitIdString, 10, 32)
 	valueString := request.Params["value"]
 	value, errValue := strconv.ParseBool(valueString)
 	webResponse := webResponseStruct{}
@@ -1661,9 +1671,9 @@ func (this *controllerStruct) setBypassHandler(request webserver.HttpRequest) we
  */
 func (this *controllerStruct) setDiscreteValueHandler(request webserver.HttpRequest) webserver.HttpResponse {
 	chainIdString := request.Params["chain"]
-	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 64)
+	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 32)
 	unitIdString := request.Params["unit"]
-	unitId64, errUnitId := strconv.ParseUint(unitIdString, 10, 64)
+	unitId64, errUnitId := strconv.ParseUint(unitIdString, 10, 32)
 	param := request.Params["param"]
 	value := request.Params["value"]
 	webResponse := webResponseStruct{}
@@ -1761,7 +1771,7 @@ func (this *controllerStruct) setDiscreteValueHandler(request webserver.HttpRequ
  */
 func (this *controllerStruct) setDistanceHandler(request webserver.HttpRequest) webserver.HttpResponse {
 	chainIdString := request.Params["chain"]
-	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 64)
+	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 32)
 	valueString := request.Params["value"]
 	value, errDistance := strconv.ParseFloat(valueString, 64)
 	webResponse := webResponseStruct{}
@@ -1888,7 +1898,7 @@ func (this *controllerStruct) setFramesPerPeriodHandler(request webserver.HttpRe
  */
 func (this *controllerStruct) setLevelHandler(request webserver.HttpRequest) webserver.HttpResponse {
 	chainIdString := request.Params["chain"]
-	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 64)
+	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 32)
 	valueString := request.Params["value"]
 	value, errDistance := strconv.ParseFloat(valueString, 64)
 	webResponse := webResponseStruct{}
@@ -2063,7 +2073,7 @@ func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpReq
 				 */
 				webResponse = webResponseStruct{
 					Success: false,
-					Reason:  "Failed to decode metronome beats per minute.",
+					Reason:  "Failed to decode metronome beats per period.",
 				}
 
 			} else {
@@ -2346,9 +2356,9 @@ func (this *controllerStruct) setTunerValueHandler(request webserver.HttpRequest
  */
 func (this *controllerStruct) setNumericValueHandler(request webserver.HttpRequest) webserver.HttpResponse {
 	chainIdString := request.Params["chain"]
-	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 64)
+	chainId64, errChainId := strconv.ParseUint(chainIdString, 10, 32)
 	unitIdString := request.Params["unit"]
-	unitId64, errUnitId := strconv.ParseUint(unitIdString, 10, 64)
+	unitId64, errUnitId := strconv.ParseUint(unitIdString, 10, 32)
 	param := request.Params["param"]
 	valueString := request.Params["value"]
 	value64, errValue := strconv.ParseInt(valueString, 10, 32)
@@ -2594,14 +2604,17 @@ func (this *controllerStruct) process(inputBuffers [][]float64, outputBuffers []
 		 * Start processing for each input channel.
 		 */
 		for i := 0; i < nIn; i++ {
+			chain := this.effects[i]
+			inputBuffer := inputBuffers[i]
+			outputBuffer := outputBuffers[i]
 
 			/*
 			 * Create a new signal processing task.
 			 */
 			task := processingTask{
-				chain:        this.effects[i],
-				inputBuffer:  inputBuffers[i],
-				outputBuffer: outputBuffers[i],
+				chain:        chain,
+				inputBuffer:  inputBuffer,
+				outputBuffer: outputBuffer,
 				sampleRate:   sampleRate,
 			}
 
@@ -3313,8 +3326,7 @@ func (this *controllerStruct) Operate(numChannels uint32) {
 	 */
 	if err != nil {
 		msg := err.Error()
-		msgNew := "Initialization failed: " + msg
-		fmt.Printf("%s\n", msgNew)
+		fmt.Printf("Initialization failed: %s\n", msg)
 	} else {
 		cfg := this.config
 		serverCfg := cfg.WebServer
