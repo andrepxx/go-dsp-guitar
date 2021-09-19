@@ -1,6 +1,17 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.6.6
+
+Maintenance / bugfixes / corrections:
+
+- Improve handling of RIFF WAVE files to enable correct handling of files which have a 'JUNK' chunk as the first sub-chunk inside the 'RIFF' chunk. Files following the ITU-R recommendation BS.2088-1 will have this layout to allow for on-the-fly upgrade to a file format requiring a larger header, such as RF64 or BW64, without re-writing the actual sample data.
+- Correct minimum chunk size for data size chunk for RF64 / BW64 handling.
+- Update to latest version of "pure-knob" to fix an issue with touch screen support.
+- Fix minor mistakes in documentation.
+- Increment patch version number: v1.6.5 --> v1.6.6
+
+
 v1.6.5
 
 Maintenance / bugfixes / corrections:
