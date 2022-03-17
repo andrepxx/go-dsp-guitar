@@ -6,9 +6,9 @@ import (
 	"github.com/andrepxx/go-dsp-guitar/fft"
 	"github.com/andrepxx/go-dsp-guitar/resample"
 	"github.com/andrepxx/go-dsp-guitar/wave"
-	"io/ioutil"
 	"math"
 	"math/cmplx"
+	"os"
 	"strconv"
 )
 
@@ -702,7 +702,7 @@ func (this *impulseResponsesStruct) Names() []string {
  * Imports a set of impulse responses using a descriptor file.
  */
 func Import(descriptorFilePath string) (ImpulseResponses, error) {
-	content, err := ioutil.ReadFile(descriptorFilePath)
+	content, err := os.ReadFile(descriptorFilePath)
 
 	/*
 	 * Check if file could be read.
@@ -732,7 +732,7 @@ func Import(descriptorFilePath string) (ImpulseResponses, error) {
 				dcFloat := float64(dc)
 				compensation := 0.05 * dcFloat
 				fac := math.Pow(10.0, compensation)
-				waveBuffer, err := ioutil.ReadFile(wavePath)
+				waveBuffer, err := os.ReadFile(wavePath)
 
 				/*
 				 * Check if file was read successfully.

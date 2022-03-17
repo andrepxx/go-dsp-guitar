@@ -22,7 +22,7 @@ type poweramp struct {
 /*
  * Compile a new filter for this power amplifier.
  */
-func (this *poweramp) compile(sampleRate uint32, id uint64) (filter.Filter, error) {
+func (this *poweramp) compile(sampleRate uint32) (filter.Filter, error) {
 	irs := this.impulseResponses
 
 	/*
@@ -115,7 +115,8 @@ func (this *poweramp) compile(sampleRate uint32, id uint64) (filter.Filter, erro
 			 * Check for errors.
 			 */
 			if err != nil {
-				return nil, fmt.Errorf("Failed to add filter: %s", err.Error())
+				msg := err.Error()
+				return nil, fmt.Errorf("Failed to add filter: %s", msg)
 			}
 
 		}
@@ -137,9 +138,7 @@ func (this *poweramp) SetDiscreteValue(name string, value string) error {
 	 */
 	if err == nil {
 		sr := this.sampleRate
-		id := this.idCompiled + 1
-		this.idCompiled = id
-		flt, err := this.compile(sr, id)
+		flt, err := this.compile(sr)
 
 		/*
 		 * Check if filter was compiled.
@@ -166,9 +165,7 @@ func (this *poweramp) SetNumericValue(name string, value int32) error {
 	 */
 	if err == nil {
 		sr := this.sampleRate
-		id := this.idCompiled + 1
-		this.idCompiled = id
-		flt, err := this.compile(sr, id)
+		flt, err := this.compile(sr)
 
 		/*
 		 * Check if filter was compiled.
@@ -194,9 +191,7 @@ func (this *poweramp) Process(in []float64, out []float64, sampleRate uint32) {
 	if sampleRate != this.sampleRate {
 		this.sampleRate = sampleRate
 		sr := this.sampleRate
-		id := this.idCompiled + 1
-		this.idCompiled = id
-		flt, err := this.compile(sr, id)
+		flt, err := this.compile(sr)
 
 		/*
 		 * Check if filter was compiled.

@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -289,9 +288,11 @@ func (this *webServerStruct) fileHandler(writer http.ResponseWriter, request *ht
 			fmt.Fprintf(writer, "[ERROR] - '%s' does not exist!\n", path)
 		} else {
 			hdr.Set("Content-type", mimetype)
-			io.Copy(writer, fd)
+			modTime := time.Time{}
+			http.ServeContent(writer, request, path, modTime, fd)
 		}
 
+		fd.Close()
 	}
 
 }
@@ -373,7 +374,7 @@ func (this *webServerStruct) Run() {
 	redirectHandler := this.redirect
 	httpMux := http.NewServeMux()
 	httpMux.HandleFunc("/", redirectHandler)
-	discard := ioutil.Discard
+	discard := io.Discard
 	logger := log.New(discard, "", log.LstdFlags)
 	cfg := this.config
 	httpPort := cfg.Port

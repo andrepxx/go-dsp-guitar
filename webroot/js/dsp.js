@@ -1629,7 +1629,13 @@ function UI() {
 					storage.put(this, 'interval', intervalNew);
 				}
 
-				handler.setTunerValue('channel', value);
+				/*
+				 * Set input channel when this is an actual event.
+				 */
+				if (e !== null) {
+					handler.setTunerValue('channel', value);
+				}
+
 			};
 
 			dropDownChannelElem.onchange(null);

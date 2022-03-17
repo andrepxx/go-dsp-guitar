@@ -8,8 +8,10 @@ import (
  * Global constants.
  */
 const (
-	DEFAULT_SAMPLE_RATE = 96000
-	OUTPUT_COUNT        = 1
+	DEFAULT_BEATS_PER_PERIOD = 4
+	DEFAULT_BPM_SPEED        = 120
+	DEFAULT_SAMPLE_RATE      = 96000
+	OUTPUT_COUNT             = 1
 )
 
 /*
@@ -35,9 +37,9 @@ type Metronome interface {
 	BeatsPerPeriod() uint32
 	Process(outputBuffer []float64)
 	SampleRate() uint32
-	SetBeatsPerPeriod(count uint32)
+	SetBeatsPerPeriod(count uint32) error
 	SetSampleRate(rate uint32)
-	SetSpeed(speed uint32)
+	SetSpeed(speed uint32) error
 	SetTick(name string, coefficients []float64)
 	SetTock(name string, coefficients []float64)
 	Tick() (string, []float64)
@@ -65,6 +67,14 @@ func (this *metronomeStruct) Process(outputBuffer []float64) {
 	bpm := this.bpmSpeed
 	beatsPerPeriod := this.beatsPerPeriod
 	this.mutex.RUnlock()
+	sampleCounter := this.sampleCounter
+	tickCounter := this.tickCounter
+	sampleRate := this.sampleRate
+	tickSize := len(tickBuf)
+	tickSize32 := uint32(tickSize)
+	tockSize := len(tockBuf)
+	tockSize32 := uint32(tockSize)
+	samplesPerBeat := (60 * sampleRate) / bpm
 
 	/*
 	 * Prevent division by zero.
@@ -72,15 +82,6 @@ func (this *metronomeStruct) Process(outputBuffer []float64) {
 	if beatsPerPeriod == 0 {
 		beatsPerPeriod = 1
 	}
-
-	sampleCounter := this.sampleCounter
-	tickCounter := this.tickCounter
-	sampleRate := this.sampleRate
-	tickSize := len(tickBuf)
-	unsignedTickSize := uint32(tickSize)
-	tockSize := len(tockBuf)
-	unsignedTockSize := uint32(tockSize)
-	samplesPerBeat := (60 * sampleRate) / bpm
 
 	/*
 	 * Generate the output samples.
@@ -94,18 +95,20 @@ func (this *metronomeStruct) Process(outputBuffer []float64) {
 		if tickCounter == 0 {
 
 			/*
-			 * Check if buffer is allocated and part of the tick must be output.
+			 * Check if buffer is allocated and part of the tick
+			 * must be output.
 			 */
-			if (tickBuf != nil) && (sampleCounter < unsignedTickSize) {
+			if (tickBuf != nil) && (sampleCounter < tickSize32) {
 				sample = tickBuf[sampleCounter]
 			}
 
 		} else {
 
 			/*
-			 * Check if buffer is allocated and part of the tock must be output.
+			 * Check if buffer is allocated and part of the tock
+			 * must be output.
 			 */
-			if (tockBuf != nil) && (sampleCounter < unsignedTockSize) {
+			if (tockBuf != nil) && (sampleCounter < tockSize32) {
 				sample = tockBuf[sampleCounter]
 			}
 
@@ -117,7 +120,7 @@ func (this *metronomeStruct) Process(outputBuffer []float64) {
 		/*
 		 * Reset sample counter on every beat.
 		 */
-		if sampleCounter > samplesPerBeat {
+		if sampleCounter >= samplesPerBeat {
 			sampleCounter = 0
 			tickCounter = (tickCounter + 1) % beatsPerPeriod
 		}
@@ -141,10 +144,11 @@ func (this *metronomeStruct) SampleRate() uint32 {
 /*
  * Sets the number of beats per period.
  */
-func (this *metronomeStruct) SetBeatsPerPeriod(count uint32) {
+func (this *metronomeStruct) SetBeatsPerPeriod(count uint32) error {
 	this.mutex.Lock()
 	this.beatsPerPeriod = count
 	this.mutex.Unlock()
+	return nil
 }
 
 /*
@@ -160,10 +164,11 @@ func (this *metronomeStruct) SetSampleRate(rate uint32) {
 /*
  * Sets the speed in beats per minute.
  */
-func (this *metronomeStruct) SetSpeed(speed uint32) {
+func (this *metronomeStruct) SetSpeed(speed uint32) error {
 	this.mutex.Lock()
 	this.bpmSpeed = speed
 	this.mutex.Unlock()
+	return nil
 }
 
 /*
@@ -269,8 +274,8 @@ func Create() Metronome {
 	 * Create a new metronome struct.
 	 */
 	m := metronomeStruct{
-		beatsPerPeriod:   4,
-		bpmSpeed:         120,
+		beatsPerPeriod:   DEFAULT_BEATS_PER_PERIOD,
+		bpmSpeed:         DEFAULT_BPM_SPEED,
 		coefficientsTick: nil,
 		coefficientsTock: nil,
 		sampleCounter:    0,

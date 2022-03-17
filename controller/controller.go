@@ -18,7 +18,7 @@ import (
 	"github.com/andrepxx/go-dsp-guitar/tuner"
 	"github.com/andrepxx/go-dsp-guitar/wave"
 	"github.com/andrepxx/go-dsp-guitar/webserver"
-	"io/ioutil"
+	"io"
 	"math"
 	"os"
 	"runtime"
@@ -340,17 +340,18 @@ func (this *controllerStruct) getConfigurationHandler(request webserver.HttpRequ
 	fx := this.effects
 	numChannels := len(fx)
 	framesPerPeriod := uint32(0)
+	binding := this.binding
 
 	/*
 	 * If we are bound to a hardware interface, query frames per period.
 	 */
-	if this.binding != nil {
+	if binding != nil {
 		framesPerPeriod = hwio.FramesPerPeriod()
 	}
 
 	webChains := make([]webChainStruct, numChannels)
 	spatChannels := make([]webSpatializerChannelStruct, numChannels)
-	paramTypes := effects.ParameterTypes()
+	parameterTypes := effects.ParameterTypes()
 
 	/*
 	 * Iterate over the channels and the associated signal chains.
@@ -365,33 +366,54 @@ func (this *controllerStruct) getConfigurationHandler(request webserver.HttpRequ
 		for idUnit := 0; idUnit < numUnits; idUnit++ {
 			unitType, _ := chain.UnitType(idUnit)
 			bypass, _ := chain.GetBypass(idUnit)
-			params, _ := chain.Parameters(idUnit)
-			numParams := len(params)
-			webParams := make([]webParameterStruct, numParams)
+			parameters, _ := chain.Parameters(idUnit)
+			numParameters := len(parameters)
+			webParameters := make([]webParameterStruct, numParameters)
 
 			/*
-			 * Iterate over the parameters and copy all values.
+			 * Iterate over the parameters.
 			 */
-			for idParam, param := range params {
-				paramTypeId := param.Type
-				paramType := paramTypes[paramTypeId]
-				webParams[idParam].Name = param.Name
-				webParams[idParam].Type = paramType
-				webParams[idParam].PhysicalUnit = param.PhysicalUnit
-				webParams[idParam].Minimum = param.Minimum
-				webParams[idParam].Maximum = param.Maximum
-				webParams[idParam].NumericValue = param.NumericValue
-				webParams[idParam].DiscreteValueIndex = param.DiscreteValueIndex
-				nValues := len(param.DiscreteValues)
-				discreteValuesSource := param.DiscreteValues
-				discreteValuesTarget := make([]string, nValues)
-				copy(discreteValuesTarget, discreteValuesSource)
-				webParams[idParam].DiscreteValues = discreteValuesTarget
+			for idParameter, parameter := range parameters {
+				name := parameter.Name
+				parameterTypeId := parameter.Type
+				parameterType := parameterTypes[parameterTypeId]
+				physicalUnit := parameter.PhysicalUnit
+				minimum := parameter.Minimum
+				maximum := parameter.Maximum
+				numericValue := parameter.NumericValue
+				discreteValueIndex := parameter.DiscreteValueIndex
+				discreteValuesSource := parameter.DiscreteValues
+				numDiscreteValues := len(discreteValuesSource)
+				discreteValues := make([]string, numDiscreteValues)
+				copy(discreteValues, discreteValuesSource)
+
+				/*
+				 * Create data structure for parameter.
+				 */
+				webParameter := webParameterStruct{
+					Name:               name,
+					Type:               parameterType,
+					PhysicalUnit:       physicalUnit,
+					Minimum:            minimum,
+					Maximum:            maximum,
+					NumericValue:       numericValue,
+					DiscreteValueIndex: discreteValueIndex,
+					DiscreteValues:     discreteValues,
+				}
+
+				webParameters[idParameter] = webParameter
 			}
 
-			webUnits[idUnit].Type = unitType
-			webUnits[idUnit].Bypass = bypass
-			webUnits[idUnit].Parameters = webParams
+			/*
+			 * Create data structure for unit.
+			 */
+			webUnit := webUnitStruct{
+				Type:       unitType,
+				Bypass:     bypass,
+				Parameters: webParameters,
+			}
+
+			webUnits[idUnit] = webUnit
 		}
 
 		webChains[idChannel].Units = webUnits
@@ -403,11 +425,19 @@ func (this *controllerStruct) getConfigurationHandler(request webserver.HttpRequ
 		if spat != nil {
 			idChannel32 := uint32(idChannel)
 			azimuth, _ := spat.GetAzimuth(idChannel32)
-			spatChannels[idChannel].Azimuth = azimuth
 			distance, _ := spat.GetDistance(idChannel32)
-			spatChannels[idChannel].Distance = distance
 			level, _ := spat.GetLevel(idChannel32)
-			spatChannels[idChannel].Level = level
+
+			/*
+			 * Create data structure for spatializer channel.
+			 */
+			spatChannel := webSpatializerChannelStruct{
+				Azimuth:  azimuth,
+				Distance: distance,
+				Level:    level,
+			}
+
+			spatChannels[idChannel] = spatChannel
 		}
 
 	}
@@ -474,7 +504,7 @@ func (this *controllerStruct) getConfigurationHandler(request webserver.HttpRequ
 		Enabled: levelMeterEnabled,
 	}
 
-	batchProcessing := (this.binding == nil)
+	batchProcessing := (binding == nil)
 
 	/*
 	 * Create configuration structure.
@@ -895,7 +925,7 @@ func (this *controllerStruct) persistenceRestoreHandler(request webserver.HttpRe
 
 		} else {
 			patchFile := patchFiles[0]
-			patchBytes, err := ioutil.ReadAll(patchFile)
+			patchBytes, err := io.ReadAll(patchFile)
 
 			/*
 			 * Check if patch file could be successfully read.
@@ -2061,12 +2091,12 @@ func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpReq
 		 */
 		switch param {
 		case "beats-per-period":
-			rawValue, err := strconv.ParseUint(value, 10, 32)
+			rawValue, errParse := strconv.ParseUint(value, 10, 32)
 
 			/*
 			 * Check if value failed to parse.
 			 */
-			if err != nil {
+			if errParse != nil {
 
 				/*
 				 * Indicate failure.
@@ -2078,14 +2108,33 @@ func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpReq
 
 			} else {
 				value := uint32(rawValue)
-				metr.SetBeatsPerPeriod(value)
+				errSet := metr.SetBeatsPerPeriod(value)
 
 				/*
-				 * Indicate success.
+				 * Check if value could be set.
 				 */
-				webResponse = webResponseStruct{
-					Success: true,
-					Reason:  "",
+				if errSet != nil {
+					msg := errSet.Error()
+					reason := fmt.Sprintf("Failed to set metronome beats per period: %s", msg)
+
+					/*
+					 * Indicate failure.
+					 */
+					webResponse = webResponseStruct{
+						Success: false,
+						Reason:  reason,
+					}
+
+				} else {
+
+					/*
+					 * Indicate success.
+					 */
+					webResponse = webResponseStruct{
+						Success: true,
+						Reason:  "",
+					}
+
 				}
 
 			}
@@ -2120,12 +2169,12 @@ func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpReq
 			}
 
 		case "speed":
-			rawValue, err := strconv.ParseUint(value, 10, 32)
+			rawValue, errParse := strconv.ParseUint(value, 10, 32)
 
 			/*
 			 * Check if value failed to parse.
 			 */
-			if err != nil {
+			if errParse != nil {
 
 				/*
 				 * Indicate failure.
@@ -2137,7 +2186,34 @@ func (this *controllerStruct) setMetronomeValueHandler(request webserver.HttpReq
 
 			} else {
 				value := uint32(rawValue)
-				metr.SetSpeed(value)
+				errSet := metr.SetSpeed(value)
+
+				/*
+				 * Check if value could be set.
+				 */
+				if errSet != nil {
+					msg := errSet.Error()
+					reason := fmt.Sprintf("Failed to set metronome speed: %s", msg)
+
+					/*
+					 * Indicate failure.
+					 */
+					webResponse = webResponseStruct{
+						Success: false,
+						Reason:  reason,
+					}
+
+				} else {
+
+					/*
+					 * Indicate success.
+					 */
+					webResponse = webResponseStruct{
+						Success: true,
+						Reason:  "",
+					}
+
+				}
 
 				/*
 				 * Indicate success.
@@ -2819,7 +2895,7 @@ func (this *controllerStruct) processFiles(scanner *bufio.Scanner, targetRate ui
 			inputs[fileId] = make([]float64, 0)
 			sampleRates[fileId] = DEFAULT_SAMPLE_RATE
 		} else {
-			buf, err := ioutil.ReadFile(fileName)
+			buf, err := os.ReadFile(fileName)
 
 			/*
 			 * Check if file could be read.
@@ -3156,7 +3232,7 @@ func (this *controllerStruct) processFiles(scanner *bufio.Scanner, targetRate ui
  * Initialize the controller.
  */
 func (this *controllerStruct) initialize(nInputs uint32, useHardware bool) error {
-	content, err := ioutil.ReadFile(CONFIG_PATH)
+	content, err := os.ReadFile(CONFIG_PATH)
 
 	/*
 	 * Check if file could be read.
@@ -3442,7 +3518,7 @@ func CreateController() Controller {
  * Returns version information.
  */
 func Version() (string, error) {
-	content, err := ioutil.ReadFile(CONFIG_PATH)
+	content, err := os.ReadFile(CONFIG_PATH)
 
 	/*
 	 * Check if file could be read.

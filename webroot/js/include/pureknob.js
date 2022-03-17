@@ -229,10 +229,13 @@
 				 */
 				'resize': function() {
 					const canvas = this._canvas;
-					canvas.style.height = '100%';
-					canvas.style.width = '100%';
-					canvas.height = this._height;
-					canvas.width = this._width;
+					const ctx = canvas.getContext('2d');
+					const scale = window.devicePixelRatio;
+					canvas.style.height = this._height + 'px';
+					canvas.style.width = this._width + 'px';
+					canvas.height = Math.floor(this._height * scale);
+					canvas.width = Math.floor(this._width * scale);
+					ctx.scale(scale, scale);
 				},
 
 				/*
@@ -292,7 +295,24 @@
 				graph.redraw();
 			};
 
+			/*
+			 * Listen for device pixel ratio changes.
+			 */
+			const updatePixelRatio = function() {
+				const pixelRatio = window.devicePixelRatio;
+				graph.redraw();
+				const pixelRatioString = pixelRatio.toString();
+				const matcher = '(resolution:' + pixelRatioString + 'dppx)';
+
+				const params = {
+					'once': true
+				};
+
+				window.matchMedia(matcher).addEventListener('change', updatePixelRatio, params);
+			}
+
 			canvas.addEventListener('resize', resizeListener);
+			updatePixelRatio();
 			return graph;
 		}
 
@@ -570,10 +590,13 @@
 				 */
 				'resize': function() {
 					const canvas = this._canvas;
-					canvas.style.height = '100%';
-					canvas.style.width = '100%';
-					canvas.height = this._height;
-					canvas.width = this._width;
+					const ctx = canvas.getContext('2d');
+					const scale = window.devicePixelRatio;
+					canvas.style.height = this._height + 'px';
+					canvas.style.width = this._width + 'px';
+					canvas.height = Math.floor(this._height * scale);
+					canvas.width = Math.floor(this._width * scale);
+					ctx.scale(scale, scale);
 				},
 
 				/*
@@ -1120,6 +1143,22 @@
 
 			};
 
+			/*
+			 * Listen for device pixel ratio changes.
+			 */
+			const updatePixelRatio = function() {
+				const pixelRatio = window.devicePixelRatio;
+				knob.redraw();
+				const pixelRatioString = pixelRatio.toString();
+				const matcher = '(resolution:' + pixelRatioString + 'dppx)';
+
+				const params = {
+					'once': true
+				};
+
+				window.matchMedia(matcher).addEventListener('change', updatePixelRatio, params);
+			}
+
 			canvas.addEventListener('dblclick', doubleClickListener);
 			canvas.addEventListener('mousedown', mouseDownListener);
 			canvas.addEventListener('mouseleave', mouseCancelListener);
@@ -1132,6 +1171,7 @@
 			canvas.addEventListener('touchcancel', touchCancelListener);
 			canvas.addEventListener('wheel', scrollListener);
 			input.addEventListener('keydown', keyDownListener);
+			updatePixelRatio();
 			return knob;
 		};
 

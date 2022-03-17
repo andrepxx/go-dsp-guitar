@@ -2,8 +2,8 @@ package tuner
 
 import (
 	"github.com/andrepxx/go-dsp-guitar/wave"
-	"io/ioutil"
 	"math"
+	"os"
 	"testing"
 )
 
@@ -42,7 +42,7 @@ func TestTuner(t *testing.T) {
 	 */
 	for i, path := range wavePaths {
 		currentNote := notes[i]
-		buf, err := ioutil.ReadFile(path)
+		buf, err := os.ReadFile(path)
 
 		/*
 		 * Check if file was successfully read.

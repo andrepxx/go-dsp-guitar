@@ -333,7 +333,10 @@
 	color: #ffffff;
 	font-family: monospace;
 	height: 30px;
-	margin: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	margin-right: 10px;
+	margin-top: 0px;
 	position: relative;
 	width: 80px;
 }
