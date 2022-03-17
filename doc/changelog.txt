@@ -1,6 +1,19 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.6.7
+
+Maintenance / bugfixes / corrections:
+
+- Replace usage of deprecated "io/ioutil" package with equivalent methods from "io" or "os" package.
+- Simplify power amp code to no longer supply IDs for compiled filters. Filters are regenerated synchronously for some time in order to avoid race conditions, especially during batch processing, so these IDs are no longer needed in order to guarantee sequential ordering.
+- Change interface of metronome value setters to support them failing to set a value. (This is an interface change in preparation for upcoming features.)
+- Introduce new constants for default values in metronome.
+- Update to latest version of "pure-knob", improving support for high-DPI displays.
+- Several small bugfixes, code improvements and UI changes.
+- Increment patch version number: v1.6.6 --> v1.6.7
+
+
 v1.6.6
 
 Maintenance / bugfixes / corrections:
