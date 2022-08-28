@@ -1,6 +1,17 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.7.0
+
+New features / enhancements:
+
+- Add configuration option to disable TLS on the web server. Setting this option will switch to unencrypted HTTP communication. This option is provided to facilitate running the software behind a reverse proxy and should only be used in these scenarios.
+
+Maintenance / bugfixes / corrections:
+
+- Increment minor version number: v1.6.7 --> v1.7.0
+
+
 v1.6.7
 
 Maintenance / bugfixes / corrections:
