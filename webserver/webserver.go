@@ -65,6 +65,7 @@ type Timeouts struct {
 type Config struct {
 	Name          string
 	Port          string
+	TLSDisabled   bool
 	TLSPort       string
 	TLSPrivateKey string
 	TLSPublicKey  string
@@ -371,12 +372,34 @@ func (this *webServerStruct) RemoveCgi(path string) {
  * listener.
  */
 func (this *webServerStruct) Run() {
-	redirectHandler := this.redirect
 	httpMux := http.NewServeMux()
-	httpMux.HandleFunc("/", redirectHandler)
+	cfg := this.config
+	tlsDisabled := cfg.TLSDisabled
+	cgis := this.cgis
+	cgiHandler := this.cgiHandler
+	fileHandler := this.fileHandler
+
+	/*
+	 * If TLS is disabled by configuration, handle requests via unencrypted
+	 * HTTP, otherwise instruct all HTTP clients to switch to TLS.
+	 */
+	if tlsDisabled {
+
+		/*
+		 * Register all CGI paths to HTTP server.
+		 */
+		for path, _ := range cgis {
+			httpMux.HandleFunc(path, cgiHandler)
+		}
+
+		httpMux.HandleFunc("/", fileHandler)
+	} else {
+		redirectHandler := this.redirect
+		httpMux.HandleFunc("/", redirectHandler)
+	}
+
 	discard := io.Discard
 	logger := log.New(discard, "", log.LstdFlags)
-	cfg := this.config
 	httpPort := cfg.Port
 	httpAddr := fmt.Sprintf(":%s", httpPort)
 	timeouts := cfg.Timeouts
@@ -407,86 +430,90 @@ func (this *webServerStruct) Run() {
 		WriteTimeout:      httpTimeoutWrite,
 	}
 
-	tlsMux := http.NewServeMux()
-	cgis := this.cgis
-	cgiHandler := this.cgiHandler
-
-	/*
-	 * Register all CGI paths to TLS server.
-	 */
-	for path, _ := range cgis {
-		tlsMux.HandleFunc(path, cgiHandler)
-	}
-
-	fileHandler := this.fileHandler
-	tlsMux.HandleFunc("/", fileHandler)
-	tlsPort := cfg.TLSPort
-	tlsAddr := fmt.Sprintf(":%s", tlsPort)
-
-	/*
-	 * TLS cipher suites to use.
-	 */
-	ciphersuites := []uint16{
-		tls.TLS_CHACHA20_POLY1305_SHA256,
-		tls.TLS_AES_256_GCM_SHA384,
-		tls.TLS_AES_128_GCM_SHA256,
-		tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
-		tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
-		tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-		tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-		tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-		tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-	}
-
-	/*
-	 * Curves to use for elliptic curve cryptography.
-	 */
-	curves := []tls.CurveID{
-		tls.X25519,
-	}
-
-	/*
-	 * Use at least TLS 1.2 and Curve25519 (no NIST-Curves!).
-	 */
-	tlsConfig := tls.Config{
-		CipherSuites:             ciphersuites,
-		CurvePreferences:         curves,
-		MinVersion:               tls.VersionTLS12,
-		PreferServerCipherSuites: true,
-	}
-
-	tlsTimeouts := timeouts.TLS
-	tlsTimeoutHeaderSec := tlsTimeouts.Header
-	tlsTimeoutHeaderDur := time.Duration(tlsTimeoutHeaderSec)
-	tlsTimeoutHeader := tlsTimeoutHeaderDur * time.Second
-	tlsTimeoutReadSec := tlsTimeouts.Read
-	tlsTimeoutReadDur := time.Duration(tlsTimeoutReadSec)
-	tlsTimeoutRead := tlsTimeoutReadDur * time.Second
-	tlsTimeoutWriteSec := tlsTimeouts.Write
-	tlsTimeoutWriteDur := time.Duration(tlsTimeoutWriteSec)
-	tlsTimeoutWrite := tlsTimeoutWriteDur * time.Second
-	tlsTimeoutIdleSec := tlsTimeouts.Idle
-	tlsTimeoutIdleDur := time.Duration(tlsTimeoutIdleSec)
-	tlsTimeoutIdle := tlsTimeoutIdleDur * time.Second
-
-	/*
-	 * The TLS server.
-	 */
-	tlsServer := http.Server{
-		Addr:              tlsAddr,
-		ErrorLog:          logger,
-		Handler:           tlsMux,
-		IdleTimeout:       tlsTimeoutIdle,
-		ReadHeaderTimeout: tlsTimeoutHeader,
-		ReadTimeout:       tlsTimeoutRead,
-		TLSConfig:         &tlsConfig,
-		WriteTimeout:      tlsTimeoutWrite,
-	}
-
-	publicKey := cfg.TLSPublicKey
-	privateKey := cfg.TLSPrivateKey
-	go tlsServer.ListenAndServeTLS(publicKey, privateKey)
 	go httpServer.ListenAndServe()
+
+	/*
+	 * Only configure TLS server if TLS is not disabled by configuration.
+	 */
+	if !tlsDisabled {
+		tlsMux := http.NewServeMux()
+
+		/*
+		 * Register all CGI paths to TLS server.
+		 */
+		for path, _ := range cgis {
+			tlsMux.HandleFunc(path, cgiHandler)
+		}
+
+		tlsMux.HandleFunc("/", fileHandler)
+		tlsPort := cfg.TLSPort
+		tlsAddr := fmt.Sprintf(":%s", tlsPort)
+
+		/*
+		 * TLS cipher suites to use.
+		 */
+		ciphersuites := []uint16{
+			tls.TLS_CHACHA20_POLY1305_SHA256,
+			tls.TLS_AES_256_GCM_SHA384,
+			tls.TLS_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+		}
+
+		/*
+		 * Curves to use for elliptic curve cryptography.
+		 */
+		curves := []tls.CurveID{
+			tls.X25519,
+		}
+
+		/*
+		 * Use at least TLS 1.2 and Curve25519 (no NIST-Curves!).
+		 */
+		tlsConfig := tls.Config{
+			CipherSuites:             ciphersuites,
+			CurvePreferences:         curves,
+			MinVersion:               tls.VersionTLS12,
+			PreferServerCipherSuites: true,
+		}
+
+		tlsTimeouts := timeouts.TLS
+		tlsTimeoutHeaderSec := tlsTimeouts.Header
+		tlsTimeoutHeaderDur := time.Duration(tlsTimeoutHeaderSec)
+		tlsTimeoutHeader := tlsTimeoutHeaderDur * time.Second
+		tlsTimeoutReadSec := tlsTimeouts.Read
+		tlsTimeoutReadDur := time.Duration(tlsTimeoutReadSec)
+		tlsTimeoutRead := tlsTimeoutReadDur * time.Second
+		tlsTimeoutWriteSec := tlsTimeouts.Write
+		tlsTimeoutWriteDur := time.Duration(tlsTimeoutWriteSec)
+		tlsTimeoutWrite := tlsTimeoutWriteDur * time.Second
+		tlsTimeoutIdleSec := tlsTimeouts.Idle
+		tlsTimeoutIdleDur := time.Duration(tlsTimeoutIdleSec)
+		tlsTimeoutIdle := tlsTimeoutIdleDur * time.Second
+
+		/*
+		 * The TLS server.
+		 */
+		tlsServer := http.Server{
+			Addr:              tlsAddr,
+			ErrorLog:          logger,
+			Handler:           tlsMux,
+			IdleTimeout:       tlsTimeoutIdle,
+			ReadHeaderTimeout: tlsTimeoutHeader,
+			ReadTimeout:       tlsTimeoutRead,
+			TLSConfig:         &tlsConfig,
+			WriteTimeout:      tlsTimeoutWrite,
+		}
+
+		publicKey := cfg.TLSPublicKey
+		privateKey := cfg.TLSPrivateKey
+		go tlsServer.ListenAndServeTLS(publicKey, privateKey)
+	}
+
 }
 
 /*
