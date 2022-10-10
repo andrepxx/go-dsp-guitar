@@ -1,6 +1,14 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.7.1
+
+Maintenance / bugfixes / corrections:
+
+- Update go-jack dependency.
+- Increment patch version number: v1.7.0 --> v1.7.1
+
+
 v1.7.0
 
 New features / enhancements:
