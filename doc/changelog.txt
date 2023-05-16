@@ -1,6 +1,22 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.8.0
+
+New features / enhancements:
+
+- Add three new "British Vintage" amplifier models.
+- Increment minor version number: v1.7.2 --> v1.8.0
+
+
+v1.7.2
+
+Maintenance / bugfixes / corrections:
+
+- Update the sysroot for our Windows builds with libraries extracted from latest Windows 10 install.
+- Increment patch-level version number: v1.7.1 --> v1.7.2
+
+
 v1.7.1
 
 Maintenance / bugfixes / corrections:

@@ -2,7 +2,7 @@
 	"ImpulseResponses": "ir/index.json",
 
 	"WebServer": {
-		"Name": "go-dsp-guitar/1.7.2",
+		"Name": "go-dsp-guitar/1.8.0",
 		"Port": "8080",
 		"TLSDisabled": false,
 		"TLSPort": "8443",
