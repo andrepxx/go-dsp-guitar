@@ -45,6 +45,21 @@
 		"Compensation": -20
 	},
 	{
+		"Name": "Guitar: British Vintage (Bright)",
+		"Path": "ir/guitar/brit-v-bright.wav",
+		"Compensation": -20
+	},
+	{
+		"Name": "Guitar: British Vintage (Dark)",
+		"Path": "ir/guitar/brit-v-dark.wav",
+		"Compensation": -20
+	},
+	{
+		"Name": "Guitar: British Vintage (Neutral)",
+		"Path": "ir/guitar/brit-v-neutral.wav",
+		"Compensation": -20
+	},
+	{
 		"Name": "Guitar: Custom BP",
 		"Path": "ir/guitar/custom-bp-neutral.wav",
 		"Compensation": -25
