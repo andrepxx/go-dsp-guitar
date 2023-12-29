@@ -195,3 +195,6 @@ You may need the following packages in order to build the software on your syste
 
 **A:** A performance discussion / analysis is available [here](/doc/performance.md).
 
+**Q: How do I set this app up on Windows?**
+
+**A:** You have to setup *JACK Audio Connection Kit* as a sound server first. A short documentation is available [here](/doc/windows-setup.md).
