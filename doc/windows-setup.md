@@ -1,6 +1,6 @@
 # Setting up go-dsp-guitar on Windows.
 
-*go-dsp-guitar* uses *JACK Audio Connection Kit* as the way to access the system's audio devices. *JACK* a so called "sound server" and related API that comes originally from the POSIX / Unix world, but has been ported to Windows as well. It's the way Unix applications access the sound card for latency-sensitive operation, so you can think of it as the Unix equivalent to *ASIO*. However, it can actually do more, since it cannot only connect applications to audio devices, but also applications to one another. For example, you could forward the signal from a software synthesizer through an effects processor (like *go-dsp-guitar*) and then through your digital audio workstation (DAW), like *Ardour*, *Cubase*, *Presonus*, or whatever.
+*go-dsp-guitar* uses *JACK Audio Connection Kit* as the way to access the system's audio devices. *JACK* is a so called "sound server" and related API that comes originally from the POSIX / Unix world, but has been ported to Windows as well. It's the way Unix applications access the sound card for latency-sensitive operation, so you can think of it as the Unix equivalent to *ASIO*. However, it can actually do more, since it cannot only connect applications to audio devices, but also applications to one another. For example, you could forward the signal from a software synthesizer through an effects processor (like *go-dsp-guitar*) and then through your digital audio workstation (DAW), like *Ardour*, *Cubase*, *Presonus*, or whatever.
 
 ### Setting up JACK and running go-dsp-guitar in real-time mode
 
@@ -57,7 +57,7 @@ Even now, *go-dsp-guitar* will probably not have access to your audio hardware y
 
 To find what to put in that section, and how *JACK* and *go-dsp-guitar* are set up on Linux in general, how the connection setup works, etc., watch this video: https://www.youtube.com/watch?v=fxgwbZSU4_g
 
-For specific setup of JACK and *go-dsp-guitar* on Windows, watch this video: 
+For specific setup of JACK and *go-dsp-guitar* on Windows, watch this video: https://www.youtube.com/watch?v=ujBH5qj3R5A
 
 ### Alternatively: Running go-dsp-guitar in batch processing mode
 
