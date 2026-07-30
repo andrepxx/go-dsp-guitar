@@ -41,7 +41,7 @@ func (this *poweramp) compile(sampleRate uint32) (filter.Filter, error) {
 			targetOrder64, err := strconv.ParseUint(targetOrderString, 10, 32)
 
 			/*
-			 * Abort if error occured during parsing.
+			 * Abort if error occurred during parsing.
 			 */
 			if err != nil {
 				return nil, fmt.Errorf("Could not parse filter target order: '%s'", targetOrderString)
@@ -65,7 +65,7 @@ func (this *poweramp) compile(sampleRate uint32) (filter.Filter, error) {
 			level, errLevel := this.getNumericValue(paramLevel)
 
 			/*
-			 * Check if an error occured.
+			 * Check if an error occurred.
 			 */
 			if errName != nil || errLevel != nil {
 				return nil, fmt.Errorf("Error parsing values for filter %d.", i)
