@@ -21,7 +21,7 @@ func main() {
 		msg, err := controller.Version()
 
 		/*
-		 * If an error occured, print error message, otherwise
+		 * If an error occurred, print error message, otherwise
 		 * print version information.
 		 */
 		if err != nil {

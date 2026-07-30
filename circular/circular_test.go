@@ -133,7 +133,7 @@ func TestBuffer(t *testing.T) {
 		for i, err := range errs {
 
 			/*
-			 * Check if an error occured.
+			 * Check if an error occurred.
 			 */
 			if err != nil {
 				msg := err.Error()
