@@ -1,6 +1,14 @@
 Changelog for go-dsp-guitar
 ---------------------------
 
+v1.8.1
+
+New features / enhancements:
+
+- Add logo for go-dsp-guitar instrument processor.
+- Increment patch-level version number: v1.8.0 --> v1.8.1
+
+
 v1.8.0
 
 New features / enhancements:

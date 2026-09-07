@@ -1,3 +1,5 @@
+![go-dsp-guitar](logo.svg)
+
 # go-dsp-guitar
 
 This project implements a cross-platform multichannel multi-effects processor for electric guitars and other instruments, based upon concepts and algorithms originating from the field of circuit simulation.
