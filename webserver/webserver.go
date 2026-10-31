@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	REQUEST_SIZE = 1 << 20
+	MAX_REQUEST_SIZE_MEMORY = 1 << 20
+	MAX_REQUEST_SIZE_TOTAL  = 1 << 30
 )
 
 /*
@@ -33,8 +34,11 @@ type HttpRequest struct {
  * Exchange format for HTTP responses.
  */
 type HttpResponse struct {
-	Header map[string]string
-	Body   []byte
+	Header                map[string]string
+	StatusCode            int
+	Body                  []byte
+	ContentReadCloser     io.ReadCloser
+	ContentReadSeekCloser io.ReadSeekCloser
 }
 
 /*
@@ -116,7 +120,7 @@ func (this *webServerStruct) setDefaultHeaders(writer http.ResponseWriter) {
  */
 func (this *webServerStruct) limitRequestSize(writer http.ResponseWriter, request *http.Request) {
 	requestBody := request.Body
-	limitedBody := http.MaxBytesReader(writer, requestBody, REQUEST_SIZE)
+	limitedBody := http.MaxBytesReader(writer, requestBody, MAX_REQUEST_SIZE_TOTAL)
 	request.Body = limitedBody
 }
 
@@ -125,7 +129,7 @@ func (this *webServerStruct) limitRequestSize(writer http.ResponseWriter, reques
  */
 func (this *webServerStruct) cgiHandler(writer http.ResponseWriter, request *http.Request) {
 	this.limitRequestSize(writer, request)
-	request.ParseMultipartForm(REQUEST_SIZE)
+	request.ParseMultipartForm(MAX_REQUEST_SIZE_MEMORY)
 	protocol := request.Proto
 	method := request.Method
 	url := request.URL
@@ -133,11 +137,12 @@ func (this *webServerStruct) cgiHandler(writer http.ResponseWriter, request *htt
 	host := request.Host
 	params := make(map[string]string)
 	files := make(map[string][]multipart.File)
+	form := request.Form
 
 	/*
 	 * Iterate over all form values and parse parameters.
 	 */
-	for key, values := range request.Form {
+	for key, values := range form {
 		ps := strings.Join(values, ",")
 		params[key] = ps
 	}
@@ -232,8 +237,33 @@ func (this *webServerStruct) cgiHandler(writer http.ResponseWriter, request *htt
 		hdr.Set(key, value)
 	}
 
+	statusCode := response.StatusCode
+
+	/*
+	 * Set default status code of HTTP 200 - OK.
+	 */
+	if statusCode == 0 {
+		statusCode = http.StatusOK
+	}
+
 	body := response.Body
-	writer.Write(body)
+	contentReadCloser := response.ContentReadCloser
+	contentReadSeekCloser := response.ContentReadSeekCloser
+
+	/*
+	 * Check which body to serve.
+	 */
+	if body != nil {
+		writer.Write(body)
+	} else if contentReadSeekCloser != nil {
+		modTime := time.Time{}
+		http.ServeContent(writer, request, "", modTime, contentReadSeekCloser)
+		contentReadSeekCloser.Close()
+	} else if contentReadCloser != nil {
+		io.Copy(writer, contentReadCloser)
+		contentReadCloser.Close()
+	}
+
 }
 
 /*
@@ -291,9 +321,9 @@ func (this *webServerStruct) fileHandler(writer http.ResponseWriter, request *ht
 			hdr.Set("Content-type", mimetype)
 			modTime := time.Time{}
 			http.ServeContent(writer, request, path, modTime, fd)
+			fd.Close()
 		}
 
-		fd.Close()
 	}
 
 }
@@ -351,7 +381,7 @@ func (this *webServerStruct) GetCgis() []string {
 	/*
 	 * Append all CGI paths to list.
 	 */
-	for path, _ := range cgis {
+	for path := range cgis {
 		cgisNew = append(cgisNew, path)
 	}
 
@@ -388,7 +418,7 @@ func (this *webServerStruct) Run() {
 		/*
 		 * Register all CGI paths to HTTP server.
 		 */
-		for path, _ := range cgis {
+		for path := range cgis {
 			httpMux.HandleFunc(path, cgiHandler)
 		}
 
@@ -441,7 +471,7 @@ func (this *webServerStruct) Run() {
 		/*
 		 * Register all CGI paths to TLS server.
 		 */
-		for path, _ := range cgis {
+		for path := range cgis {
 			tlsMux.HandleFunc(path, cgiHandler)
 		}
 

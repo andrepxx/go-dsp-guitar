@@ -150,7 +150,7 @@ func (this *oversamplerDecimatorStruct) Decimate(in []float64, out []float64) er
 		err := flt.Process(in, buffer)
 
 		/*
-		 * Check if an error occurred.
+		 * Check if an error occured.
 		 */
 		if err != nil {
 			msg := err.Error()
